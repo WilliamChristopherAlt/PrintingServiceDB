@@ -18,17 +18,20 @@ from collections import defaultdict
 # ============================================================================
 # CONFIGURATION - Update these paths as needed  
 # ============================================================================
-SPEC_FILE_PATH = r"pmtm_database\pipeline\specs.yaml"
-MEDIA_FOLDER = r"pmtm_database\medias"
-OUTPUT_SQL_FILE = r"pmtm_database\sql\insert.sql"
+import os
+script_dir = os.path.dirname(os.path.abspath(__file__))
+SPEC_FILE_PATH = os.path.join(script_dir, "specs.yaml")
+MEDIA_FOLDER = os.path.join(script_dir, "..", "medias")
+OUTPUT_SQL_FILE = os.path.join(script_dir, "..", "sql", "insert.sql")
 
-delete_path = r"pmtm_database\sql\delete.sql"
-design_path = r"pmtm_database\sql\design.sql"
+delete_path = os.path.join(script_dir, "..", "sql", "delete.sql")
+design_path = os.path.join(script_dir, "..", "sql", "design.sql")
 
 BULK_INSERT_SIZE = 1000  # Number of rows per INSERT statement
 
 INCLUDE_SCHEMA_RESET = True  # When True, prepend delete.sql and design.sql content to output
 SKIP_USE_STATEMENT = False    # When True, omit the "USE database; GO" block
+SQL_SERVER_MODE = True        # When True, generate SQL Server compatible syntax
 
 # ============================================================================
 # UTILITY FUNCTIONS
@@ -91,8 +94,12 @@ def generate_password_hash(password="123456"):
     return hash_val, salt
 
 def generate_uuid():
-    """Generate a UUID string."""
-    return str(uuid.uuid4())
+    """Generate a UUID string for SQL Server.""" 
+    if SQL_SERVER_MODE:
+        # Return bare GUID string; BulkInsertHelper will add quotes
+        return str(uuid.uuid4()).upper()
+    else:
+        return str(uuid.uuid4()).upper()
 
 def random_date_in_range(start_days_ago, end_days_ago=0):
     """Generate a random date within a range of days ago."""
@@ -205,6 +212,18 @@ class BulkInsertHelper:
             return
         
         column_list = ", ".join(self.columns)
+        
+        # Handle reserved table names in SQL Server mode (e.g., [user])
+        table_name_sql = self.table_name
+        try:
+            from __main__ import SQL_SERVER_MODE  # may not exist in some contexts
+            sql_server_mode = SQL_SERVER_MODE
+        except ImportError:
+            # Fallback: use module-level variable if available
+            sql_server_mode = 'SQL_SERVER_MODE' in globals() and globals()['SQL_SERVER_MODE']
+        
+        if sql_server_mode and self.table_name.lower() == "user":
+            table_name_sql = "[user]"
         values_list = []
         
         for row in self.rows:
@@ -220,7 +239,7 @@ class BulkInsertHelper:
                     formatted_values.append(str(value))
             values_list.append(f"({', '.join(formatted_values)})")
         
-        sql = f"INSERT INTO {self.table_name} ({column_list}) VALUES\n"
+        sql = f"INSERT INTO {table_name_sql} ({column_list}) VALUES\n"
         sql += ",\n".join(values_list)
         sql += ";"
         
@@ -320,6 +339,7 @@ class PrintingServiceDataGenerator:
         
         first_names = self.spec['first_names']
         last_names = self.spec['last_names']
+        used_emails = set()
         
         # Generate shared password hash for all users
         shared_password_hash, shared_password_salt = generate_password_hash("123456")
@@ -345,7 +365,14 @@ class PrintingServiceDataGenerator:
                 user_type = 'staff'
                 email_domain = random.choice(self.spec['staff_email_domains'])
             
-            email = generate_email(full_name, email_domain)
+            # Ensure email uniqueness to satisfy UNIQUE(email) constraint
+            base_email = generate_email(full_name, email_domain)
+            email = base_email
+            suffix = 1
+            while email in used_emails:
+                email = f"{base_email.split('@')[0]}{suffix}@{base_email.split('@')[1]}"
+                suffix += 1
+            used_emails.add(email)
             phone = generate_phone_number(phone_prefixes)
             created_at = random_date_in_range(730, 30)  # 2 years to 1 month ago
             is_active = 1  # All users are active now
@@ -534,6 +561,10 @@ class PrintingServiceDataGenerator:
                             class_name, class_code, year_level, max_students_per_class,
                             created_at.strftime('%Y-%m-%d %H:%M:%S')
                         ])
+        
+        # Flush class INSERT statements
+        for stmt in bulk_classes.get_statements():
+            self.add_sql(stmt)
         
     def generate_students(self):
         """Generate student-specific data."""
@@ -1259,7 +1290,8 @@ def main():
         if INCLUDE_SCHEMA_RESET:
             # Include delete and design scripts
             try:
-                with open(delete_path, 'r', encoding='utf-8') as f:
+                # Use utf-8-sig to strip any BOM from schema files
+                with open(delete_path, 'r', encoding='utf-8-sig') as f:
                     delete_content = f.read()
                 final_output.append("-- ============================================")
                 final_output.append("-- CLEANUP EXISTING DATA")
@@ -1267,8 +1299,9 @@ def main():
                 final_output.append(delete_content)
                 final_output.append("")
                 
-                with open(design_path, 'r', encoding='utf-8') as f:
+                with open(design_path, 'r', encoding='utf-8-sig') as f:
                     design_content = f.read()
+                    
                 final_output.append("-- ============================================")
                 final_output.append("-- CREATE DATABASE SCHEMA")
                 final_output.append("-- ============================================")
@@ -1279,7 +1312,7 @@ def main():
         
         if not SKIP_USE_STATEMENT:
             final_output.append("USE printing_service_db;")
-            final_output.append("GO;")
+            final_output.append("GO")
             final_output.append("")
         
         final_output.append("-- ============================================")
