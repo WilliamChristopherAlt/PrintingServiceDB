@@ -1,0 +1,250 @@
+@startuml
+!theme plain
+top to bottom direction
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+
+skinparam class {
+  BackgroundColor LightBlue
+  BorderColor Blue
+}
+
+' Level 0 tables
+class page_allocation {
+  allocation_id
+  semester
+  academic_year
+  page_type_id
+  default_page_count
+  allocation_date
+  created_at
+  created_by
+  UNIQUE
+}
+class permitted_file_type {
+  file_type_id
+  file_extension
+  mime_type
+  description
+  is_permitted
+  created_at
+  updated_at
+  updated_by
+}
+class print_job_page {
+  page_record_id
+  job_id
+  page_number
+  UNIQUE
+}
+class printer_activity_log {
+  log_id
+  printer_id
+  action_type
+  performed_by
+  action_detail
+  action_timestamp
+}
+class student_page_purchase {
+  purchase_id
+  student_id
+  page_size_id
+  quantity
+  amount_paid
+  payment_method
+  payment_reference
+  payment_status
+  transaction_date
+}
+class system_audit_log {
+  audit_id
+  user_id
+  action_type
+  table_name
+  record_id
+  previous_audit_id
+  changed_field
+  ip_address
+  user_agent
+  action_timestamp
+}
+class system_configuration {
+  config_id
+  config_key
+  config_value
+  description
+  updated_at
+  updated_by
+}
+
+' Level 1 tables
+class print_job {
+  job_id
+  student_id
+  printer_id
+  file_name
+  file_type
+  file_size_kb
+  paper_size_id
+  page_orientation
+  print_side
+  color_mode
+  number_of_copy
+  print_status
+  start_time
+  end_time
+  created_at
+}
+
+' Level 2 tables
+class printer_physical {
+  printer_id
+  model_id
+  serial_number
+  campus_name
+  building_name
+  room_number
+  is_enabled
+  installed_date
+  last_maintenance_date
+  created_at
+  updated_at
+  created_by
+}
+class student {
+  student_id
+  user_id
+  student_code
+  class_id
+  enrollment_date
+  graduation_date
+  status
+}
+
+' Level 3 tables
+class "class" {
+  class_id
+  major_id
+  academic_year_id
+  class_name
+  class_code
+  year_level
+  max_students
+  created_at
+  UNIQUE
+}
+class printer_model {
+  model_id
+  brand_id
+  model_name
+  description
+  max_paper_size_id
+  supports_color
+  supports_duplex
+  created_at
+  UNIQUE
+}
+class staff {
+  staff_id
+  user_id
+  employee_code
+  position
+  hire_date
+}
+
+' Level 4 tables
+class academic_year {
+  academic_year_id
+  year_name
+  start_date
+  end_date
+  is_current
+  created_at
+}
+class brand {
+  brand_id
+  brand_name
+  country_of_origin
+  website
+  created_at
+}
+class major {
+  major_id
+  department_id
+  major_name
+  major_code
+  degree_type
+  duration_years
+  description
+  established_date
+  created_at
+  UNIQUE
+}
+class page_size {
+  page_size_id
+  size_name
+  width_mm
+  height_mm
+  created_at
+}
+class "user" {
+  user_id
+  email
+  full_name
+  password_hash
+  password_salt
+  user_type
+  phone_number
+  created_at
+  updated_at
+  is_active
+}
+
+' Level 5 tables
+class department {
+  department_id
+  faculty_id
+  department_name
+  department_code
+  description
+  established_date
+  created_at
+  UNIQUE
+}
+
+' Level 6 tables
+class faculty {
+  faculty_id
+  faculty_name
+  faculty_code
+  description
+  established_date
+  created_at
+}
+
+' Relationships
+faculty <-- department
+department <-- major
+major <-- "class"
+academic_year <-- "class"
+"user" <-- student
+"class" <-- student
+"user" <-- staff
+brand <-- printer_model
+page_size <-- printer_model
+printer_model <-- printer_physical
+staff <-- printer_physical
+staff <-- page_allocation
+page_size <-- page_allocation
+student <-- student_page_purchase
+page_size <-- student_page_purchase
+staff <-- system_configuration
+staff <-- permitted_file_type
+student <-- print_job
+printer_physical <-- print_job
+page_size <-- print_job
+print_job <-- print_job_page
+printer_physical <-- printer_activity_log
+staff <-- printer_activity_log
+"user" <-- system_audit_log
+@enduml
