@@ -1,0 +1,500 @@
+Trang Mua Trang In
+1. Thành phần giao diện
+Phần 1: Current Balance Card (Trên cùng)
+Tiêu đề: "Current Balance"
+Hiển thị số dư A4:
+Label: "A4 Pages"
+Số trang A4 hiện có (số lớn, rõ ràng)
+Hiển thị tương đương A3:
+Label: "A3 Equivalent"
+Số trang A3 tương đương (tính từ A4, 1 A3 = 2 A4)
+Phần 2: Package Selection (Giữa)
+Tiêu đề: "Select Package"
+Mô tả: "Choose a page package or set a custom amount"
+Các gói có sẵn (4 gói):
+50 pages: $10.00 ($0.200/page)
+100 pages: $18.00 ($0.180/page) - giảm 10%
+200 pages: $35.00 ($0.175/page) - giảm 12.5%
+500 pages: $80.00 ($0.160/page) - giảm 20%
+Mỗi gói hiển thị:
+Số trang
+Tổng giá
+Giá mỗi trang
+Nút chọn hoặc radio button
+Highlight khi được chọn
+Custom Amount card:
+Input "Number of Pages" với nút +/-
+Hiển thị "Price" tính theo giá gốc
+Có thể nhập trực tiếp hoặc dùng nút
+Text hướng dẫn: "1 A3 page = 2 A4 pages. Prices shown are in USD."
+Phần 3: Action Button (Dưới)
+Nút "Proceed to Payment" (primary button)
+Disabled khi chưa chọn gói hoặc nhập số trang
+Enabled khi đã chọn
+Phần 4: Payment Modal (Sau khi click Proceed)
+Hiển thị summary:
+Package selected / Custom amount
+Number of pages
+Total price
+Chọn payment method:
+BKPay (recommended)
+Bank Transfer
+Credit/Debit Card
+E-Wallet (Momo, ZaloPay)
+Mỗi method có icon và radio button
+Nút "Confirm Payment" và "Cancel"
+Phần 5: Success Modal (Sau khi thanh toán thành công)
+Icon thành công (✓)
+Thông điệp: "Payment Successful!"
+Thông tin:
+Pages added: X pages
+New balance: Y A4 pages
+Transaction ID
+Amount paid
+Nút "View Transaction History" và "Done"
+Phần 6: Transaction History Section (Dưới cùng - optional)
+Tiêu đề: "Recent Transactions"
+Bảng hiển thị:
+Date
+Package/Amount
+Pages Added
+Amount Paid
+Payment Method
+Status
+Hiển thị 5 giao dịch gần nhất
+Link "View All Transactions"
+2. Flow tương tác
+2.1 Xem số dư hiện tại
+Người dùng truy cập trang Buy Pages
+Hiển thị số dư A4 hiện tại
+Tự động tính và hiển thị A3 equivalent
+Load từ database dựa trên student_id
+2.2 Chọn gói có sẵn
+Người dùng click vào một trong 4 gói preset
+Card được highlight
+Các gói khác bị deselect
+Custom amount bị clear
+Nút "Proceed to Payment" được enable
+Hiển thị số trang và giá của gói đã chọn
+2.3 Nhập số lượng tùy chỉnh
+Người dùng click vào Custom Amount card
+Deselect tất cả gói preset
+Focus vào input field
+Người dùng nhập số trang hoặc dùng nút +/-
+Validate: min = 1, max = 1000
+Tính giá real-time (price = pages × base_price)
+Hiển thị tổng giá
+Enable nút "Proceed to Payment"
+Người dùng nhập số không hợp lệ
+Hiển thị error message
+Disable nút "Proceed to Payment"
+2.4 Tiến hành thanh toán
+Người dùng click "Proceed to Payment"
+Mở payment modal
+Hiển thị summary đơn hàng
+Người dùng chọn payment method
+Highlight method đã chọn
+Enable nút "Confirm Payment"
+Người dùng click "Cancel"
+Đóng modal
+Quay lại trang chọn gói
+Giữ nguyên gói đã chọn
+Người dùng click "Confirm Payment"
+Hiển thị loading spinner
+Tạo record trong student_page_purchase với payment_status = 'pending'
+Redirect đến payment gateway (BKPay/Bank/Card/E-Wallet)
+2.5 Xử lý callback từ payment gateway
+Payment gateway trả về kết quả thành công
+Cập nhật payment_status = 'completed'
+Cập nhật số dư trang in trong database
+Hiển thị success modal
+Show transaction ID và số dư mới
+Payment gateway trả về kết quả thất bại
+Cập nhật payment_status = 'failed'
+Hiển thị error modal với lý do
+Không cập nhật số dư
+Đề xuất thử lại hoặc chọn method khác
+2.6 Sau khi thanh toán thành công
+Người dùng click "View Transaction History"
+Đóng success modal
+Scroll xuống transaction history section
+Hoặc chuyển đến trang transaction history đầy đủ
+Người dùng click "Done"
+Đóng success modal
+Refresh trang để hiển thị số dư mới
+Hoặc quay về dashboard
+2.7 Xem lịch sử giao dịch
+Người dùng scroll xuống Recent Transactions section
+Hiển thị 5 giao dịch gần nhất
+Load từ student_page_purchase
+Người dùng click "View All Transactions"
+Chuyển đến trang transaction history đầy đủ
+Có filter và search
+2.8 Xử lý lỗi
+Network error khi load số dư
+Hiển thị error message
+Hiển thị nút "Retry"
+Validation error (số trang không hợp lệ)
+Hiển thị inline error
+Highlight input field màu đỏ
+Disable nút payment
+Payment timeout
+Giữ payment_status = 'pending'
+Hiển thị message "Payment processing. Please check back later."
+Có link để check payment status
+Payment gateway error
+Hiển thị error message từ gateway
+Đề xuất thử payment method khác
+Không trừ số dư
+3. Use Case
+Danh sách các usecase
+Use Case Index
+Tên Use Case
+MoSCoW
+SV-3-1
+Mua trang in
+Must Have
+SV-3-2
+Xem Số Dư Hiện Tại & Lịch Sử Giao Dịch
+Must Have
+
+SV-3-1: Mua trang in
+Mục
+Nội dung
+Usecase ID
+SV-3-1
+Tên
+Mua trang in
+Mô tả
+Sinh viên mua thêm trang in thông qua các gói có sẵn hoặc số lượng tùy chỉnh
+Actor
+Sinh viên
+Trigger
+Sinh viên click "Buy More Pages" từ dashboard hoặc truy cập trực tiếp trang mua trang
+Quy định nghiệp vụ
+- Tất cả gói mua tính theo trang A4
+- Tỷ lệ quy đổi:
+- 1 A3 = 2 A4
+- 1 A5 = 0.5 A4
+- Giá gói có sẵn (dữ liệu sẽ định sẵn trong DB):
+- 50 trang: $10.00 ($0.200/trang)
+- 100 trang: $18.00 ($0.180/trang, giảm 10%)
+- 200 trang: $35.00 ($0.175/trang, giảm 12.5%)
+- 500 trang: $80.00 ($0.160/trang, giảm 20%)
+- Số lượng tùy chỉnh: giá gốc $0.200/trang
+- Số trang tối thiểu: 1
+- Số trang tối đa mỗi lần: 1000
+- Phương thức thanh toán: BKPay, Chuyển khoản ngân hàng, Thẻ tín dụng/ghi nợ, Ví điện tử
+- Lưu page_size_id = A4 trong bảng student_page_purchase
+- Luồng trạng thái thanh toán: pending → completed/failed
+Main Flow
+Bước 1: Xem số dư
+1. Sinh viên truy cập trang mua trang
+2. Hệ thống truy vấn số dư từ bảng student_page_purchase (với payment_status = 'completed')
+3. Hệ thống tính tổng số trang A4 tương đương đã mua
+4. Hệ thống tính tổng số trang A4 tương đương đã in từ bảng print_job
+5. Hệ thống tính số dư: đã mua - đã in
+6. Hiển thị số dư A4 và số trang A3 tương đương
+
+Bước 2: Chọn gói hoặc nhập số lượng
+7. Sinh viên chọn một trong 4 gói có sẵn
+- Hoặc: Sinh viên nhấn vào ô nhập tùy chỉnh và nhập số trang
+8. Hệ thống kiểm tra tính hợp lệ của số lượng (1-1000)
+9. Hệ thống tính giá dựa trên gói đã chọn hoặc giá gốc
+10. Hiển thị tóm tắt: số trang, giá tiền, số dư mới sau khi mua
+11. Kích hoạt nút "Proceed to Payment"
+
+Bước 3: Chọn phương thức thanh toán
+12. Sinh viên nhấn "Proceed to Payment"
+13. Hệ thống mở cửa sổ thanh toán
+14. Hiển thị tóm tắt đơn hàng
+15. Sinh viên chọn phương thức thanh toán
+16. Sinh viên nhấn "Confirm Payment"
+
+Bước 4: Xử lý thanh toán
+17. Hệ thống tạo bản ghi trong bảng student_page_purchase:
+- student_id: từ phiên đăng nhập
+- page_size_id: A4 (tra cứu từ bảng page_size)
+- quantity: số trang đã chọn
+- amount_paid: tổng giá tiền
+- payment_method: phương thức đã chọn
+- payment_status: 'pending'
+- transaction_date: GETDATE()
+18. Hệ thống chuyển hướng đến cổng thanh toán
+19. Sinh viên xác nhận thanh toán tại cổng thanh toán
+20. Cổng thanh toán xử lý giao dịch
+
+Bước 5: Callback và cập nhật
+21. Cổng thanh toán gửi callback về hệ thống
+22. Hệ thống xác minh chữ ký callback
+23. Hệ thống cập nhật bảng student_page_purchase:
+- payment_status: 'completed'
+- payment_reference: mã tham chiếu từ cổng thanh toán
+24. Hệ thống tính toán số dư mới
+25. Hệ thống ghi log giao dịch trong bảng system_audit_log
+26. Chuyển hướng về trang mua trang với thông báo thành công
+27. Hiển thị:
+- Mã giao dịch (purchase_id)
+- Số trang đã thêm
+- Số dư mới
+- Số tiền đã thanh toán
+28. Gửi email xác nhận (tùy chọn)
+Alternative Flow
+Alt 1: Sinh viên chọn gói khác
+- Tại bước 7, sinh viên chọn gói khác
+- Bỏ chọn gói cũ
+- Đánh dấu gói mới
+- Cập nhật tóm tắt với giá mới
+
+Alt 2: Sinh viên chuyển từ gói có sẵn sang tùy chỉnh
+- Tại bước 7, sau khi chọn gói có sẵn, sinh viên nhấn vào ô tùy chỉnh
+- Bỏ chọn gói có sẵn
+- Xóa nội dung ô nhập tùy chỉnh
+- Sinh viên nhập số trang tùy chỉnh
+- Tính giá theo giá gốc ($0.200/trang)
+
+Alt 3: Sinh viên hủy thanh toán
+- Tại bước 16, sinh viên nhấn "Cancel"
+- Đóng cửa sổ thanh toán
+- KHÔNG tạo bản ghi trong bảng student_page_purchase
+- Quay lại trang chọn gói
+- Giữ nguyên lựa chọn
+
+Alt 4: Sinh viên đóng cổng thanh toán
+- Tại bước 19, sinh viên đóng cửa sổ cổng thanh toán
+- Trạng thái thanh toán vẫn là 'pending'
+- Hiển thị thông báo "Thanh toán chưa hoàn tất"
+- Đề xuất kiểm tra trạng thái thanh toán hoặc thử lại
+Exception Flow
+Exc 1: Số lượng không hợp lệ
+- Số trang < 1 → "Yêu cầu tối thiểu 1 trang"
+- Số trang > 1000 → "Tối đa 1000 trang mỗi giao dịch"
+- Nhập ký tự không phải số → "Vui lòng nhập số hợp lệ"
+- Đánh dấu ô nhập màu đỏ
+- Vô hiệu hóa nút "Proceed to Payment"
+
+Exc 2: Không thể tải số dư
+- Kết nối cơ sở dữ liệu thất bại
+- Hiển thị lỗi: "Không thể tải số dư. Vui lòng thử lại."
+- Hiển thị nút "Thử lại"
+- Không cho phép tiến hành thanh toán
+
+Exc 3: Cổng thanh toán không khả dụng
+- Tại bước 18, không thể chuyển hướng
+- Hiển thị lỗi: "Dịch vụ thanh toán tạm thời không khả dụng"
+- Đề xuất thử phương thức khác hoặc thử lại sau
+- KHÔNG tạo bản ghi pending nếu chưa chuyển hướng thành công
+
+Exc 4: Thanh toán thất bại
+- Callback trả về payment_status = 'failed'
+- Cập nhật bản ghi: payment_status = 'failed'
+- Hiển thị thông báo lỗi:
+- "Thanh toán thất bại"
+- Lý do từ cổng thanh toán (số dư không đủ, thẻ bị từ chối, v.v.)
+- Mã giao dịch để tham chiếu
+- KHÔNG cập nhật số dư
+- Đề xuất:
+- Thử lại
+- Chọn phương thức thanh toán khác
+- Liên hệ hỗ trợ
+
+Exc 5: Thanh toán hết thời gian
+- Tại bước 21, không nhận được callback trong 15 phút
+- Bản ghi vẫn ở payment_status = 'pending'
+- Hiển thị cảnh báo: "Thanh toán đang được xử lý. Có thể mất vài phút."
+- Hiển thị nút "Kiểm tra trạng thái thanh toán"
+- Khi nhấn kiểm tra trạng thái:
+- Truy vấn API cổng thanh toán
+- Cập nhật trạng thái dựa trên phản hồi
+- Cập nhật số dư nếu hoàn tất
+Tiền tố
+- Sinh viên đã đăng nhập
+- Có ít nhất 1 phương thức thanh toán khả dụng
+- Dịch vụ cổng thanh toán đang hoạt động
+- Kết nối cơ sở dữ liệu ổn định
+Hậu tố
+- Bản ghi mới được tạo trong bảng student_page_purchase
+- payment_status = 'completed'
+- payment_reference được lưu
+- Số dư trang in được cập nhật
+- Giao dịch được ghi log trong bảng system_audit_log
+- Sinh viên nhận xác nhận (giao diện + email tùy chọn)
+Input
+- student_id (từ phiên đăng nhập)
+- Lựa chọn: gói có sẵn hoặc số lượng tùy chỉnh
+- quantity (số trang A4)
+- payment_method (BKPay, Chuyển khoản ngân hàng, Thẻ, Ví điện tử)
+- payment_gateway_response (dữ liệu callback)
+Output
+Thành công:
+json<br>{<br> "status": "success",<br> "purchase_id": "uuid-here",<br> "transaction_id": "TXN123456",<br> "pages_added": 100,<br> "page_size": "A4",<br> "amount_paid": 18.00,<br> "payment_method": "BKPay",<br> "payment_reference": "BKPAY-REF-789",<br> "previous_balance": 150,<br> "new_balance": 250,<br> "transaction_date": "2024-12-04T10:30:00Z"<br>}<br>
+
+Thất bại:
+json<br>{<br> "status": "failed",<br> "error_code": "PAYMENT_DECLINED",<br> "message": "Thanh toán bị ngân hàng từ chối. Vui lòng kiểm tra tài khoản hoặc thử phương thức thanh toán khác.",<br> "purchase_id": "uuid-here",<br> "amount_attempted": 18.00,<br> "payment_method": "Credit Card",<br> "gateway_error": "Số dư không đủ"<br>}<br>
+
+Đang chờ:
+json<br>{<br> "status": "pending",<br> "message": "Thanh toán đang được xử lý. Vui lòng kiểm tra lại sau vài phút.",<br> "purchase_id": "uuid-here",<br> "check_status_url": "/api/payment/status/uuid-here",<br> "estimated_time": "5-10 phút"<br>}<br>
+
+SV-3-2: Xem Số Dư Hiện Tại & Lịch Sử Giao Dịch
+Mục
+Nội dung
+Use Case ID
+SV-3-2
+Tên
+Xem số dư hiện tại & lịch sử giao dịch
+Mô tả
+Sinh viên xem số dư trang in hiện tại và lịch sử các giao dịch mua trang
+Actor
+Sinh viên
+Trigger
+Sinh viên truy cập trang mua trang in
+Quy định nghiệp vụ
+- Hiển thị số trang còn dư của từng kích thước giấy A3, A4
+- Số dư = Tổng đã mua - Tổng đã in
+- Chỉ tính giao dịch có payment_status = 'completed'
+- Lịch sử hiển thị 5 giao dịch gần nhất mặc định
+- Có thể xem tất cả giao dịch
+- Lọc theo trạng thái thanh toán và khoảng thời gian
+Main Flow
+Bước 1: Hiển thị số dư
+1. Sinh viên truy cập trang mua trang
+2. Hệ thống truy vấn tổng số trang đã mua từ bảng student_page_purchase (với payment_status = 'completed')
+3. Hệ thống tính tổng số trang A4 tương đương đã mua
+4. Hệ thống truy vấn tổng số trang đã in từ bảng print_job (với print_status = 'completed')
+5. Hệ thống tính tổng số trang A4 tương đương đã in
+6. Hệ thống tính số dư: đã mua - đã in
+7. Hiển thị số dư A4 trên card "Current Balance"
+8. Tính và hiển thị số trang A3 tương đương (số dư A4 / 2)
+
+Bước 2: Hiển thị lịch sử giao dịch
+9. Hệ thống truy vấn 5 giao dịch gần nhất từ bảng student_page_purchase
+10. Sắp xếp theo transaction_date giảm dần
+11. Hiển thị bảng lịch sử với các cột:
+ - Ngày giao dịch
+ - Gói/Số lượng
+ - Số trang đã thêm
+ - Số tiền đã thanh toán
+ - Phương thức thanh toán
+ - Trạng thái
+12. Hiển thị link "View All Transactions"
+
+Bước 3: Xem tất cả giao dịch
+13. Sinh viên nhấn "View All Transactions"
+14. Hệ thống chuyển đến trang lịch sử giao dịch đầy đủ
+15. Hiển thị tất cả giao dịch của sinh viên
+16. Hiển thị bộ lọc:
+ - Trạng thái thanh toán (All, Completed, Pending, Failed, Refunded)
+ - Khoảng thời gian (Today, This Week, This Month, Custom Range)
+17. Sinh viên áp dụng bộ lọc
+18. Hệ thống cập nhật danh sách theo bộ lọc
+19. Hiển thị phân trang nếu có nhiều giao dịch
+Alternative Flow
+Alt 1: Không có giao dịch nào
+- Tại bước 9, không tìm thấy giao dịch
+- Hiển thị thông báo: "Bạn chưa có giao dịch nào"
+- Hiển thị nút "Buy Pages Now"
+
+Alt 2: Làm mới số dư
+- Tại bất kỳ bước nào, sinh viên nhấn nút làm mới
+- Hệ thống truy vấn lại số dư
+- Cập nhật hiển thị với dữ liệu mới
+
+Alt 3: Xem chi tiết giao dịch
+- Tại bước 11, sinh viên nhấn vào một giao dịch
+- Hiển thị modal chi tiết giao dịch:
+ - Mã giao dịch (purchase_id)
+ - Mã tham chiếu thanh toán (payment_reference)
+ - Thời gian giao dịch
+ - Số trang đã mua
+ - Loại trang (A4)
+ - Số tiền
+ - Phương thức thanh toán
+ - Trạng thái
+- Hiển thị nút "Close"
+
+Alt 4: Tìm kiếm giao dịch
+- Tại bước 15, sinh viên nhập từ khóa tìm kiếm
+- Tìm theo mã giao dịch hoặc mã tham chiếu
+- Hệ thống lọc và hiển thị kết quả phù hợp
+Exception Flow
+Exc 1: Không thể tải số dư
+- Tại bước 2-6, kết nối cơ sở dữ liệu thất bại
+- Hiển thị lỗi: "Không thể tải số dư. Vui lòng thử lại."
+- Hiển thị nút "Thử lại"
+- Hiển thị số dư là "---" hoặc "N/A"
+
+Exc 2: Không thể tải lịch sử
+- Tại bước 9, truy vấn thất bại
+- Hiển thị lỗi: "Không thể tải lịch sử giao dịch"
+- Hiển thị nút "Thử lại"
+- Vẫn hiển thị số dư nếu đã tải thành công
+
+Exc 3: Bộ lọc không hợp lệ
+- Tại bước 17, khoảng thời gian không hợp lệ (ngày bắt đầu > ngày kết thúc)
+- Hiển thị lỗi inline: "Ngày bắt đầu phải trước ngày kết thúc"
+- Không áp dụng bộ lọc
+- Giữ nguyên kết quả hiện tại
+
+Exc 4: Phân trang thất bại
+- Tại bước 19, không thể tải trang tiếp theo
+- Hiển thị lỗi: "Không thể tải thêm giao dịch"
+- Giữ nguyên dữ liệu đã tải
+- Vô hiệu hóa nút "Load More" hoặc phân trang
+Tiền điều kiện
+- Sinh viên đã đăng nhập
+- Kết nối cơ sở dữ liệu ổn định
+Hậu điều kiện
+- Sinh viên biết được số dư trang in hiện tại
+- Sinh viên xem được lịch sử các giao dịch đã thực hiện
+- Không có thay đổi dữ liệu trong cơ sở dữ liệu
+Input
+- student_id (từ phiên đăng nhập)
+- Bộ lọc (tùy chọn):
+ - payment_status (All, Completed, Pending, Failed, Refunded)
+ - start_date (ngày bắt đầu)
+ - end_date (ngày kết thúc)
+- Từ khóa tìm kiếm (tùy chọn)
+- Số trang (cho phân trang)
+Output
+Số dư:
+json<br>{<br>  "student_id": "uuid-here",<br>  "a4_balance": 250,<br>  "a3_equivalent": 125,<br>  "total_purchased": 500,<br>  "total_printed": 250,<br>  "last_updated": "2024-12-04T10:30:00Z"<br>}<br>
+
+Lịch sử giao dịch:
+json<br>{<br>  "transactions": [<br>    {<br>      "purchase_id": "uuid-1",<br>      "transaction_date": "2024-12-01T14:20:00Z",<br>      "package": "100 pages",<br>      "pages_added": 100,<br>      "amount_paid": 18.00,<br>      "payment_method": "BKPay",<br>      "payment_status": "completed"<br>    },<br>    {<br>      "purchase_id": "uuid-2",<br>      "transaction_date": "2024-11-15T09:15:00Z",<br>      "package": "Custom (75 pages)",<br>      "pages_added": 75,<br>      "amount_paid": 15.00,<br>      "payment_method": "Credit Card",<br>      "payment_status": "completed"<br>    }<br>  ],<br>  "total_count": 15,<br>  "page": 1,<br>  "page_size": 5<br>}<br>
+
+
+Thành viên
+Đồng ý
+Không đồng ý
+Lê Ngọc Đăng Khoa
+
+
+
+
+Hiểu Vy Lý
+
+
+
+
+Nguyễn Hồng Bảo Ngọc
+
+
+
+
+Lê Anh Tuấn
+
+
+
+
+Phan Thanh Thái Tuấn
+
+
+
+
+Phan Điền Mạnh Thiên
+
+
+
+
+
+

@@ -269,6 +269,8 @@ class PrintingServiceDataGenerator:
         self.staff = []
         self.brands = []
         self.models = []
+        self.buildings = []
+        self.rooms = []
         self.printers = []
         self.print_jobs = []
         
@@ -750,52 +752,120 @@ class PrintingServiceDataGenerator:
         
         # Generate physical printers
         bulk_printers = BulkInsertHelper("printer_physical", [
-            "printer_id", "model_id", "serial_number", "campus_name", "building_name",
-            "room_number", "is_enabled", "installed_date", "last_maintenance_date", 
-            "created_at", "created_by"
+            "printer_id", "model_id", "room_id", "serial_number", "is_enabled",
+            "installed_date", "last_maintenance_date", "created_at", "created_by"
+        ])
+        
+        # First generate buildings
+        bulk_buildings = BulkInsertHelper("building", [
+            "building_id", "building_code", "address", "campus_name", "created_at"
         ])
         
         campuses = self.spec['campuses']
+        
+        for campus in campuses:
+            for building_name in campus['buildings']:
+                building_id = generate_uuid()
+                building_code = building_name[:10].upper().replace(' ', '')
+                address = f"{building_name}, {campus['name']} Campus"
+                
+                building_data = {
+                    'building_id': building_id,
+                    'building_code': building_code,
+                    'building_name': building_name,
+                    'campus_name': campus['name'],
+                    'address': address
+                }
+                
+                self.buildings.append(building_data)
+                
+                created_at = random_date_in_range(3650, 365)
+                bulk_buildings.add_row([
+                    building_id,
+                    sql_escape(building_code),
+                    sql_escape(address),
+                    sql_escape(campus['name']),
+                    created_at.strftime('%Y-%m-%d %H:%M:%S')
+                ])
+        
+        for stmt in bulk_buildings.get_statements():
+            self.add_sql(stmt)
+        
+        # Generate rooms
+        bulk_rooms = BulkInsertHelper("room", [
+            "room_id", "building_id", "room_code", "room_type", "created_at"
+        ])
+        
+        room_types = ['Classroom', 'Lab', 'Office', 'Library', 'Study Hall', 'Conference Room']
         printers_range = self.spec['printers_per_building']
+        
+        for building in self.buildings:
+            num_rooms = random.randint(printers_range['min'], printers_range['max'])
+            
+            for room_num in range(1, num_rooms + 1):
+                room_id = generate_uuid()
+                room_code = f"{room_num:03d}"
+                room_type = random.choice(room_types)
+                
+                room_data = {
+                    'room_id': room_id,
+                    'building_id': building['building_id'],
+                    'building_code': building['building_code'],
+                    'campus_name': building['campus_name'],
+                    'room_code': room_code,
+                    'room_type': room_type
+                }
+                
+                self.rooms.append(room_data)
+                
+                created_at = random_date_in_range(2190, 180)
+                bulk_rooms.add_row([
+                    room_id,
+                    building['building_id'],
+                    sql_escape(room_code),
+                    sql_escape(room_type),
+                    created_at.strftime('%Y-%m-%d %H:%M:%S')
+                ])
+        
+        for stmt in bulk_rooms.get_statements():
+            self.add_sql(stmt)
         
         # Get a random staff member as creator
         creator_staff = random.choice(self.staff) if self.staff else None
         
-        for campus in campuses:
-            for building in campus['buildings']:
-                num_printers = random.randint(printers_range['min'], printers_range['max'])
+        # Generate printers for rooms (about 70% of rooms have printers)
+        for room in self.rooms:
+            if random.random() < 0.7:  # 70% chance of having a printer
+                printer_id = generate_uuid()
+                model = random.choice(self.models)
                 
-                for room_num in range(1, num_printers + 1):
-                    printer_id = generate_uuid()
-                    model = random.choice(self.models)
-                    
-                    room_number = f"{room_num:03d}"
-                    serial_number = generate_serial_number()
-                    installed_date = random_date_in_range(1095, 30)
-                    last_maintenance = random_date_in_range(90, 0)
-                    created_at = installed_date
-                    is_enabled = random.choice([True, True, True, False])  # 75% enabled
-                    
-                    printer_data = {
-                        'printer_id': printer_id,
-                        'model_id': model['model_id'],
-                        'campus_name': campus['name'],
-                        'building_name': building,
-                        'room_number': room_number,
-                        'is_enabled': is_enabled
-                    }
-                    
-                    self.printers.append(printer_data)
-                    self.printer_by_id[printer_id] = printer_data
-                    
-                    bulk_printers.add_row([
-                        printer_id, model['model_id'], serial_number,
-                        campus['name'], building, room_number, is_enabled,
-                        installed_date.strftime('%Y-%m-%d'),
-                        last_maintenance.strftime('%Y-%m-%d'),
-                        created_at.strftime('%Y-%m-%d %H:%M:%S'),
-                        creator_staff['staff_id'] if creator_staff else None
-                    ])
+                serial_number = generate_serial_number()
+                installed_date = random_date_in_range(1095, 30)
+                last_maintenance = random_date_in_range(90, 0)
+                created_at = installed_date
+                is_enabled = random.choice([True, True, True, False])  # 75% enabled
+                
+                printer_data = {
+                    'printer_id': printer_id,
+                    'model_id': model['model_id'],
+                    'room_id': room['room_id'],
+                    'campus_name': room['campus_name'],
+                    'building_code': room['building_code'],
+                    'room_code': room['room_code'],
+                    'room_type': room['room_type'],
+                    'is_enabled': is_enabled
+                }
+                
+                self.printers.append(printer_data)
+                self.printer_by_id[printer_id] = printer_data
+                
+                bulk_printers.add_row([
+                    printer_id, model['model_id'], room['room_id'], serial_number, is_enabled,
+                    installed_date.strftime('%Y-%m-%d'),
+                    last_maintenance.strftime('%Y-%m-%d'),
+                    created_at.strftime('%Y-%m-%d %H:%M:%S'),
+                    creator_staff['staff_id'] if creator_staff else None
+                ])
         
         for stmt in bulk_printers.get_statements():
             self.add_sql(stmt)

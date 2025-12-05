@@ -145,6 +145,34 @@ CREATE TABLE page_size (
 CREATE INDEX idx_size_name ON page_size (size_name);
 GO
 
+-- Building and Room Management Tables
+-- ============================================
+
+CREATE TABLE building (
+    building_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    building_code VARCHAR(20) NOT NULL UNIQUE,
+    address VARCHAR(255) NOT NULL,
+    campus_name VARCHAR(100) NOT NULL,
+    created_at DATETIME DEFAULT GETDATE()
+);
+CREATE INDEX idx_building_code ON building (building_code);
+CREATE INDEX idx_campus_name ON building (campus_name);
+GO
+
+CREATE TABLE room (
+    room_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    building_id UNIQUEIDENTIFIER NOT NULL,
+    room_code VARCHAR(20) NOT NULL,
+    room_type VARCHAR(50) NOT NULL,
+    created_at DATETIME DEFAULT GETDATE(),
+    FOREIGN KEY (building_id) REFERENCES building(building_id),
+    UNIQUE (building_id, room_code)
+);
+CREATE INDEX idx_building_room ON room (building_id);
+CREATE INDEX idx_room_code ON room (room_code);
+CREATE INDEX idx_room_type ON room (room_type);
+GO
+
 -- Printer Management Tables
 -- ============================================
 
@@ -177,10 +205,8 @@ GO
 CREATE TABLE printer_physical (
     printer_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     model_id UNIQUEIDENTIFIER NOT NULL,
+    room_id UNIQUEIDENTIFIER NOT NULL,
     serial_number VARCHAR(100) UNIQUE,
-    campus_name VARCHAR(100) NOT NULL,
-    building_name VARCHAR(100) NOT NULL,
-    room_number VARCHAR(20) NOT NULL,
     is_enabled BIT DEFAULT 1,
     installed_date DATE,
     last_maintenance_date DATE,
@@ -188,11 +214,11 @@ CREATE TABLE printer_physical (
     updated_at DATETIME DEFAULT GETDATE(),
     created_by UNIQUEIDENTIFIER,
     FOREIGN KEY (model_id) REFERENCES printer_model(model_id),
+    FOREIGN KEY (room_id) REFERENCES room(room_id),
     FOREIGN KEY (created_by) REFERENCES staff(staff_id)
 );
 CREATE INDEX idx_model ON printer_physical (model_id);
-CREATE INDEX idx_campus ON printer_physical (campus_name);
-CREATE INDEX idx_building ON printer_physical (building_name);
+CREATE INDEX idx_room ON printer_physical (room_id);
 CREATE INDEX idx_enabled ON printer_physical (is_enabled);
 GO
 
@@ -442,9 +468,10 @@ SELECT
     pp.printer_id,
     b.brand_name,
     pm.model_name,
-    pp.campus_name,
-    pp.building_name,
-    pp.room_number,
+    bld.campus_name,
+    bld.address AS building_address,
+    r.room_code,
+    r.room_type,
     pp.is_enabled,
     COUNT(DISTINCT pj.job_id) AS total_job,
     COUNT(DISTINCT pj.student_id) AS unique_student_count,
@@ -460,10 +487,12 @@ SELECT
 FROM printer_physical pp
 JOIN printer_model pm ON pp.model_id = pm.model_id
 JOIN brand b ON pm.brand_id = b.brand_id
+JOIN room r ON pp.room_id = r.room_id
+JOIN building bld ON r.building_id = bld.building_id
 LEFT JOIN print_job pj ON pp.printer_id = pj.printer_id AND pj.print_status = 'completed'
 LEFT JOIN page_size ps ON pj.paper_size_id = ps.page_size_id
 LEFT JOIN job_pages jp ON pj.job_id = jp.job_id
-GROUP BY pp.printer_id, b.brand_name, pm.model_name, pp.campus_name, pp.building_name, pp.room_number, pp.is_enabled;
+GROUP BY pp.printer_id, b.brand_name, pm.model_name, bld.campus_name, bld.address, r.room_code, r.room_type, pp.is_enabled;
 GO
 -- View: Monthly reports (automated)
 CREATE VIEW monthly_report AS
@@ -548,9 +577,10 @@ SELECT
     END * pj.number_of_copy AS a4_equivalent,
     b.brand_name AS printer_brand,
     pm.model_name AS printer_model,
-    pp.campus_name,
-    pp.building_name,
-    pp.room_number,
+    bld.campus_name,
+    bld.address AS building_address,
+    r.room_code,
+    r.room_type,
     pj.print_status,
     pj.start_time,
     pj.end_time
@@ -564,13 +594,15 @@ JOIN faculty f ON d.faculty_id = f.faculty_id
 JOIN printer_physical pp ON pj.printer_id = pp.printer_id
 JOIN printer_model pm ON pp.model_id = pm.model_id
 JOIN brand b ON pm.brand_id = b.brand_id
+JOIN room r ON pp.room_id = r.room_id
+JOIN building bld ON r.building_id = bld.building_id
 JOIN page_size ps ON pj.paper_size_id = ps.page_size_id
 LEFT JOIN print_job_page pjp ON pj.job_id = pjp.job_id
 GROUP BY pj.job_id, s.student_id, s.student_code, u.full_name, 
          c.class_name, m.major_name, d.department_name, f.faculty_name,
          pj.file_name, ps.size_name, pj.print_side, pj.color_mode, pj.number_of_copy,
-         b.brand_name, pm.model_name, pp.campus_name, pp.building_name, 
-         pp.room_number, pj.print_status, pj.start_time, pj.end_time;
+         b.brand_name, pm.model_name, bld.campus_name, bld.address, 
+         r.room_code, r.room_type, pj.print_status, pj.start_time, pj.end_time;
 GO
 
 -- View: Active printers with full details
@@ -584,16 +616,20 @@ SELECT
     pm.supports_color,
     pm.supports_duplex,
     pp.serial_number,
-    pp.campus_name,
-    pp.building_name,
-    pp.room_number,
+    bld.campus_name,
+    bld.building_code,
+    bld.address AS building_address,
+    r.room_code,
+    r.room_type,
     pp.installed_date,
     pp.last_maintenance_date,
     pp.is_enabled,
-    CONCAT(pp.campus_name, ' - ', pp.building_name, ' - Room ', pp.room_number) AS full_location
+    CONCAT(bld.campus_name, ' - ', bld.building_code, ' - Room ', r.room_code) AS full_location
 FROM printer_physical pp
 JOIN printer_model pm ON pp.model_id = pm.model_id
 JOIN brand b ON pm.brand_id = b.brand_id
+JOIN room r ON pp.room_id = r.room_id
+JOIN building bld ON r.building_id = bld.building_id
 JOIN page_size ps ON pm.max_paper_size_id = ps.page_size_id
 WHERE pp.is_enabled = 1;
 GO
@@ -657,9 +693,11 @@ SELECT
     pp.printer_id,
     b.brand_name,
     pm.model_name,
-    pp.campus_name,
-    pp.building_name,
-    pp.room_number,
+    bld.campus_name,
+    bld.building_code,
+    bld.address AS building_address,
+    r.room_code,
+    r.room_type,
     pp.installed_date,
     pp.last_maintenance_date,
     DATEDIFF(DAY, pp.last_maintenance_date, GETDATE()) AS days_since_maintenance,
@@ -667,9 +705,11 @@ SELECT
 FROM printer_physical pp
 JOIN printer_model pm ON pp.model_id = pm.model_id
 JOIN brand b ON pm.brand_id = b.brand_id
+JOIN room r ON pp.room_id = r.room_id
+JOIN building bld ON r.building_id = bld.building_id
 LEFT JOIN print_job pj ON pp.printer_id = pj.printer_id 
     AND pj.end_time > pp.last_maintenance_date
 WHERE pp.is_enabled = 1
-GROUP BY pp.printer_id, b.brand_name, pm.model_name, pp.campus_name, 
-         pp.building_name, pp.room_number, pp.installed_date, pp.last_maintenance_date;
+GROUP BY pp.printer_id, b.brand_name, pm.model_name, bld.campus_name, 
+         bld.building_code, bld.address, r.room_code, r.room_type, pp.installed_date, pp.last_maintenance_date;
 GO

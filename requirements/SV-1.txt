@@ -1,0 +1,149 @@
+Thành phần chung
+Thành phần giao diện
+Phần 1: Thanh header
+Logo HCMSIU ở bên trái
+Tên hệ thống: "Dịch vụ in ấn sinh viên"
+Notification (icon cái chuông không cần tên cũng được)
+Phần thông tin người dùng (góc phải, một ô vuông có chức năng xổ xuống)
+Avatar/icon người dùng
+Username bên dưới
+Page Balance (A4)
+Menu xổ xuống:
+User Infomation
+Settings
+Log out (màu đỏ)
+Phần 2: Thanh bên (Sidebar)
+Home
+Printers Info
+Print Document
+Print History
+Buy Pages
+Chân trang cho sidebar (Footer)
+Copyright Information
+Contact Us
+System Version
+
+flow
+Chức năng: Điều hướng hệ thống (Người dùng đã đăng nhập vào ứng dụng, sidebar và header luôn cố định, khi di chuột qua các nút đổi màu, nổi lên)
+Click chuột mục trên sidebar
+Hệ thống tải nội dung của module tương ứng vào khu vực nội dung chính (Main Content).
+Click chuột mục trên header (Thông báo và tài khoản)
+Thông báo
+Xổ ra tất cả các thông báo gồm nội dung thông báo, giờ, ngày 
+Hệ thống tải nội dung của module tương ứng vào khu vực nội dung chính (Main Content).
+Tài khoản
+Xổ ra danh mục các chức năng Thông tin cá nhân, Cài đặt, Đăng xuất
+Click chuột vào một mục
+Hệ thống tải nội dung của module tương ứng vào khu vực nội dung chính (Main Content).
+SV-1-1: Điều hướng hệ thống
+Mục
+Nội dung
+Index
+SV-1-1
+Tên
+Điều hướng hệ thống
+Mô tả
+Người dùng chuyển đến trang mong muốn
+Tiền tố
+Đã đăng nhập hệ thống
+Hậu tố
+Màn hình chức năng tương ứng được hiển thị.
+Quy định nghiệp vụ
+Sidebar, header phải luôn hiển thị ở tất cả các trang con (trừ màn hình login/error).
+Flow chính
+1. Sinh viên nhấn vào một mục trên Sidebar (VD: "Lịch sử in").
+2. Hệ thống tải nội dung của module tương ứng vào khu vực nội dung chính (Main Content).
+Flow thay thế
+1a. Sinh viên nhấn vào Mục thông báo.
+2a. Hệ thống xổ ra danh sách thông báo.
+1b. Sinh viên nhấn vào Mục tài khoản.
+1b1. Hệ thống xổ ra danh sách chức năng tài khoản
+1b2. Sinh viên nhấn vào một mục
+Usecase tiếp tục bước 2
+Flow xử lý lỗi
+Trang đích không tồn tại (404) → Hiển thị thông báo "Chức năng đang bảo trì" hoặc quay về Trang chủ.
+Input
+Sự kiện click chuột của người dùng.
+Output đúng
+Giao diện chuyển sang trang chức năng mong muốn.
+
+
+SV-1-2: Đăng xuất?
+
+Mục
+Nội dung
+Index
+SV-1-2
+Tên
+Đăng xuất khỏi hệ thống
+Mô tả
+Người dùng kết thúc phiên làm việc hiện tại để bảo mật tài khoản và rời khỏi hệ thống
+Tiền tố
+Đã đăng nhập hệ thống
+Hậu tố
+Người dùng đã đăng xuất. Màn hình Đăng nhập (Login) được hiển thị.
+Quy định nghiệp vụ
+Hệ thống phải xóa hoàn toàn dữ liệu phiên làm việc (Session Data) và Cookie liên quan đến người dùng.
+Nếu có thao tác chưa lưu hoặc lệnh in đang chờ xử lý, hệ thống phải yêu cầu xác nhận trước khi đăng xuất.
+Flow chính
+1. Sinh viên nhấn vào Mục tài khoản/Profile Icon trên Header.
+2. Hệ thống xổ ra danh sách chức năng tài khoản.
+3. Sinh viên nhấn vào nút "Đăng xuất".
+4. Hệ thống thực hiện xóa session và đăng xuất người dùng.
+5. Hệ thống chuyển hướng (redirect) người dùng đến Trang Đăng nhập.
+Flow thay thế
+1a. (Sau bước 3) Hệ thống phát hiện có lệnh in đang trong trạng thái Queued (Đang chờ) hoặc Printing (Đang in).
+2a. Hệ thống hiển thị hộp thoại xác nhận: "Bạn có chắc chắn muốn đăng xuất không? Việc đăng xuất sẽ không hủy các lệnh in đã được gửi."
+3a. Sinh viên nhấn "Đồng ý". Usecase tiếp tục bước 4 của Flow chính.
+4a. Sinh viên nhấn "Hủy". Usecase kết thúc và giữ nguyên màn hình hiện tại.
+Flow xử lý lỗi
+1. Hệ thống gặp lỗi khi thực hiện xóa Session/Cookie (VD: Lỗi kết nối Server/DB).
+2. Hệ thống hiển thị thông báo lỗi: "Đăng xuất không thành công. Vui lòng thử lại."
+3. Giữ nguyên trạng thái đăng nhập của người dùng.
+Input
+Sự kiện click chuột của người dùng.
+Output đúng
+Giao diện chuyển sang Trang Đăng nhập (Login Page).
+
+
+
+
+
+
+
+Review
+Thành viên
+Đồng ý
+Không đồng ý
+Lê Ngọc Đăng Khoa
+
+
+
+
+Hiểu Vy Lý
+
+
+
+
+Nguyễn Hồng Bảo Ngọc
+
+
+
+
+Lê Anh Tuấn
+
+
+
+
+Phan Thanh Thái Tuấn
+
+
+
+
+Phan Điền Mạnh Thiên
+
+
+
+
+
+

@@ -1,0 +1,739 @@
+Trang In Tài Liệu
+1. Thành phần giao diện
+Progress Stepper (Trên cùng)
+Hiển thị 4 bước: Upload → Printer → Settings → Confirm
+Highlight bước hiện tại
+Hiển thị "Step X of 4"
+Step 1: Upload Document
+Tiêu đề: "Select Document"
+ Mô tả: "Upload a PDF or Word document to print"
+Vùng kéo-thả file
+
+
+Text: "Drag and drop your file here or click to browse"
+Hỗ trợ click để mở file picker
+Text hướng dẫn: "PDF or DOCX (up to 50 MB)"
+Upload progress indicator
+
+
+Progress bar hiển thị % khi đang upload
+Estimated time remaining
+"Uploading..." text
+File info card (sau khi upload thành công):
+
+
+Tên file
+Kích thước
+Số trang
+Icon loại file
+Nút "Remove" để xóa và chọn lại
+Text thông tin: "Allowed file types: PDF, DOCX. Maximum file size: 50 MB."
+
+
+Text lưu trữ: "Files are stored securely and will be deleted after printing."
+
+
+Nút "Continue to Printer Selection" (enabled sau khi upload thành công)
+
+
+Step 2: Printer Selection
+Tiêu đề: "Select Printer"
+ Mô tả: "Choose an available printer"
+Bộ lọc vị trí:
+
+
+Dropdown "Campus"
+Dropdown "Building" (cập nhật theo Campus)
+Dropdown "Room" (cập nhật theo Building)
+Danh sách máy in (dạng card):
+
+
+Tên máy in
+Vị trí đầy đủ (Campus - Building - Room)
+Status badge:
+"Available" (màu xanh)
+"Busy" (màu vàng)
+"Offline" (màu xám)
+Icon trạng thái
+Thông tin hỗ trợ (A4, A3, Color, Duplex icons)
+Queue info: "X jobs ahead" (nếu Busy)
+Empty state (khi không có máy in):
+
+
+Icon máy in với dấu X
+Text: "No printers available at this location"
+Suggestion: "Try selecting a different location"
+Nút "Back" và "Continue to Settings"
+
+
+Step 3: Print Settings
+Tiêu đề: "Configure Print Settings"
+ Mô tả: "Customize your print job"
+Form cấu hình:
+
+ Paper Size: Dropdown
+
+
+A3
+A4 (default)
+A5
+Page Range:
+
+
+Radio "All pages" (default)
+Radio "Custom" với input field
+Placeholder: "e.g., 1-5, 8, 10-12"
+Helper text: "Enter page numbers and ranges separated by commas"
+Orientation: Radio buttons
+
+
+Portrait (default)
+Landscape
+Sides: Radio buttons
+
+
+One-sided (default)
+Two-sided (Duplex)
+Color Mode: Dropdown
+
+
+Color
+Grayscale
+Black & White (default)
+Copies: Number input với nút +/-
+
+
+Min: 1, Max: 99
+Default: 1
+Preview area:
+
+
+Thumbnail của trang đầu tiên
+Text: "Preview updates based on your settings"
+Hiển thị orientation và paper size
+Page Balance Summary card:
+
+
+"Current Balance: [X] A4 pages"
+"Pages to Print: [Y] A4 equivalent"
+"Remaining After Print: [Z] A4 pages"
+Warning state (khi không đủ số dư):
+Text màu đỏ: "Insufficient balance"
+Required: [Y] pages
+Available: [X] pages
+Need: [Y-X] more pages
+Nút "Buy More Pages"
+Nút "Back" và "Continue to Confirm" (disabled nếu không đủ số dư)
+
+
+Step 4: Confirmation
+Tiêu đề: "Review & Confirm"
+ Mô tả: "Please review your print job before submitting"
+Summary sections:
+
+ Document Info:
+
+
+File name
+File size
+Total pages in document
+Printer Info:
+
+
+Printer name
+Location (Campus - Building - Room)
+Current status
+Print Settings:
+
+
+Paper size
+Page range (e.g., "Pages 1-5, 8, 10-12" or "All pages")
+Orientation
+Sides
+Color mode
+Number of copies
+Page Balance:
+
+
+Pages to print (A4 equivalent)
+Current balance
+Remaining balance after print
+Nút "Back to Edit", "Cancel", và "Submit Print Job"
+
+
+Success Modal (Sau khi submit)
+Icon thành công (✓)
+Thông điệp: "Print Job Submitted Successfully!"
+Job ID: Display mã job (e.g., "JOB-123456")
+Thông tin:
+Printer location
+Estimated completion time
+Pages printed
+Balance remaining
+Nút "View Print History" và "Print Another Document"
+Loading States
+Upload spinner: "Uploading file... [X%]"
+Submit spinner: "Submitting print job..."
+Printer status check: "Checking printer availability..."
+Error Displays
+Network error banner:
+
+
+Icon: ⚠️
+Text: "Connection failed. Please try again."
+Nút "Retry"
+Upload error banner:
+
+
+Icon: ❌
+Text: [Error message]
+Nút "Try Again"
+Printer offline notification:
+
+
+Icon: 🔴
+Text: "Selected printer is no longer available"
+Suggestion: "Please select another printer"
+Nút "Back to Printer Selection"
+
+2. Flow tương tác
+2.1 Upload tài liệu (Step 1)
+Người dùng truy cập trang in tài liệu
+Hiển thị vùng kéo-thả file với text hướng dẫn
+Người dùng click vào vùng upload hoặc kéo-thả file
+Hiển thị file picker (nếu click)
+Người dùng chọn file
+Hiển thị upload progress bar với %
+Nếu file hợp lệ:
+Upload progress bar đạt 100%
+Hiển thị file info card
+Hiển thị: tên file, kích thước, số trang, icon loại file
+Nút "Continue" chuyển từ disabled sang enabled
+Nếu file không hợp lệ:
+Hiển thị error banner màu đỏ
+Text lỗi cụ thể (sai định dạng / quá lớn)
+Không cho phép continue
+Người dùng có thể click "Remove" để xóa file
+Xóa file info card
+Reset về trạng thái ban đầu (vùng kéo-thả)
+Nút "Continue" trở lại disabled
+Người dùng click "Continue to Printer Selection"
+Chuyển sang Step 2
+Progress stepper highlight Step 2
+2.2 Chọn máy in (Step 2)
+Hiển thị bộ lọc vị trí (Campus, Building, Room)
+Hiển thị danh sách máy in với status badges
+Người dùng chọn Campus từ dropdown
+Danh sách Building được cập nhật theo Campus
+Room dropdown bị reset
+Người dùng chọn Building
+Danh sách Room được cập nhật theo Building
+Người dùng chọn Room
+Danh sách máy in được lọc theo vị trí đã chọn
+Nếu không có máy in:
+Hiển thị empty state với icon và text
+Suggestion: chọn vị trí khác
+Nút "Continue" disabled
+Người dùng click chọn một máy in
+Card máy in được highlight (border màu xanh)
+Hiển thị status: Available/Busy/Offline
+Hiển thị thông tin hỗ trợ (A4, A3, Color icons)
+Nếu Busy: hiển thị "X jobs ahead"
+Nếu máy in Offline: không cho phép chọn (card màu xám, disabled)
+Nút "Continue" chuyển từ disabled sang enabled
+Người dùng click "Back"
+Quay lại Step 1
+Progress stepper highlight Step 1
+Giữ nguyên file đã upload
+Người dùng click "Continue to Settings"
+Chuyển sang Step 3
+Progress stepper highlight Step 3
+2.3 Cấu hình in (Step 3)
+Hiển thị form cấu hình với các giá trị default
+Hiển thị preview thumbnail của trang đầu
+Hiển thị Page Balance Summary card với số dư hiện tại
+Người dùng chọn Paper Size từ dropdown
+Preview cập nhật kích thước
+Page Balance Summary cập nhật "Pages to Print"
+Recalculate A4 equivalent
+Người dùng chọn Page Range
+Nếu chọn "All":
+Input custom bị disabled và clear
+Tính tất cả trang trong tài liệu
+Nếu chọn "Custom":
+Input custom được enabled
+Placeholder: "e.g., 1-5, 8, 10-12"
+Helper text hiển thị
+Người dùng nhập page range custom
+Validate format trong khi nhập
+Nếu format sai:
+Input border màu đỏ
+Error text: "Invalid format. Use: 1-5, 8, 10-12"
+Nếu page number vượt quá tài liệu:
+Error text: "Page number exceeds document length"
+Người dùng chọn Orientation
+Preview xoay theo hướng (Portrait/Landscape)
+Người dùng chọn Sides
+Recalculate pages to print (two-sided = ½ sheets)
+Page Balance Summary cập nhật
+Người dùng chọn Color Mode
+Preview thay đổi màu sắc tương ứng
+Người dùng thay đổi Copies
+Dùng nút +/- hoặc nhập trực tiếp
+Validate: min=1, max=99
+Recalculate total pages to print
+Page Balance Summary cập nhật real-time
+Page Balance Summary tự động cập nhật:
+"Pages to Print: [Y] A4 equivalent"
+"Remaining After Print: [Current - Y]"
+Nếu không đủ số dư:
+Text màu đỏ: "Insufficient balance"
+Hiển thị "Required: [Y] | Available: [X] | Need: [Y-X] more"
+Nút "Buy More Pages" xuất hiện
+Nút "Continue" bị disabled
+Nếu đủ số dư:
+Text màu xanh
+Nút "Continue" enabled
+Người dùng click "Back"
+Quay lại Step 2
+Progress stepper highlight Step 2
+Giữ nguyên settings đã chọn
+Người dùng click "Buy More Pages" (nếu không đủ)
+Mở trang mua trang trong tab mới
+Giữ nguyên trang in hiện tại
+Người dùng click "Continue to Confirm"
+Chuyển sang Step 4
+Progress stepper highlight Step 4
+2.4 Xác nhận và gửi (Step 4)
+Hiển thị summary đầy đủ trong các sections
+Hiển thị tất cả thông tin đã chọn (read-only)
+Người dùng review thông tin
+Người dùng click "Back to Edit"
+Quay lại Step 3
+Progress stepper highlight Step 3
+Giữ nguyên toàn bộ thông tin đã cấu hình
+Người dùng click "Cancel"
+Hiển thị confirm dialog: "Are you sure you want to cancel?"
+Nếu confirm:
+Đóng trang in
+Quay về dashboard
+Không lưu gì
+Nếu không confirm:
+Đóng dialog
+Ở lại Step 4
+Người dùng click "Submit Print Job"
+Nút "Submit" chuyển sang disabled
+Hiển thị loading spinner: "Submitting print job..."
+Submit button text: "Submitting..."
+Nếu submit thành công:
+Đóng trang print
+Hiển thị success modal
+Hiển thị Job ID (e.g., "JOB-123456")
+Hiển thị thông tin: printer location, estimated time, pages printed, balance remaining
+Nếu submit thất bại:
+Hiển thị error banner
+Text lỗi cụ thể
+Nút "Submit" quay lại enabled
+Nút "Retry" xuất hiện
+Người dùng click "View Print History" (trong success modal)
+Đóng modal
+Chuyển đến trang lịch sử in
+Người dùng click "Print Another Document" (trong success modal)
+Đóng modal
+Reset form về Step 1 (trạng thái ban đầu)
+Clear tất cả dữ liệu đã nhập
+2.5 Xử lý lỗi và edge cases
+Upload file sai định dạng:
+Hiển thị error banner màu đỏ
+Icon: ❌
+Text: "Invalid file type. Please upload PDF or DOCX."
+Không cho phép continue
+Nút "Try Again" để chọn file khác
+Upload file quá lớn:
+Hiển thị error banner màu đỏ
+Text: "File size exceeds 50 MB limit."
+Hiển thị kích thước file: "Your file: [X] MB"
+Không cho phép continue
+Network error khi upload:
+Upload progress bar dừng lại
+Hiển thị error banner: "Upload failed. Connection error."
+Nút "Retry Upload"
+Giữ nguyên file đã chọn để retry
+Không có máy in available:
+Hiển thị empty state với icon
+Text: "No printers available at this location."
+Suggestion: "Try selecting a different location"
+Nút "Continue" disabled
+Không đủ số dư tại Step 3:
+Page Balance Summary hiển thị warning màu đỏ
+Text: "Insufficient balance"
+Breakdown: Required vs Available
+Nút "Buy More Pages" xuất hiện
+Nút "Continue" disabled
+Không đủ số dư tại Step 4 (double-check):
+Khi click Submit, kiểm tra lại số dư
+Nếu không đủ (số dư đã thay đổi):
+Hiển thị error banner
+Text: "Balance insufficient. Your balance may have changed."
+Nút "Back to Settings" để review
+Không submit job
+Máy in offline khi submit:
+Hiển thị error modal
+Icon: 🔴
+Text: "Selected printer is no longer available."
+Suggestion: "Please select another printer."
+Nút "Back to Printer Selection"
+Không trừ số dư
+Network error khi submit:
+Hiển thị error banner
+Text: "Connection failed. Please try again."
+Nút "Retry"
+Nút "Submit" quay lại enabled
+Không trừ số dư cho đến khi submit thành công
+Session timeout:
+Hiển thì notification: "Session expired. Please log in again."
+Redirect về trang login
+(Optional) Lưu draft để recover sau khi login
+
+3. Use Case
+Danh sách các usecase
+Use Case Index
+Tên Use Case
+MoSCoW
+SV-4-1
+In tài liệu
+Must Have
+
+
+Mục
+Nội dung
+Usecase ID
+SV-4-1
+Tên
+In tài liệu
+Mô tả
+Sinh viên upload tài liệu, chọn máy in, cấu hình thông số in và gửi lệnh in
+Actor
+Sinh viên
+Trigger
+Sinh viên click "Upload & Print Document" từ dashboard hoặc truy cập trực tiếp trang in
+Quy định nghiệp vụ
+Hệ thống chỉ chấp nhận những file có mặt trong bảng permitted_file_type và có is_permitted = 1 (hiện hỗ trợ PDF, DOCX).
+Dung lượng file upload tối đa 50MB.
+Mỗi lượt in cho phép tối đa 99 copies.
+File sau khi upload sẽ được lưu trên Supabase Storage, và database chỉ lưu file_name.
+Page range phải nhập đúng định dạng "1-5, 8, 10-12". Backend sẽ parse và tạo record tương ứng trong print_job_page.
+Tùy chọn two-sided làm giảm số trang thành một nửa
+Trạng thái lệnh in đi theo flow: queued → printing → completed / failed / cancelled.
+Trước khi submit, hệ thống kiểm tra số dư real-time từ student_page_purchase và print_job để đảm bảo sinh viên đủ tiền.
+
+
+Main Flow
+Bước 1: Upload tài liệu
+1. Sinh viên truy cập trang in tài liệu
+2. Sinh viên click hoặc kéo-thả file vào vùng upload
+3. Hệ thống hiển thị file picker (nếu click)
+4. Sinh viên chọn file (PDF hoặc DOCX)
+5. Hệ thống validate file:
+  - Kiểm tra định dạng trong bảng permitted_file_type (is_permitted = 1)
+  - Kiểm tra kích thước ≤ 50MB
+6. Nếu hợp lệ:
+  - Upload file lên Supabase Storage
+  - Hiển thị upload progress (%)
+  - Extract metadata: tên file, kích thước, số trang
+  - Hiển thị file info card
+  - Enable nút "Continue"
+7. Nếu không hợp lệ:
+  - Hiển thị error message cụ thể
+  - Không upload
+  - Disable nút "Continue"
+8. Sinh viên click "Continue to Printer Selection"
+
+Bước 2: Chọn máy in
+9. Hệ thống truy vấn danh sách máy in từ printer_physical JOIN với printer_model, brand, room, building WHERE is_enabled = 1
+10. Hiển thị danh sách máy in với: tên (model_name), vị trí (campus_name, building_code, room_code), status, thông tin hỗ trợ
+11. Sinh viên lọc theo vị trí (Campus → Building → Room)
+12. Hệ thống lọc danh sách theo điều kiện được chọn
+13. Sinh viên chọn một máy in
+14. Hệ thống kiểm tra máy in có is_enabled = 1 và không offline
+15. Nếu khả dụng:
+  • Làm nổi bật máy in đã chọn
+  • Kích hoạt nút "Continue"
+16. Nếu offline: không cho phép chọn, hiển thị "Printer offline"
+17. Sinh viên nhấn "Continue to Settings"
+
+Bước 3: Cấu hình in
+18. Hệ thống tải thông tin máy in đã chọn để kiểm tra settings
+19. Hiển thị form với giá trị mặc định:
+  • Paper size: A4 (tra page_size_id từ bảng page_size)
+  • Page range: All
+  • Orientation: Portrait
+  • Sides: One-sided
+  • Color mode: Black & White
+  • Copies: 1
+20. Hệ thống tính số dư hiện tại:
+  • Tổng A4 equivalent đã mua từ student_page_purchase WHERE payment_status = 'completed'
+  • Tổng A4 equivalent đã in từ print_job JOIN print_job_page WHERE print_status = 'completed'
+  • Số dư = Đã mua - Đã in
+21. Sinh viên thay đổi settings
+22. Mỗi khi thay đổi:
+  • Hệ thống phân tích page range (nếu custom) hoặc dùng total pages (nếu all)
+  • Áp dụng A4 conversion từ page_size
+  • Nhân với number_of_copy
+  • So sánh với số dư
+23. Nếu đủ số dư:
+  • Hiển thị "Pages to Print: [Y]"
+  • Hiển thị "Remaining: [số dư - Y]"
+  • Kích hoạt nút "Continue"
+24. Nếu không đủ:
+  • Hiển thị warning màu đỏ: "Insufficient balance"
+  • Hiển thị breakdown (Required vs Available)
+  • Vô hiệu hóa nút "Continue"
+  • Hiển thị nút "Buy More Pages"
+25. Sinh viên nhấn "Continue to Confirm"
+
+Bước 4: Xác nhận và submit
+26. Hệ thống hiển thị summary:
+  • Document info (file name, size, total pages)
+  • Printer info (name, location)
+  • Print settings (tất cả cấu hình)
+  • Page balance (pages to print, current balance, remaining)
+27. Sinh viên xem xét thông tin
+28. Sinh viên nhấn "Submit Print Job"
+29. Hệ thống kiểm tra lại số dư:
+  • Query lại số dư hiện tại
+  • So sánh với pages to print
+  • Nếu không đủ: hủy bỏ và hiển thị error
+30. Hệ thống kiểm tra máy in vẫn khả dụng:
+  • Xác minh is_enabled = 1
+  • Kiểm tra status không offline
+  • Nếu offline: hủy bỏ và hiển thị error
+31. Nếu tất cả kiểm tra đều pass, hệ thống tạo record trong print_job:
+  • job_id: NEWID()
+  • student_id: từ session
+  • printer_id: máy in đã chọn
+  • file_name: tên file (Supabase path)
+  • file_type: PDF/DOCX
+  • file_size_kb: kích thước
+  • paper_size_id: lookup từ page_size
+  • page_orientation: portrait/landscape
+  • print_side: one-sided/double-sided
+  • color_mode: color/grayscale/black-white
+  • number_of_copy: số copies
+  • print_status: 'queued'
+  • start_time: NULL
+  • end_time: NULL
+  • created_at: GETDATE()
+32. Hệ thống phân tích page range và tạo records trong print_job_page:
+  • Với mỗi trang trong range: INSERT INTO print_job_page (job_id, page_number)
+33. Hệ thống ghi log vào system_audit_log:
+  • action_type: 'print_job_created'
+  • table_name: 'print_job'
+  • record_id: job_id mới tạo
+34. Hệ thống gửi lệnh in đến máy in (qua print queue/service)
+35. Hệ thống trả về job_id
+36. Hiển thị success modal với: Job ID, Printer location, Estimated completion time, Pages printed, Remaining balance
+
+Background process:
+37. Printer service nhận job và bắt đầu in
+38. Cập nhật print_status: 'queued' → 'printing', start_time: GETDATE()
+39. Khi in xong: cập nhật print_status: 'completed', end_time: GETDATE()
+Alternative Flow
+Alt 1: Sinh viên quay lại bước trước
+• Tại bất kỳ bước nào (2, 3, 4), sinh viên nhấn "Back"
+• Hệ thống quay về bước trước
+• Giữ nguyên tất cả dữ liệu đã nhập
+• Progress stepper cập nhật highlight
+Alt 2: Sinh viên xóa file và chọn lại
+• Tại Bước 1, sau khi tải lên file, sinh viên nhấn "Remove"
+• Hệ thống xóa file khỏi Supabase Storage
+• Reset về trạng thái ban đầu
+• Vô hiệu hóa nút "Continue"
+Alt 3: Sinh viên hủy job
+• Tại bất kỳ bước nào, sinh viên nhấn "Cancel"
+• Hiển thị confirm dialog: "Are you sure you want to cancel?"
+• Nếu xác nhận:
+  - Xóa file tạm khỏi Supabase Storage
+  - Đóng trang in
+  - Chuyển hướng về dashboard
+  - Không tạo print job
+• Nếu không xác nhận: đóng dialog, ở lại bước hiện tại
+Alt 4: Sinh viên mua thêm trang khi không đủ
+• Tại Bước 3, khi không đủ số dư, sinh viên nhấn "Buy More Pages"
+• Mở trang mua trang trong tab/window mới
+• Giữ nguyên tab hiện tại với tất cả thông tin đã nhập
+• Sau khi mua xong, sinh viên quay lại tab in
+• Hệ thống tự động làm mới số dư
+• Kiểm tra lại số dư, nếu đủ: kích hoạt nút "Continue"
+Exception Flow
+Exc 1: File không hợp lệ
+• Tại Bước 1, bước 5: kiểm tra file
+• File không phải PDF/DOCX hoặc > 50MB
+• Xử lý:
+  - Không tải lên file
+  - Hiển thị error banner với lý do cụ thể
+  - Vô hiệu hóa nút "Continue"
+  - Người dùng phải chọn file khác
+
+Exc 2: Page range không hợp lệ
+• Format sai (ví dụ: "1-5-8", "abc", "1,,5"):
+  - Kiểm tra format: chỉ số, dấu phẩy, dấu gạch ngang
+  - Hiển thị error: "Invalid page range format. Use: 1-5, 8, 10-12"
+  - Input border màu đỏ
+  - Vô hiệu hóa nút "Continue"
+• Số trang vượt quá tài liệu (ví dụ: "1-100" nhưng chỉ có 50 trang):
+  - Kiểm tra: phân tích range và kiểm tra max page ≤ total pages
+  - Hiển thị error: "Page number exceeds document length (max: 50)"
+  - Input border màu đỏ
+  - Vô hiệu hóa nút "Continue"
+
+Exc 3: Không đủ số dư
+• Tại Bước 3:
+  - Pages to print > số dư hiện tại
+  - Hiển thị Page Balance Summary màu đỏ
+  - Text: "Insufficient balance"
+  - Breakdown: "Required: [Y] | Available: [X] | Need: [Y-X] more"
+  - Vô hiệu hóa nút "Continue"
+  - Hiển thị nút "Buy More Pages"
+• Tại Bước 4 (kiểm tra lại khi submit):
+  - Số dư đã thay đổi → không đủ
+  - Hủy bỏ submit (không tạo print_job)
+  - Hiển thị error modal: "Balance insufficient. Your balance may have changed."
+  - Detail: "Required: [Y] | Available: [X]"
+  - Nút "Back to Settings"
+
+Exc 4: Máy in không khả dụng
+• Không có máy in ở vị trí:
+  - Query không trả về máy in nào
+  - Hiển thị empty state: "No printers available at this location."
+  - Suggestion: "Try selecting a different location"
+  - Vô hiệu hóa nút "Continue"
+• Máy in offline khi chọn:
+  - Không cho phép chọn (card disabled, màu xám)
+  - Badge "Offline" màu đỏ
+  - Tooltip: "This printer is currently offline"
+• Máy in offline khi submit:
+  - Máy in chuyển sang offline hoặc is_enabled = 0
+  - Hủy bỏ submit (không tạo print_job)
+  - Hiển thị error modal: "Selected printer is no longer available."
+  - Nút "Back to Printer Selection"
+  - Không trừ số dư
+Tiền điều kiện
+• Sinh viên đã đăng nhập (session hợp lệ, student_id có trong bảng student)
+• Có ít nhất 1 máy in khả dụng (is_enabled = 1 trong printer_physical)
+• Sinh viên có số dư > 0
+• Hệ thống file storage (Supabase) đang hoạt động
+• Kết nối database ổn định
+• Print service/queue đang hoạt động
+Hậu điều kiện
+Khi thành công:
+- File được upload và lưu trong Supabase Storage
+- Record mới trong bảng print_job với print_status = 'queued'
+- Records trong bảng print_job_page cho từng trang cần in
+- Giao dịch được log trong system_audit_log (action_type: 'print_job_created')
+- Lệnh in được gửi đến máy in qua print queue
+- Sinh viên nhận Job ID
+- (Background) Printer service cập nhật: queued → printing → completed
+- (Background) Số dư được tính real-time từ print_job JOIN print_job_page
+
+Khi thất bại:
+- Không tạo record nào trong database
+- File không được upload hoặc bị xóa
+- Số dư không thay đổi
+- Error được log vào system_audit_log (action_type: 'print_job_failed')
+- Sinh viên nhận thông báo lỗi cụ thể
+Input
+• File: PDF hoặc DOCX (≤50MB)
+• Printer: printer_id từ bảng printer_physical
+• Print settings:
+  - paper_size_id: lookup từ page_size (A3/A4/A5)
+  - page_range: String (ví dụ: "1-5,8,10-12") hoặc "all"
+  - page_orientation: 'portrait' hoặc 'landscape'
+  - print_side: 'one-sided' hoặc 'double-sided'
+  - color_mode: 'color', 'grayscale', hoặc 'black-white'
+  - number_of_copy: Integer (1-99)
+• Session data: student_id từ authenticated session
+Output
+Thành công:
+json<br>{<br> "status": "success",<br> "job_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",<br> "printer": {<br> "printer_id": "printer-uuid-here",<br> "name": "HP LaserJet Pro M404dn",<br> "location": "CS1 - H1 - 101"<br> },<br> "file": {<br> "file_name": "Assignment_Final.pdf",<br> "file_size_kb": 2048,<br> "total_pages": 10<br> },<br> "settings": {<br> "paper_size": "A4",<br> "page_range": "1-5,8",<br> "pages_to_print": 6,<br> "orientation": "portrait",<br> "sides": "one-sided",<br> "color_mode": "black-white",<br> "copies": 2<br> },<br> "balance": {<br> "a4_equivalent_to_print": 12,<br> "previous_balance": 150,<br> "remaining_balance": 138<br> },<br> "print_status": "queued",<br> "estimated_completion": "2024-12-04T10:35:00Z",<br> "created_at": "2024-12-04T10:30:00Z"<br>}<br>
+
+Thất bại - Không đủ số dư:
+json<br>{<br> "status": "error",<br> "error_code": "INSUFFICIENT_BALANCE",<br> "message": "Không đủ số dư. Vui lòng mua thêm trang.",<br> "details": {<br> "required_pages": 20,<br> "current_balance": 15,<br> "shortage": 5<br> },<br> "suggestion": "Buy 50 pages package for $10.00 to continue"<br>}<br>
+
+Thất bại - Máy in offline:
+json<br>{<br> "status": "error",<br> "error_code": "PRINTER_OFFLINE",<br> "message": "Máy in đã chọn không khả dụng.",<br> "details": {<br> "printer_id": "printer-uuid-here",<br> "printer_name": "HP LaserJet Pro M404dn",<br> "location": "CS1 - H1 - 101",<br> "current_status": "offline"<br> },<br> "suggestion": "Please select another printer"<br>}<br>
+
+Thất bại - File không hợp lệ:
+json<br>{<br> "status": "error",<br> "error_code": "INVALID_FILE",<br> "message": "File không hợp lệ.",<br> "details": {<br> "file_name": "document.exe",<br> "file_size_kb": 1024,<br> "reason": "Invalid file type. Only PDF and DOCX are allowed."<br> }<br>}<br>
+
+Thất bại - Lỗi kết nối:
+json<br>{<br> "status": "error",<br> "error_code": "NETWORK_ERROR",<br> "message": "Kết nối thất bại. Vui lòng thử lại.",<br> "details": {<br> "error": "Connection timeout",<br> "timestamp": "2024-12-04T10:30:15Z"<br> }<br>}<br>
+
+
+Technical Notes
+
+File Storage:
+• Files tải lên Supabase Storage bucket: print-documents
+• File naming: {student_id}/{timestamp}_{original_filename}
+• Chỉ file_name (không có URL prefix) được lưu trong print_job.file_name
+• Backend thêm Supabase URL khi truy xuất
+• Scheduled cleanup: xóa files > 30 ngày sau print_status = 'completed'
+
+Page Balanc:
+• Balance KHÔNG được lưu trực tiếp - tính real-time khi cần
+• Total purchased: SUM từ student_page_purchase WHERE payment_status = 'completed', chuyển đổi sang A4 equivalent sử dụng tỷ lệ chuyển đổi page_size
+• Total printed: SUM từ print_job JOIN print_job_page WHERE print_status = 'completed', chuyển đổi sang A4 equivalent
+• Balance = Total purchased - Total printed
+
+Page Range Parsing:
+• Input: "1-5, 8, 10-12"
+• Backend tách bằng dấu phẩy, mở rộng ranges, loại bỏ trùng lặp
+• Kiểm tra tất cả page numbers ≤ document total pages
+• Tạo các record riêng lẻ trong print_job_page cho mỗi trang
+
+Print Status Workflow:
+• Người dùng submit → print_status = 'queued', start_time = NULL, end_time = NULL
+• Printer nhận → print_status = 'printing', start_time = GETDATE()
+• Hoàn thành → print_status = 'completed', end_time = GETDATE()
+• Thất bại → print_status = 'failed', end_time = GETDATE() (balance không bị trừ)
+• Người dùng hủy → print_status = 'cancelled' (chỉ khi còn 'queued')
+
+Error Logging:
+• Tất cả errors được log vào system_audit_log với action_type = 'print_job_failed' hoặc 'print_job_created'
+
+
+Thành viên
+Đồng ý
+Không đồng ý
+Lê Ngọc Đăng Khoa
+
+
+
+
+Hiểu Vy Lý
+
+
+
+
+Nguyễn Hồng Bảo Ngọc
+
+
+
+
+Lê Anh Tuấn
+
+
+
+
+Phan Thanh Thái Tuấn
+
+
+
+
+Phan Điền Mạnh Thiên
+
+
+
+
+
+
