@@ -30,7 +30,7 @@ design_path = os.path.join(script_dir, "..", "sql", "design.sql")
 BULK_INSERT_SIZE = 1000  # Number of rows per INSERT statement
 
 INCLUDE_SCHEMA_RESET = True  # When True, prepend delete.sql and design.sql content to output
-SKIP_USE_STATEMENT = False    # When True, omit the "USE database; GO" block
+SKIP_USE_STATEMENT = True     # When True, omit the "USE database; GO" block (set to True for SQL Server versions that don't support USE)
 SQL_SERVER_MODE = True        # When True, generate SQL Server compatible syntax
 
 # ============================================================================
@@ -1349,13 +1349,22 @@ class PrintingServiceDataGenerator:
             # Each printer has 2-5 activity logs
             num_logs = random.randint(2, 5)
             
+            # Look up room and building information
+            room = next((r for r in self.rooms if r['room_id'] == printer['room_id']), None)
+            building = None
+            if room:
+                building = next((b for b in self.buildings if b['building_id'] == room['building_id']), None)
+            
+            building_name = building['building_name'] if building else printer.get('building_code', 'Unknown Building')
+            room_code = printer.get('room_code', 'Unknown Room')
+            
             for _ in range(num_logs):
                 log_id = generate_uuid()
                 action = random.choice(actions)
                 staff_member = random.choice(self.staff) if self.staff else None
                 
                 details = {
-                    'added': f"Printer installed in {printer['building_name']} Room {printer['room_number']}",
+                    'added': f"Printer installed in {building_name} Room {room_code}",
                     'enabled': "Printer enabled for student use",
                     'disabled': "Printer temporarily disabled for maintenance",
                     'updated': "Printer configuration updated",
@@ -1467,6 +1476,25 @@ def main():
                 # Use utf-8-sig to strip any BOM from schema files
                 with open(delete_path, 'r', encoding='utf-8-sig') as f:
                     delete_content = f.read()
+                
+                # Remove USE statements and GO statements after USE if SKIP_USE_STATEMENT is True
+                if SKIP_USE_STATEMENT:
+                    lines = delete_content.split('\n')
+                    filtered_lines = []
+                    skip_next_go = False
+                    for i, line in enumerate(lines):
+                        # Skip USE statements
+                        if line.strip().upper().startswith('USE '):
+                            skip_next_go = True
+                            continue
+                        # Skip GO after USE statement
+                        if skip_next_go and line.strip().upper() == 'GO':
+                            skip_next_go = False
+                            continue
+                        skip_next_go = False
+                        filtered_lines.append(line)
+                    delete_content = '\n'.join(filtered_lines)
+                
                 final_output.append("-- ============================================")
                 final_output.append("-- CLEANUP EXISTING DATA")
                 final_output.append("-- ============================================")
@@ -1475,6 +1503,24 @@ def main():
                 
                 with open(design_path, 'r', encoding='utf-8-sig') as f:
                     design_content = f.read()
+                
+                # Remove USE statements and GO statements after USE if SKIP_USE_STATEMENT is True
+                if SKIP_USE_STATEMENT:
+                    lines = design_content.split('\n')
+                    filtered_lines = []
+                    skip_next_go = False
+                    for i, line in enumerate(lines):
+                        # Skip USE statements
+                        if line.strip().upper().startswith('USE '):
+                            skip_next_go = True
+                            continue
+                        # Skip GO after USE statement
+                        if skip_next_go and line.strip().upper() == 'GO':
+                            skip_next_go = False
+                            continue
+                        skip_next_go = False
+                        filtered_lines.append(line)
+                    design_content = '\n'.join(filtered_lines)
                     
                 final_output.append("-- ============================================")
                 final_output.append("-- CREATE DATABASE SCHEMA")

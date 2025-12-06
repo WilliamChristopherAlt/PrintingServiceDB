@@ -247,7 +247,19 @@ CREATE INDEX idx_semester ON page_allocation (semester, academic_year);
 CREATE INDEX idx_page_type ON page_allocation (page_type_id);
 GO
 
-
+CREATE TABLE discount_pack (
+    discount_pack_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    num_pages INT NOT NULL,
+    percent_off DECIMAL(5, 4) NOT NULL CHECK (percent_off >= 0 AND percent_off <= 1),
+    pack_name VARCHAR(100),
+    description TEXT,
+    is_active BIT DEFAULT 1,
+    created_at DATETIME DEFAULT GETDATE(),
+    updated_at DATETIME DEFAULT GETDATE()
+);
+CREATE INDEX idx_num_pages ON discount_pack (num_pages);
+CREATE INDEX idx_is_active ON discount_pack (is_active);
+GO
 
 CREATE TABLE student_page_purchase (
     purchase_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
@@ -269,20 +281,6 @@ CREATE INDEX idx_transaction_date ON student_page_purchase (transaction_date);
 CREATE INDEX idx_payment_status ON student_page_purchase (payment_status);
 CREATE INDEX idx_page_size ON student_page_purchase (page_size_id);
 CREATE INDEX idx_discount_pack ON student_page_purchase (discount_pack_id);
-GO
-
-CREATE TABLE discount_pack (
-    discount_pack_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    num_pages INT NOT NULL,
-    percent_off DECIMAL(5, 4) NOT NULL CHECK (percent_off >= 0 AND percent_off <= 1),
-    pack_name VARCHAR(100),
-    description TEXT,
-    is_active BIT DEFAULT 1,
-    created_at DATETIME DEFAULT GETDATE(),
-    updated_at DATETIME DEFAULT GETDATE()
-);
-CREATE INDEX idx_num_pages ON discount_pack (num_pages);
-CREATE INDEX idx_is_active ON discount_pack (is_active);
 GO
 
 -- System Configuration Tables
