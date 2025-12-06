@@ -193,6 +193,7 @@ CREATE TABLE printer_model (
     max_paper_size_id UNIQUEIDENTIFIER NOT NULL,
     supports_color BIT DEFAULT 0,
     supports_duplex BIT DEFAULT 0,
+    pages_per_second FLOAT,
     created_at DATETIME DEFAULT GETDATE(),
     FOREIGN KEY (brand_id) REFERENCES brand(brand_id),
     FOREIGN KEY (max_paper_size_id) REFERENCES page_size(page_size_id),
@@ -208,6 +209,8 @@ CREATE TABLE printer_physical (
     room_id UNIQUEIDENTIFIER NOT NULL,
     serial_number VARCHAR(100) UNIQUE,
     is_enabled BIT DEFAULT 1,
+    status VARCHAR(20) NOT NULL DEFAULT 'idle' CHECK (status IN ('unplugged', 'idle', 'printing', 'maintained')),
+    printing_status VARCHAR(50) NULL CHECK (printing_status IN ('printing', 'paper_jam', 'out_of_paper', 'out_of_toner', 'low_toner', 'door_open', 'paper_tray_empty', 'network_error', 'offline', 'error')),
     installed_date DATE,
     last_maintenance_date DATE,
     created_at DATETIME DEFAULT GETDATE(),
@@ -220,6 +223,8 @@ CREATE TABLE printer_physical (
 CREATE INDEX idx_model ON printer_physical (model_id);
 CREATE INDEX idx_room ON printer_physical (room_id);
 CREATE INDEX idx_enabled ON printer_physical (is_enabled);
+CREATE INDEX idx_status ON printer_physical (status);
+CREATE INDEX idx_printing_status ON printer_physical (printing_status);
 GO
 
 -- Page Balance Management Tables
@@ -250,17 +255,34 @@ CREATE TABLE student_page_purchase (
     page_size_id UNIQUEIDENTIFIER NOT NULL,
     quantity INT NOT NULL,
     amount_paid DECIMAL(10, 2) NOT NULL,
+    discount_pack_id UNIQUEIDENTIFIER NULL, -- Link to discount pack if package was used
     payment_method VARCHAR(50) NOT NULL,
     payment_reference VARCHAR(100),
     payment_status VARCHAR(20) NOT NULL DEFAULT 'pending' CHECK (payment_status IN ('pending', 'completed', 'failed', 'refunded')),
     transaction_date DATETIME DEFAULT GETDATE(),
     FOREIGN KEY (student_id) REFERENCES student(student_id) ON DELETE CASCADE,
-    FOREIGN KEY (page_size_id) REFERENCES page_size(page_size_id)
+    FOREIGN KEY (page_size_id) REFERENCES page_size(page_size_id),
+    FOREIGN KEY (discount_pack_id) REFERENCES discount_pack(discount_pack_id)
 );
 CREATE INDEX idx_student_purchase ON student_page_purchase (student_id);
 CREATE INDEX idx_transaction_date ON student_page_purchase (transaction_date);
 CREATE INDEX idx_payment_status ON student_page_purchase (payment_status);
 CREATE INDEX idx_page_size ON student_page_purchase (page_size_id);
+CREATE INDEX idx_discount_pack ON student_page_purchase (discount_pack_id);
+GO
+
+CREATE TABLE discount_pack (
+    discount_pack_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    num_pages INT NOT NULL,
+    percent_off DECIMAL(5, 4) NOT NULL CHECK (percent_off >= 0 AND percent_off <= 1),
+    pack_name VARCHAR(100),
+    description TEXT,
+    is_active BIT DEFAULT 1,
+    created_at DATETIME DEFAULT GETDATE(),
+    updated_at DATETIME DEFAULT GETDATE()
+);
+CREATE INDEX idx_num_pages ON discount_pack (num_pages);
+CREATE INDEX idx_is_active ON discount_pack (is_active);
 GO
 
 -- System Configuration Tables

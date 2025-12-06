@@ -287,6 +287,9 @@ class PrintingServiceDataGenerator:
         self.staff_by_id = {}
         self.printer_by_id = {}
         
+        # Discount packs (initialized empty, populated in generate_discount_packs)
+        self.discount_packs = []
+        
         # System state
         self.current_academic_year = spec['current_academic_year']
         self.semester_names = spec['semester_names']
@@ -311,6 +314,9 @@ class PrintingServiceDataGenerator:
         
         print("Generating page allocation system...")
         self.generate_page_allocation_system()
+        
+        print("Generating discount packages...")
+        self.generate_discount_packs()
         
         print("Generating printer infrastructure...")
         self.generate_printer_infrastructure()
@@ -715,7 +721,7 @@ class PrintingServiceDataGenerator:
         # Generate models
         bulk_models = BulkInsertHelper("printer_model", [
             "model_id", "brand_id", "model_name", "description", "max_paper_size_id",
-            "supports_color", "supports_duplex", "created_at"
+            "supports_color", "supports_duplex", "pages_per_second", "created_at"
         ])
         
         for brand in self.brands:
@@ -730,13 +736,25 @@ class PrintingServiceDataGenerator:
                     if ps["size_name"] == model_config['max_paper_size']
                 )
                 
+                # Generate pages_per_second (typical range: 0.2 to 2.0 pages/second)
+                # Use value from config if available, otherwise generate realistic value
+                if 'pages_per_second' in model_config:
+                    pages_per_second = float(model_config['pages_per_second'])
+                else:
+                    # Generate based on printer type: color printers are typically slower
+                    if model_config.get('supports_color', False):
+                        pages_per_second = round(random.uniform(0.2, 0.8), 2)  # 0.2-0.8 pps for color
+                    else:
+                        pages_per_second = round(random.uniform(0.5, 2.0), 2)  # 0.5-2.0 pps for B&W
+                
                 model_data = {
                     'model_id': model_id,
                     'brand_id': brand['brand_id'],
                     'name': model_config['name'],
                     'max_paper_size_id': max_paper_size_id,
                     'supports_color': model_config['supports_color'],
-                    'supports_duplex': model_config['supports_duplex']
+                    'supports_duplex': model_config['supports_duplex'],
+                    'pages_per_second': pages_per_second
                 }
                 
                 self.models.append(model_data)
@@ -744,7 +762,8 @@ class PrintingServiceDataGenerator:
                 bulk_models.add_row([
                     model_id, brand['brand_id'], model_config['name'], description,
                     max_paper_size_id, model_config['supports_color'],
-                    model_config['supports_duplex'], created_at.strftime('%Y-%m-%d %H:%M:%S')
+                    model_config['supports_duplex'], pages_per_second,
+                    created_at.strftime('%Y-%m-%d %H:%M:%S')
                 ])
         
         for stmt in bulk_models.get_statements():
@@ -753,7 +772,8 @@ class PrintingServiceDataGenerator:
         # Generate physical printers
         bulk_printers = BulkInsertHelper("printer_physical", [
             "printer_id", "model_id", "room_id", "serial_number", "is_enabled",
-            "installed_date", "last_maintenance_date", "created_at", "created_by"
+            "status", "printing_status", "installed_date", "last_maintenance_date",
+            "created_at", "created_by"
         ])
         
         # First generate buildings
@@ -834,6 +854,9 @@ class PrintingServiceDataGenerator:
         creator_staff = random.choice(self.staff) if self.staff else None
         
         # Generate printers for rooms (about 70% of rooms have printers)
+        status_options = ['idle', 'idle', 'idle', 'idle', 'idle', 'printing', 'maintained', 'unplugged']  # Weighted: mostly idle
+        printing_status_options = ['printing', 'paper_jam', 'low_toner', 'out_of_paper', 'network_error', 'error']
+        
         for room in self.rooms:
             if random.random() < 0.7:  # 70% chance of having a printer
                 printer_id = generate_uuid()
@@ -845,6 +868,21 @@ class PrintingServiceDataGenerator:
                 created_at = installed_date
                 is_enabled = random.choice([True, True, True, False])  # 75% enabled
                 
+                # Generate status
+                if not is_enabled:
+                    status = random.choice(['unplugged', 'maintained'])
+                else:
+                    status = random.choice(status_options)
+                
+                # Generate printing_status (only set when status is 'printing', otherwise NULL)
+                printing_status = None
+                if status == 'printing':
+                    # 85% chance of normal printing, 15% chance of error
+                    if random.random() < 0.85:
+                        printing_status = 'printing'
+                    else:
+                        printing_status = random.choice(printing_status_options)
+                
                 printer_data = {
                     'printer_id': printer_id,
                     'model_id': model['model_id'],
@@ -853,7 +891,9 @@ class PrintingServiceDataGenerator:
                     'building_code': room['building_code'],
                     'room_code': room['room_code'],
                     'room_type': room['room_type'],
-                    'is_enabled': is_enabled
+                    'is_enabled': is_enabled,
+                    'status': status,
+                    'printing_status': printing_status
                 }
                 
                 self.printers.append(printer_data)
@@ -861,6 +901,7 @@ class PrintingServiceDataGenerator:
                 
                 bulk_printers.add_row([
                     printer_id, model['model_id'], room['room_id'], serial_number, is_enabled,
+                    status, printing_status,
                     installed_date.strftime('%Y-%m-%d'),
                     last_maintenance.strftime('%Y-%m-%d'),
                     created_at.strftime('%Y-%m-%d %H:%M:%S'),
@@ -941,7 +982,7 @@ class PrintingServiceDataGenerator:
         # Generate student page purchases
         bulk_purchases = BulkInsertHelper("student_page_purchase", [
             "purchase_id", "student_id", "page_size_id", "quantity", "amount_paid",
-            "payment_method", "payment_reference", "payment_status", "transaction_date"
+            "discount_pack_id", "payment_method", "payment_reference", "payment_status", "transaction_date"
         ])
         
         payment_methods = self.spec['payment_methods']
@@ -984,13 +1025,76 @@ class PrintingServiceDataGenerator:
                     status = 'completed' if random.random() < success_rate else random.choice(['failed', 'pending', 'refunded'])
                     transaction_date = random_date_in_range(365, 0)
                     
+                    # Optionally link to a discount pack if quantity matches a pack
+                    discount_pack_id = None
+                    if hasattr(self, 'discount_packs') and self.discount_packs:
+                        matching_pack = next(
+                            (dp for dp in self.discount_packs if dp['num_pages'] == quantity),
+                            None
+                        )
+                        if matching_pack:
+                            discount_pack_id = matching_pack['discount_pack_id']
+                    
                     bulk_purchases.add_row([
                         purchase_id, student['student_id'], page_choice["page_size_id"], 
-                        quantity, amount, method, reference, status, 
+                        quantity, amount, discount_pack_id, method, reference, status, 
                         transaction_date.strftime('%Y-%m-%d %H:%M:%S')
                     ])
         
         for stmt in bulk_purchases.get_statements():
+            self.add_sql(stmt)
+    
+    def generate_discount_packs(self):
+        """Generate discount packages for page purchases."""
+        self.add_sql("\n-- ============================================")
+        self.add_sql("-- DISCOUNT PACKAGES DATA")
+        self.add_sql("-- ============================================")
+        
+        bulk = BulkInsertHelper("discount_pack", [
+            "discount_pack_id", "num_pages", "percent_off", "pack_name",
+            "description", "is_active", "created_at", "updated_at"
+        ])
+        
+        # Default discount packages matching the spec requirements
+        # Spec: 50 pages: $10.00, 100 pages: $18.00 (10% off), 200 pages: $35.00 (12.5% off), 500 pages: $80.00 (20% off)
+        default_packs = [
+            {"num_pages": 50, "percent_off": 0.0, "name": "50 pages", "desc": "50 pages: $10.00 ($0.200/page)"},
+            {"num_pages": 100, "percent_off": 0.10, "name": "100 pages", "desc": "100 pages: $18.00 ($0.180/page) - 10% off"},
+            {"num_pages": 200, "percent_off": 0.125, "name": "200 pages", "desc": "200 pages: $35.00 ($0.175/page) - 12.5% off"},
+            {"num_pages": 500, "percent_off": 0.20, "name": "500 pages", "desc": "500 pages: $80.00 ($0.160/page) - 20% off"},
+        ]
+        
+        # Use discount packs from spec if available, otherwise use defaults
+        discount_packs = self.spec.get('discount_packs', default_packs)
+        
+        # Store discount packs for use in purchase generation
+        self.discount_packs = []
+        
+        for pack_config in discount_packs:
+            discount_pack_id = generate_uuid()
+            num_pages = pack_config.get('num_pages', pack_config.get('pages', 100))
+            percent_off = pack_config.get('percent_off', pack_config.get('discount', 0.05))
+            
+            pack_name = pack_config.get('name', pack_config.get('pack_name', f"{num_pages} Page Pack"))
+            description = pack_config.get('description', pack_config.get('desc', f"Discount package: {percent_off*100:.0f}% off for {num_pages} pages"))
+            is_active = pack_config.get('is_active', True)
+            created_at = random_date_in_range(365, 30)
+            updated_at = created_at
+            
+            pack_data = {
+                'discount_pack_id': discount_pack_id,
+                'num_pages': num_pages,
+                'percent_off': percent_off
+            }
+            self.discount_packs.append(pack_data)
+            
+            bulk.add_row([
+                discount_pack_id, num_pages, percent_off, pack_name,
+                description, is_active, created_at.strftime('%Y-%m-%d %H:%M:%S'),
+                updated_at.strftime('%Y-%m-%d %H:%M:%S')
+            ])
+        
+        for stmt in bulk.get_statements():
             self.add_sql(stmt)
     
     def generate_system_configuration(self):
