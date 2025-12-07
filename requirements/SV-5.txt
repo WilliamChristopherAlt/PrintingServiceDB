@@ -1,0 +1,1368 @@
+Trang lịch sử in
+1. Thành phần giao diện
+Phần 1: Bảng lọc và tìm kiếm (Trên cùng)
+Bộ chọn khoảng thời gian:
+Chọn ngày "Từ" (Date picker)
+Chọn ngày "Đến" (Date picker)
+Nút chọn nhanh: Hôm nay, 7 ngày qua, 30 ngày qua, Học kỳ này, Tất cả
+Tùy chọn lọc:
+Lọc trạng thái: Xổ xuống (Tất cả, Hoàn thành, Thất bại, Đã hủy, Đang chờ, Đang in)
+Khổ giấy: Xổ xuống đa chọn (A3, A4, A5)
+Chế độ màu: Xổ xuống đa chọn (Màu, Xám, Đen trắng)
+In mặt: Xổ xuống (Tất cả, Một mặt, Hai mặt)
+Thanh tìm kiếm:
+Input tìm kiếm theo tên file
+Nút biểu tượng tìm kiếm
+Nút hành động:
+Nút "Áp dụng bộ lọc"
+Nút "Xóa bộ lọc"
+Sắp xếp:
+Xổ xuống sắp xếp: Mới nhất, Cũ nhất, Tên file (A-Z), Tên file (Z-A), Số trang (nhiều nhất), Số trang (ít nhất)
+Phần 2: Thẻ thống kê tóm tắt (Dưới bộ lọc)
+Tổng công việc in: Số lượng công việc đã lọc
+Tổng trang đã in: Trang tương đương A4 (chỉ công việc hoàn thành)
+Đang in: Số lượng công việc đang in
+Thất bại: Số lượng công việc thất bại
+Phần 3: Danh sách công việc in (Nội dung chính)
+Empty state (khi không có kết quả):
+Icon tài liệu trống
+Text: "Không tìm thấy công việc in"
+Suggestion: "Thử thay đổi bộ lọc hoặc khoảng thời gian"
+Grid layout các thẻ công việc in:
+Mỗi thẻ hiển thị:
+Header của thẻ:
+Tên file (có icon loại file)
+Trạng thái badge (màu sắc tùy theo trạng thái):
+"Hoàn thành" (màu xanh lá)
+"Thất bại" (màu đỏ)
+"Đã hủy" (màu xám)
+"Đang chờ" (màu vàng)
+"Đang in" (màu xanh dương, có animation pulse)
+Body của thẻ:
+Thông tin máy in:
+Icon máy in
+Tên máy in
+Vị trí: Campus - Building - Room
+Cài đặt in:
+Khổ giấy: Icon + text (ví dụ: "A4")
+Màu sắc: Icon + text (ví dụ: "Đen trắng")
+In mặt: Icon + text (ví dụ: "Một mặt" hoặc "Hai mặt")
+Số bản sao: Icon + text (ví dụ: "2 bản")
+Thông tin trang:
+Text: "Trang: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10..." (hiển thị tối đa 10 trang đầu tiên, nếu nhiều hơn thêm "...")
+Hoặc nếu in tất cả: "Trang: Tất cả (50 trang)"
+Tổng số trang in: "Tổng: 20 trang" (= số trang chọn × số bản sao)
+Tương đương A4: "Tương đương: 20 trang A4"
+Progress bar (chỉ hiển thị khi trạng thái = "Đang in" hoặc "Đang chờ"):
+Progress bar với phần trăm
+Text: "Đang in... X%" hoặc "Đang chờ..."
+Text thời gian ước tính: "Còn khoảng Y phút"
+Công thức tính progress:
+   current_time = thời điểm hiện tại
+    start_time = print_job.start_time
+    pages_per_second = printer_model.pages_per_second
+    total_pages = COUNT(print_job_page) × number_of_copy
+    
+    elapsed_seconds = số giây từ start_time đến current_time
+    pages_printed = elapsed_seconds × pages_per_second
+    
+    progress_percentage = MIN(99, (pages_printed / total_pages) × 100)
+    remaining_pages = MAX(0, total_pages - pages_printed)
+    estimated_remaining_seconds = remaining_pages / pages_per_second
+    estimated_remaining_minutes = CEILING(estimated_remaining_seconds / 60)
+    
+    Hiển thị:
+    - Progress bar: progress_percentage%
+    - Text: "Đang in... {progress_percentage}%"
+    - Text: "Còn khoảng {estimated_remaining_minutes} phút"
+    
+    Lưu ý:
+    - Nếu progress_percentage >= 99: "Đang hoàn tất..."
+    - Nếu status = queued: "Đang chờ..." (không có progress)
+    - Progress cập nhật mỗi 2 giây
+Footer của thẻ:
+Ngày giờ in: Icon lịch + "04/12/2024 10:30"
+Nút "Xem chi tiết"
+Nút "Hủy" (chỉ hiển thị nếu status = "Đang chờ" hoặc "Đang in")
+Phần 4: Phân trang (Cuối danh sách)
+Bộ chọn số thẻ mỗi trang: 12, 24, 48, 96
+Điều khiển phân trang: Trang trước, Số trang, Trang sau
+Text: "Hiển thị 1-12 của 150 kết quả"
+Phần 5: Modal chi tiết công việc in (Pop-up)
+Header modal:
+Tiêu đề: "Chi tiết công việc in"
+Job ID: #JOB-123456
+Trạng thái badge
+Nút đóng (X)
+Section 1: Thông tin tài liệu
+Tên file
+Loại file
+Kích thước file
+Tổng số trang trong tài liệu
+Section 2: Thông tin máy in
+Tên máy in
+Model
+Thương hiệu
+Vị trí đầy đủ (Campus - Building - Room)
+Section 3: Cài đặt in
+Khổ giấy
+Phạm vi trang: "1, 2, 3, 4, 5..." hoặc "Tất cả"
+Hướng giấy: Portrait / Landscape
+In mặt: Một mặt / Hai mặt
+Chế độ màu
+Số bản sao
+Section 4: Phân tích trang
+Số trang được chọn
+Số bản sao
+Tổng số trang in
+Tương đương A4
+Section 5: Thời gian
+Thời gian tạo
+Thời gian bắt đầu in
+Thời gian hoàn thành
+Thời gian xử lý
+Section 6: Progress (nếu đang in)
+Progress bar với công thức tính tương tự phần thẻ
+Cập nhật real-time mỗi 2 giây
+Footer modal:
+Nút "Đóng"
+Nút "Hủy" (chỉ hiển thị nếu status = "Đang chờ" hoặc "Đang in")
+Nút "In lại" (chỉ hiển thị nếu status = "Hoàn thành" hoặc "Thất bại" hoặc "Đã hủy")
+Phần 6: Confirm Dialog - Hủy công việc
+Header:
+Icon cảnh báo
+Tiêu đề: "Xác nhận hủy công việc in"
+Body:
+Text: "Bạn có chắc muốn hủy công việc in này?"
+Thông tin công việc:
+Tên file
+Số trang
+Trạng thái hiện tại
+Footer:
+Nút "Hủy bỏ" (đóng dialog, không hủy công việc)
+Nút "Xác nhận hủy" (hủy công việc in)
+Phần 7: Confirm Dialog - In lại
+Header:
+Icon thông tin
+Tiêu đề: "Xác nhận in lại"
+Body:
+Text: "Bạn có chắc muốn in lại tài liệu này?"
+Thông tin công việc:
+Tên file
+Số trang
+Tương đương A4
+Kiểm tra số dư:
+"Số dư hiện tại: X trang"
+"Cần: Y trang"
+"Còn lại sau khi in: Z trang"
+Warning (nếu không đủ):
+Icon cảnh báo
+Text: "Không đủ số dư"
+"Thiếu: W trang"
+Footer:
+Nếu đủ số dư:
+Nút "Hủy bỏ"
+Nút "Xác nhận in"
+Nếu không đủ số dư:
+Nút "Hủy bỏ"
+Nút "Mua thêm trang"
+
+2. Flow tương tác
+2.1 Tải trang lần đầu
+Sinh viên truy cập trang "Danh sách công việc in"
+Hệ thống hiển thị skeleton loading (12 thẻ)
+Danh sách được tải với bộ lọc mặc định (30 ngày qua, tất cả trạng thái, mới nhất)
+Hiển thị grid các thẻ công việc
+Hiển thị thẻ thống kê
+Hiển thị phân trang
+Nếu có công việc đang chờ hoặc đang in: bắt đầu polling mỗi 2 giây
+2.2 Áp dụng bộ lọc
+Sinh viên chọn khoảng thời gian từ date picker hoặc nút nhanh
+Sinh viên chọn trạng thái, khổ giấy, màu sắc, in mặt từ dropdown
+Sinh viên nhập tên file tìm kiếm
+Sinh viên click "Áp dụng bộ lọc"
+Hiển thị overlay loading
+Danh sách được reload với bộ lọc mới
+Thẻ thống kê được cập nhật
+2.3 Sắp xếp danh sách
+Sinh viên click dropdown sắp xếp
+Chọn kiểu sắp xếp
+Danh sách được sắp xếp lại ngay lập tức
+2.4 Xem chi tiết công việc
+Sinh viên click "Xem chi tiết" trên thẻ
+Modal chi tiết xuất hiện với skeleton loading
+Thông tin chi tiết được hiển thị
+Nếu đang in: progress bar cập nhật mỗi 2 giây
+Sinh viên đóng modal bằng nút X hoặc "Đóng"
+2.5 Hủy công việc in
+Sinh viên click nút "Hủy" trên thẻ công việc hoặc trong modal chi tiết
+Hệ thống kiểm tra trạng thái: phải là "Đang chờ" hoặc "Đang in"
+Hiển thị confirm dialog "Xác nhận hủy công việc in"
+Hiển thị thông tin công việc (tên file, số trang, trạng thái)
+Sinh viên có 2 lựa chọn:
+Click "Hủy bỏ": đóng dialog, không hủy công việc, ở lại trang hiện tại
+Click "Xác nhận hủy": tiếp tục flow hủy
+Nếu sinh viên click "Xác nhận hủy":
+Hiển thị loading spinner trên nút
+Gửi request hủy công việc đến API
+Cập nhật print_status thành "cancelled" trong database
+Nếu thành công:
+Đóng dialog
+Đóng modal (nếu đang mở)
+Cập nhật trạng thái thẻ thành "Đã hủy" (badge màu xám)
+Ẩn nút "Hủy"
+Hiển thị nút "In lại"
+Hiển thị success toast: "Đã hủy công việc in #JOB-XXXXXX"
+Cập nhật thẻ thống kê (giảm "Đang in" nếu đang in)
+Nếu thất bại:
+Hiển thị error message trong dialog
+Nút "Thử lại" xuất hiện
+2.6 In lại công việc
+Sinh viên click nút "In lại" trên modal chi tiết
+Hệ thống kiểm tra trạng thái: phải là "Hoàn thành", "Thất bại", hoặc "Đã hủy"
+Hệ thống query số dư hiện tại của sinh viên
+Hệ thống tính số trang cần in (A4 equivalent)
+Hiển thị confirm dialog "Xác nhận in lại"
+Hiển thị thông tin công việc và số dư
+Nếu đủ số dư:
+Hiển thị "Số dư hiện tại: X | Cần: Y | Còn lại: Z"
+Nút "Xác nhận in" enabled
+Sinh viên click "Xác nhận in"
+Gửi request tạo print_job mới
+Tạo record trong print_job với cùng cấu hình
+Tạo records trong print_job_page
+Nếu thành công:
+Đóng dialog và modal
+Hiển thị success toast: "Đã tạo công việc in mới: #JOB-YYYYYY"
+Reload danh sách, công việc mới xuất hiện ở đầu
+Nếu không đủ số dư:
+Hiển thị warning: "Không đủ số dư | Thiếu: W trang"
+Nút "Xác nhận in" disabled
+Hiển thị nút "Mua thêm trang"
+Sinh viên click "Mua thêm trang"
+Mở trang mua trang trong tab mới
+Giữ nguyên dialog và modal hiện tại
+2.7 Phân trang và auto-refresh
+Sinh viên click số trang hoặc nút chuyển trang
+Scroll lên đầu, hiển thị loading, tải trang mới
+Với công việc đang chờ hoặc đang in: progress tự động cập nhật mỗi 2 giây
+Khi hoàn thành: trạng thái chuyển sang "Hoàn thành", hiển thị toast notification
+2.8 Xử lý khi công việc hoàn thành (Background)
+Polling mỗi 2 giây phát hiện print_status chuyển thành "completed"
+Cập nhật trạng thái badge từ "Đang in" sang "Hoàn thành"
+Xóa progress bar
+Thay đổi màu thẻ (xanh dương → xanh lá)
+Ẩn nút "Hủy"
+Hiển thị nút "In lại"
+Cập nhật thẻ thống kê (giảm "Đang in", tăng "Tổng trang đã in")
+Hiển thị notification toast: "Công việc in #{job_id} đã hoàn thành"
+
+
+3. Use Case
+Danh sách use case
+Use Case Index
+Tên Use Case
+MoSCoW
+SV-5-1
+Xem danh sách công việc in
+Must Have
+SV-5-2
+Hủy công việc in
+Must Have
+SV-5-3
+In lại công việc
+Must Have
+
+
+Use Case SV-5-1: Xem danh sách công việc in
+Mục
+Nội dung
+Usecase ID
+SV-5-1
+Tên
+Xem danh sách công việc in
+Mô tả
+Sinh viên xem danh sách tất cả công việc in của mình với các tùy chọn lọc, tìm kiếm, sắp xếp theo nhiều tiêu chí, xem chi tiết từng công việc, và theo dõi tiến độ công việc đang in real-time
+Actor
+Sinh viên
+Trigger
+Sinh viên click "Danh sách công việc in" từ dashboard hoặc truy cập trực tiếp URL của trang danh sách công việc in
+Quy định nghiệp vụ
+1. Sinh viên chỉ được xem các công việc in của chính mình (lọc theo student_id từ authenticated session)
+
+2. Danh sách hiển thị tất cả trạng thái công việc: queued (đang chờ), printing (đang in), completed (hoàn thành), failed (thất bại), cancelled (đã hủy)
+
+3. Công việc có trạng thái printing phải hiển thị progress bar với tính toán real-time theo công thức:
+- current_time = thời điểm hiện tại
+- start_time = thời điểm bắt đầu in từ bảng print_job
+- pages_per_second = tốc độ in từ bảng printer_model
+- total_pages = tổng số trang từ print_job_page nhân với number_of_copy
+- elapsed_seconds = số giây đã trôi qua kể từ start_time
+- pages_printed = elapsed_seconds nhân pages_per_second
+- progress_percentage = tối thiểu giữa 99% và (pages_printed chia total_pages nhân 100)
+- remaining_pages = tối đa giữa 0 và (total_pages trừ pages_printed)
+- estimated_remaining_seconds = remaining_pages chia pages_per_second
+- estimated_remaining_minutes = làm tròn lên (estimated_remaining_seconds chia 60)
+
+4. Progress bar không bao giờ hiển thị 100% cho đến khi print_status chuyển thành completed. Tối đa là 99% khi đang in
+
+5. Progress của các công việc đang in tự động cập nhật mỗi 2 giây thông qua polling API hoặc WebSocket connection
+
+6. Danh sách trang in được hiển thị tối đa 10 trang đầu tiên (page_number từ print_job_page), nếu nhiều hơn thì thêm dấu ba chấm ở cuối
+
+7. Mặc định hiển thị 12 thẻ công việc mỗi trang, sinh viên có thể chọn 24, 48, hoặc 96 thẻ mỗi trang
+
+8. Sắp xếp mặc định: Mới nhất (theo thời gian tạo giảm dần)
+
+9. Khoảng thời gian mặc định: 30 ngày qua
+
+10. Tính tương đương A4 dựa trên page_size: A3 bằng 2 lần A4, A4 bằng 1 lần A4, A5 bằng 0.5 lần A4
+
+11. Công việc có trạng thái queued hoặc printing hiển thị nút "Hủy"
+
+12. Công việc có trạng thái completed, failed, hoặc cancelled hiển thị nút "In lại"
+
+13. Dữ liệu được query từ view student_printing_history và các bảng liên quan trong database
+Main Flow
+Bước 1: Truy cập trang
+1. Sinh viên click "Danh sách công việc in" từ menu navigation hoặc dashboard
+2. Hệ thống authenticate user thông qua HCMSIU_SSO service
+3. Hệ thống lấy student_id từ authenticated session
+4. Hệ thống hiển thị skeleton loading state với 12 thẻ giả
+
+Bước 2: Tải danh sách công việc mặc định
+5. Hệ thống query database để lấy danh sách công việc in của sinh viên
+6. Áp dụng bộ lọc mặc định: 30 ngày qua, tất cả trạng thái, sắp xếp theo mới nhất
+7. Lấy trang đầu tiên với 12 công việc
+8. Với mỗi công việc, hệ thống lấy:
+- Thông tin cơ bản: tên file, loại file, kích thước, trạng thái, thời gian
+- Thông tin máy in: tên, model, thương hiệu, vị trí (campus, building, room)
+- Cài đặt in: khổ giấy, màu sắc, in mặt, số bản sao
+- Danh sách trang từ bảng print_job_page (tối đa 10 trang đầu)
+- Tốc độ in từ bảng printer_model (pages_per_second)
+9. Hệ thống tính toán cho mỗi công việc:
+- Tổng số trang được chọn
+- Tổng số trang in (số trang nhân số bản sao)
+- Tương đương A4 (áp dụng conversion factor theo page_size)
+- Nếu trạng thái là printing: tính progress percentage và thời gian còn lại theo công thức
+- Xác định nút hiển thị: "Hủy" nếu queued/printing, "In lại" nếu completed/failed/cancelled
+10. Hệ thống tính thống kê tóm tắt:
+- Tổng số công việc trong bộ lọc hiện tại
+- Tổng số trang A4 đã in (chỉ công việc completed)
+- Số lượng công việc đang in
+- Số lượng công việc thất bại
+11. Hiển thị danh sách công việc dạng grid các thẻ
+12. Hiển thị thẻ thống kê tóm tắt phía trên danh sách
+13. Hiển thị pagination controls phía dưới danh sách
+14. Nếu có công việc nào đang in, bắt đầu polling mỗi 2 giây để cập nhật progress
+
+Bước 3: Sinh viên áp dụng bộ lọc (Optional)
+15. Sinh viên chỉnh sửa các bộ lọc:
+- Chọn khoảng thời gian từ date picker hoặc click nút chọn nhanh
+- Chọn trạng thái từ dropdown
+- Chọn khổ giấy (có thể chọn nhiều)
+- Chọn chế độ màu (có thể chọn nhiều)
+- Chọn in một mặt hoặc hai mặt
+- Nhập tên file để tìm kiếm
+16. Sinh viên click nút "Áp dụng bộ lọc"
+17. Hệ thống hiển thị overlay loading trên danh sách
+18. Hệ thống query lại database với các điều kiện lọc mới
+19. Cập nhật thẻ thống kê với kết quả đã lọc
+20. Hiển thị danh sách mới
+21. Nếu không có kết quả: hiển thị empty state với icon và thông báo
+
+Bước 4: Sinh viên sắp xếp danh sách (Optional)
+22. Sinh viên click dropdown sắp xếp và chọn một tùy chọn:
+- Mới nhất: sắp xếp theo thời gian tạo giảm dần
+- Cũ nhất: sắp xếp theo thời gian tạo tăng dần
+- Tên file A-Z: sắp xếp tên file từ A đến Z
+- Tên file Z-A: sắp xếp tên file từ Z đến A
+- Số trang nhiều nhất: sắp xếp theo A4 equivalent giảm dần
+- Số trang ít nhất: sắp xếp theo A4 equivalent tăng dần
+23. Danh sách được sắp xếp lại ngay lập tức
+
+Bước 5: Sinh viên xem chi tiết công việc
+24. Sinh viên click nút "Xem chi tiết" trên một thẻ công việc
+25. Hệ thống mở modal với skeleton loading
+26. Hệ thống query chi tiết đầy đủ của công việc từ database:
+- Thông tin tài liệu đầy đủ
+- Thông tin máy in chi tiết (brand, model, specifications)
+- Tất cả cài đặt in
+- Danh sách trang đầy đủ (không giới hạn 10 trang)
+- Phân tích trang và chi phí
+- Thời gian tạo, bắt đầu, hoàn thành
+27. Hiển thị modal với tất cả thông tin chi tiết
+28. Nếu công việc đang in, hiển thị progress bar và cập nhật mỗi 2 giây
+29. Hiển thị nút phù hợp: "Hủy" nếu queued/printing, "In lại" nếu completed/failed/cancelled
+30. Sinh viên xem thông tin
+31. Sinh viên đóng modal bằng nút X hoặc nút "Đóng"
+
+Bước 6: Background process - Auto refresh cho công việc đang in
+32. Trong khi có công việc trạng thái printing trên trang
+33. Hệ thống polling API mỗi 2 giây để lấy trạng thái mới
+34. Với mỗi công việc đang in, tính lại progress percentage và thời gian còn lại
+35. Cập nhật progress bar trên thẻ công việc
+36. Khi công việc chuyển sang completed:
+- Cập nhật trạng thái badge từ "Đang in" sang "Hoàn thành"
+- Xóa progress bar
+- Thay đổi màu sắc thẻ
+- Ẩn nút "Hủy", hiển thị nút "In lại"
+- Hiển thị notification toast thông báo hoàn thành
+- Cập nhật thẻ thống kê (giảm "Đang in", tăng tổng trang đã in)
+Alternative Flow
+Alt 1: Xóa bộ lọc
+1. Tại bước 15 của Main Flow, thay vì chỉnh sửa bộ lọc, sinh viên click nút "Xóa bộ lọc"
+2. Hệ thống reset tất cả bộ lọc về giá trị mặc định:
+- Khoảng thời gian: 30 ngày qua
+- Trạng thái: Tất cả
+- Khổ giấy: Tất cả
+- Chế độ màu: Tất cả
+- In mặt: Tất cả
+- Tìm kiếm: Xóa text
+3. Hệ thống reload danh sách với bộ lọc mặc định
+4. Tiếp tục từ bước 18 của Main Flow
+
+Alt 2: Sử dụng nút chọn nhanh khoảng thời gian
+1. Tại bước 15 của Main Flow, thay vì chọn date picker, sinh viên click một trong các nút:
+- Hôm nay: từ 00:00 hôm nay đến hiện tại
+- 7 ngày qua: từ 7 ngày trước đến hiện tại
+- 30 ngày qua: từ 30 ngày trước đến hiện tại
+- Học kỳ này: từ ngày bắt đầu học kỳ hiện tại đến hiện tại
+- Tất cả: không giới hạn thời gian
+2. Date picker "Từ" và "Đến" tự động điền với khoảng thời gian tương ứng
+3. Danh sách tự động reload ngay lập tức (không cần click "Áp dụng")
+4. Nút được chọn được highlight
+
+Alt 3: Phân trang
+1. Sau bước 13 của Main Flow, sinh viên click số trang hoặc nút "Trang sau"/"Trang trước"
+2. Hệ thống scroll lên đầu trang
+3. Hiển thị skeleton loading
+4. Query trang mới từ database với OFFSET phù hợp
+5. Hiển thị danh sách công việc của trang mới
+6. Cập nhật text phân trang (ví dụ: "Hiển thị 13-24 của 150 kết quả")
+7. Nếu có công việc đang in trên trang mới, bắt đầu polling
+
+Alt 4: Thay đổi số thẻ mỗi trang
+1. Sau bước 13 của Main Flow, sinh viên click dropdown số thẻ mỗi trang
+2. Chọn một trong các tùy chọn: 12, 24, 48, 96
+3. Hệ thống reload danh sách với page_size mới
+4. Số trang trong pagination được cập nhật (giảm nếu tăng page_size)
+5. Hiển thị trang đầu tiên với số thẻ mới
+Exception Flow
+Exc 1: Không có kết quả khi lọc
+1. Tại bước 18 của Main Flow, query không trả về kết quả nào
+2. Hệ thống hiển thị empty state:
+- Icon tài liệu trống
+- Text: "Không tìm thấy công việc in"
+- Suggestion: "Thử thay đổi bộ lọc hoặc khoảng thời gian"
+3. Thẻ thống kê hiển thị tất cả giá trị = 0
+4. Pagination ẩn đi
+5. Sinh viên có thể chỉnh sửa bộ lọc hoặc click "Xóa bộ lọc"
+
+Exc 2: Lỗi tải danh sách
+1. Tại bước 5 của Main Flow, API call hoặc database query thất bại
+2. Hệ thống hiển thị error state thay vì danh sách:
+- Icon cảnh báo
+- Text: "Không thể tải danh sách công việc in"
+- Error detail (nếu có): "Lỗi kết nối database" hoặc "Timeout"
+- Nút "Thử lại"
+3. Sinh viên click "Thử lại"
+4. Hệ thống gọi lại API từ bước 5
+5. Nếu thành công: hiển thị danh sách
+6. Nếu vẫn thất bại: hiển thị lại error state, ghi log vào system_audit_log
+
+Exc 3: Lỗi tải chi tiết công việc
+1. Tại bước 26 của Main Flow, query chi tiết thất bại
+2. Modal vẫn mở nhưng hiển thị error banner bên trong:
+- Icon cảnh báo
+- Text: "Không thể tải chi tiết công việc"
+- Nút "Thử lại" và "Đóng"
+3. Nếu sinh viên click "Thử lại":
+- Gọi lại API từ bước 26
+- Nếu thành công: hiển thị chi tiết
+- Nếu thất bại: hiển thị lại error banner
+4. Nếu sinh viên click "Đóng":
+- Đóng modal
+- Quay về trang danh sách
+
+Exc 4: Session timeout
+1. Tại bất kỳ bước nào, session của sinh viên hết hạn
+2. API call trả về 401 Unauthorized
+3. Hệ thống hiển thị notification: "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại."
+4. Redirect về trang login của HCMSIU_SSO
+5. Không lưu draft hoặc trạng thái
+Tiền điều kiện
+1. Sinh viên đã đăng nhập thành công qua HCMSIU_SSO
+2. Session còn hiệu lực với student_id hợp lệ
+3. Student record tồn tại trong bảng student với status = 'active'
+4. Database connection ổn định và có thể truy cập
+5. Sinh viên có ít nhất một công việc in trong hệ thống (hoặc sẽ thấy empty state)
+6. View student_printing_history đã được tạo và cập nhật đúng trong database
+Hậu điều kiện
+Khi thành công (Main Flow):
+1. Danh sách công việc in của sinh viên được hiển thị đầy đủ và chính xác
+2. Thẻ thống kê tóm tắt phản ánh đúng số liệu của bộ lọc hiện tại
+3. Progress của các công việc đang in được cập nhật real-time mỗi 2 giây
+4. Khi công việc hoàn thành, trạng thái và thống kê được cập nhật ngay lập tức
+5. Tất cả interaction được log vào system_audit_log với action_type phù hợp
+6. Các nút "Hủy" và "In lại" hiển thị đúng theo trạng thái công việc
+
+Khi thất bại:
+1. Không có thay đổi nào trong database
+2. Error được log vào system_audit_log với action_type = 'view_print_jobs_failed'
+3. Sinh viên nhận thông báo lỗi cụ thể với hướng dẫn khắc phục
+Input
+1. student_id: UNIQUEIDENTIFIER từ authenticated session
+
+2. Bộ lọc (optional):
+- start_date: DATE (ngày bắt đầu khoảng thời gian)
+- end_date: DATE (ngày kết thúc khoảng thời gian)
+- status: VARCHAR (queued, printing, completed, failed, cancelled hoặc NULL cho tất cả)
+- paper_sizes: ARRAY of VARCHAR (A3, A4, A5 hoặc NULL cho tất cả)
+- color_modes: ARRAY of VARCHAR (color, grayscale, black-white hoặc NULL cho tất cả)
+- print_side: VARCHAR (one-sided, double-sided hoặc NULL cho tất cả)
+- file_name: VARCHAR (text tìm kiếm, có thể NULL)
+
+3. Sắp xếp:
+- sort_column: VARCHAR (created_at, file_name, a4_equivalent)
+- sort_direction: VARCHAR (ASC hoặc DESC)
+
+4. Phân trang:
+- page: INTEGER (số trang hiện tại, mặc định 1)
+- page_size: INTEGER (12, 24, 48, hoặc 96, mặc định 12)
+
+5. Khi xem chi tiết:
+- job_id: UNIQUEIDENTIFIER của công việc cần xem
+Output
+Output 1: Danh sách công việc thành công
+{
+ "status": "success",
+ "summary": {
+   "total_jobs": 150,
+   "total_pages_printed": 2500,
+   "printing_jobs": 2,
+   "failed_jobs": 5
+ },
+ "jobs": [
+   {
+     "job_id": "a1b2c3d4-e5f6-7890-abcd-1234567890ab",
+     "file_name": "Assignment_Report.pdf",
+     "file_type": "pdf",
+     "file_size_kb": 2048,
+     "printer_name": "HP LaserJet Pro M404dn",
+     "location": "CS1 - H1 - 101",
+     "paper_size": "A4",
+     "color_mode": "black-white",
+     "print_side": "one-sided",
+     "pages": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+     "has_more_pages": true,
+     "selected_pages_count": 15,
+     "copies": 2,
+     "total_pages_to_print": 30,
+     "a4_equivalent": 30,
+     "print_status": "printing",
+     "progress_percentage": 45,
+     "estimated_remaining_minutes": 3,
+     "created_at": "2024-12-04T10:30:00Z",
+     "start_time": "2024-12-04T10:31:00Z",
+     "end_time": null,
+     "can_cancel": true,
+     "can_reprint": false
+   },
+   {
+     "job_id": "b2c3d4e5-f6a7-8901-bcde-2345678901bc",
+     "file_name": "Lecture_Notes.docx",
+     "print_status": "completed",
+     "progress_percentage": 100,
+     "end_time": "2024-12-04T09:45:00Z",
+     "can_cancel": false,
+     "can_reprint": true
+   }
+ ],
+ "pagination": {
+   "current_page": 1,
+   "total_pages": 13,
+   "page_size": 12,
+   "total_results": 150
+ }
+}
+
+Output 2: Không có kết quả
+{
+ "status": "success",
+ "summary": {
+   "total_jobs": 0,
+   "total_pages_printed": 0,
+   "printing_jobs": 0,
+   "failed_jobs": 0
+ },
+ "jobs": [],
+ "pagination": {
+   "current_page": 1,
+   "total_pages": 0,
+   "page_size": 12,
+   "total_results": 0
+ },
+ "message": "Không tìm thấy công việc in phù hợp"
+}
+
+Output 3: Chi tiết công việc thành công
+{
+ "status": "success",
+ "job": {
+   "job_id": "a1b2c3d4-e5f6-7890-abcd-1234567890ab",
+   "file_name": "Assignment_Report.pdf",
+   "file_type": "pdf",
+   "file_size_kb": 2048,
+   "total_pages_in_document": 50,
+   "printer": {
+     "name": "HP LaserJet Pro M404dn",
+     "brand": "HP",
+     "model": "LaserJet Pro M404dn",
+     "location": "CS1 - H1 - Room 101"
+   },
+   "settings": {
+     "paper_size": "A4",
+     "page_orientation": "portrait",
+     "print_side": "one-sided",
+     "color_mode": "black-white",
+     "copies": 2
+   },
+   "pages": {
+     "selected_pages": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
+     "total_to_print": 30,
+     "a4_equivalent": 30
+   },
+   "time": {
+     "created_at": "2024-12-04T10:30:00Z",
+     "start_time": "2024-12-04T10:31:00Z",
+     "end_time": null
+   },
+   "status": {
+     "print_status": "printing",
+     "progress_percentage": 45,
+     "estimated_remaining_minutes": 3
+   },
+   "can_cancel": true,
+   "can_reprint": false
+ }
+}
+
+Output 4: Lỗi tải danh sách
+{
+ "status": "error",
+ "error_code": "DATABASE_ERROR",
+ "message": "Không thể tải danh sách công việc in"
+}
+
+Use Case SV-5-2: Hủy công việc in
+Mục
+Nội dung
+Usecase ID
+SV-5-2
+Tên
+Hủy công việc in
+Mô tả
+Sinh viên hủy một công việc in đang chờ hoặc đang in để ngăn chặn việc in tiếp tục và giải phóng máy in
+Actor
+Sinh viên
+Trigger
+Sinh viên click nút "Hủy" trên thẻ công việc hoặc trong modal chi tiết công việc
+Quy định nghiệp vụ
+1. Chỉ có thể hủy công việc có trạng thái queued (đang chờ) hoặc printing (đang in)
+2. Không thể hủy công việc có trạng thái completed (hoàn thành), failed (thất bại), hoặc cancelled (đã hủy)
+3. Khi hủy công việc, print_status được cập nhật thành cancelled trong bảng print_job
+4. Nếu công việc đang in (status = printing), hệ thống phải gửi lệnh dừng in đến máy in thông qua print queue/service
+6. Nếu công việc đã bắt đầu in một phần trang, các trang đã in không được hoàn trả vào số dư
+7. Sau khi hủy thành công, công việc chuyển sang trạng thái cancelled và hiển thị badge màu xám
+8. Nút "Hủy" biến mất và nút "In lại" xuất hiện sau khi hủy thành công
+9. Hành động hủy phải được log vào system_audit_log với action_type = 'print_job_cancelled'
+10. Sinh viên phải xác nhận trước khi hủy để tránh hủy nhầm
+11. Nếu máy in đang offline hoặc không kết nối được, vẫn cho phép hủy công việc trong database
+Main Flow
+Bước 1: Sinh viên khởi động hủy công việc
+1. Sinh viên đang ở trang danh sách công việc in hoặc đang xem modal chi tiết
+2. Sinh viên nhìn thấy một công việc có trạng thái "Đang chờ" hoặc "Đang in"
+3. Nút "Hủy" hiển thị trên thẻ công việc hoặc trong modal
+4. Sinh viên click nút "Hủy"
+
+Bước 2: Hiển thị confirm dialog
+5. Hệ thống kiểm tra trạng thái công việc từ database
+6. Xác nhận print_status là queued hoặc printing
+7. Hiển thị confirm dialog "Xác nhận hủy công việc in" với:
+- Icon cảnh báo
+- Text: "Bạn có chắc muốn hủy công việc in này?"
+- Thông tin công việc: tên file, số trang, trạng thái hiện tại
+- Nút "Hủy bỏ" (đóng dialog, không hủy công việc)
+- Nút "Xác nhận hủy" (tiếp tục hủy công việc)
+
+Bước 3: Sinh viên xác nhận hủy
+8. Sinh viên đọc thông tin trong dialog
+9. Sinh viên click nút "Xác nhận hủy"
+10. Nút "Xác nhận hủy" hiển thị loading spinner
+11. Text nút thay đổi thành "Đang hủy..."
+
+Bước 4: Hệ thống xử lý hủy công việc
+12. Hệ thống gửi request đến API endpoint hủy công việc với job_id
+13. Backend kiểm tra lại:
+- job_id tồn tại trong bảng print_job
+- student_id từ session khớp với student_id trong print_job
+- print_status vẫn là queued hoặc printing (chưa hoàn thành hoặc đã hủy)
+14. Nếu tất cả điều kiện đều pass:
+- Cập nhật print_job.print_status = 'cancelled'
+- Cập nhật print_job.end_time = thời điểm hiện tại
+- Nếu công việc đang in (status = printing), gửi lệnh dừng in đến print queue/service
+- Ghi log vào system_audit_log:
+ - user_id: từ session
+ - action_type: 'print_job_cancelled'
+ - table_name: 'print_job'
+ - record_id: job_id
+ - changed_field: JSON object chứa old_status và new_status
+ - action_timestamp: thời điểm hiện tại
+
+Bước 5: Cập nhật giao diện
+15. Backend trả về success response
+16. Frontend đóng confirm dialog
+17. Nếu đang trong modal chi tiết:
+- Đóng modal
+18. Cập nhật thẻ công việc trên danh sách:
+- Trạng thái badge chuyển từ "Đang chờ"/"Đang in" sang "Đã hủy" (màu xám)
+- Xóa progress bar (nếu có)
+- Ẩn nút "Hủy"
+- Hiển thị nút "In lại"
+19. Cập nhật thẻ thống kê:
+- Giảm "Đang in" nếu công việc đang có status = printing
+20. Hiển thị success toast notification:
+- Icon thành công
+- Text: "Đã hủy công việc in #{job_id_short}"
+- Auto dismiss sau 3 giây
+
+Bước 6: Dọn dẹp và kết thúc
+21. Hệ thống dừng polling progress nếu công việc này đang được theo dõi
+22. Use case kết thúc
+Alternative Flow
+Alt 1: Sinh viên hủy bỏ việc hủy công việc
+1. Tại bước 8 của Main Flow, sau khi confirm dialog hiển thị
+2. Sinh viên đọc thông tin và quyết định không hủy
+3. Sinh viên click nút "Hủy bỏ" trong dialog
+4. Confirm dialog đóng lại
+5. Không có thay đổi nào trong database
+6. Ở lại trang hiện tại (danh sách hoặc modal chi tiết)
+7. Công việc vẫn giữ nguyên trạng thái
+8. Use case kết thúc
+
+Alt 2: Hủy từ modal chi tiết
+1. Thay vì click "Hủy" trên thẻ, sinh viên đang xem modal chi tiết
+2. Click nút "Hủy" trong footer của modal
+3. Tiếp tục từ bước 5 của Main Flow
+4. Sau khi hủy thành công (bước 17):
+- Đóng modal chi tiết
+- Quay về danh sách với thẻ công việc đã được cập nhật
+
+Alt 3: Hủy nhiều công việc liên tiếp
+1. Sinh viên hủy công việc thứ nhất theo Main Flow
+2. Sau khi success toast hiển thị
+3. Sinh viên tiếp tục click "Hủy" trên công việc khác
+4. Confirm dialog hiển thị cho công việc thứ hai
+5. Lặp lại Main Flow cho mỗi công việc
+6. Mỗi công việc có toast notification riêng
+Exception Flow
+Exc 1: Công việc đã hoàn thành hoặc đã hủy trước đó
+1. Tại bước 13 của Main Flow, backend phát hiện print_status không phải queued hoặc printing
+2. Backend trả về error response:
+- error_code: "INVALID_STATUS"
+- message: "Không thể hủy công việc đã hoàn thành hoặc đã hủy"
+3. Frontend hiển thị error modal:
+- Icon cảnh báo
+- Text: "Không thể hủy công việc này"
+- Detail: "Công việc đã hoàn thành hoặc đã bị hủy trước đó"
+- Nút "Đóng"
+4. Không có thay đổi trong database
+5. Khi sinh viên click "Đóng", đóng error modal
+6. Reload danh sách để đồng bộ trạng thái mới nhất
+
+Exc 2: Không có quyền hủy công việc
+1. Tại bước 13 của Main Flow, backend phát hiện student_id không khớp
+2. Backend trả về error response:
+- error_code: "UNAUTHORIZED"
+- message: "Bạn không có quyền hủy công việc này"
+3. Frontend hiển thị error modal
+4. Không có thay đổi trong database
+5. Ghi log vào system_audit_log với action_type = 'unauthorized_cancel_attempt'
+
+Exc 3: Công việc không tồn tại
+1. Tại bước 13 của Main Flow, backend không tìm thấy job_id trong database
+2. Backend trả về error response:
+- error_code: "JOB_NOT_FOUND"
+- message: "Không tìm thấy công việc in"
+3. Frontend hiển thị error modal:
+- Text: "Công việc in không tồn tại hoặc đã bị xóa"
+- Nút "Đóng"
+4. Khi đóng modal, reload danh sách
+
+Exc 4: Lỗi kết nối database
+1. Tại bước 14 của Main Flow, database operation thất bại
+2. Backend trả về error response:
+- error_code: "DATABASE_ERROR"
+- message: "Không thể hủy công việc. Vui lòng thử lại"
+3. Frontend hiển thị error trong confirm dialog:
+- Error banner màu đỏ
+- Text: "Có lỗi xảy ra. Vui lòng thử lại."
+- Nút "Thử lại" và "Đóng"
+4. Không có thay đổi trong database
+5. Nếu sinh viên click "Thử lại":
+- Gọi lại API từ bước 12
+- Nếu thành công: tiếp tục từ bước 15
+- Nếu vẫn thất bại: hiển thị lại error
+6. Nếu sinh viên click "Đóng":
+- Đóng confirm dialog
+- Ở lại trang hiện tại
+7. Ghi log error vào system_audit_log
+
+Exc 5: Lỗi gửi lệnh dừng in đến máy in
+1. Tại bước 14 của Main Flow, sau khi cập nhật database thành công
+2. Gửi lệnh dừng in đến print queue/service bị lỗi (máy in offline, network error)
+3. Hệ thống vẫn giữ print_status = 'cancelled' trong database (ưu tiên database state)
+4. Ghi log warning vào system_audit_log:
+- action_type: 'print_cancellation_printer_error'
+- detail: "Job cancelled in database but printer stop command failed"
+5. Tiếp tục từ bước 15 của Main Flow (hiển thị success cho user)
+6. Background service sẽ retry gửi lệnh dừng hoặc máy in tự phát hiện job đã cancelled
+
+Exc 6: Session timeout
+1. Tại bước 12 của Main Flow, khi gửi request đến API
+2. API trả về 401 Unauthorized (session hết hạn)
+3. Frontend hiển thị notification: "Phiên đăng nhập đã hết hạn"
+4. Redirect về trang login
+5. Không có thay đổi trong database
+Tiền điều kiện
+1. Sinh viên đã đăng nhập thành công qua HCMSIU_SSO
+2. Session còn hiệu lực với student_id hợp lệ
+3. Công việc in tồn tại trong bảng print_job với job_id hợp lệ
+4. Công việc in thuộc về sinh viên (student_id khớp)
+5. Công việc in có trạng thái queued hoặc printing
+6. Database connection ổn định
+7. Sinh viên đang ở trang danh sách công việc hoặc modal chi tiết
+Hậu điều kiện
+Khi thành công:
+1. Record trong bảng print_job được cập nhật:
+- print_status = 'cancelled'
+- end_time = thời điểm hủy
+2. Nếu công việc đang in, lệnh dừng được gửi đến print queue/service
+3. Log được tạo trong system_audit_log với action_type = 'print_job_cancelled'
+4. Giao diện được cập nhật:
+- Badge trạng thái: "Đã hủy" (màu xám)
+- Nút "Hủy" ẩn đi
+- Nút "In lại" hiển thị
+- Progress bar (nếu có) bị xóa
+5. Thẻ thống kê được cập nhật (giảm "Đang in" nếu cần)
+6. Success toast notification hiển thị
+7. Số dư trang của sinh viên KHÔNG thay đổi
+
+Khi thất bại:
+1. Không có thay đổi nào trong bảng print_job
+2. Công việc giữ nguyên trạng thái ban đầu
+3. Error được log vào system_audit_log với action_type phù hợp
+4. Sinh viên nhận thông báo lỗi cụ thể
+5. Nút "Hủy" vẫn hiển thị và có thể thử lại
+Input
+1. job_id: UNIQUEIDENTIFIER của công việc cần hủy
+2. student_id: UNIQUEIDENTIFIER từ authenticated session (để verify quyền)
+3. Confirmation: BOOLEAN (true khi sinh viên click "Xác nhận hủy" trong dialog)
+Output
+Output 1: Hủy thành công
+{
+ "status": "success",
+ "message": "Đã hủy công việc in thành công",
+ "job": {
+   "job_id": "a1b2c3d4-e5f6-7890-abcd-1234567890ab",
+   "file_name": "Assignment_Report.pdf",
+   "previous_status": "printing",
+   "new_status": "cancelled",
+   "cancelled_at": "2024-12-04T10:45:00Z"
+ }
+}
+
+Output 2: Lỗi trạng thái không hợp lệ
+{
+ "status": "error",
+ "error_code": "INVALID_STATUS",
+ "message": "Không thể hủy công việc đã hoàn thành hoặc đã hủy",
+ "details": {
+   "job_id": "a1b2c3d4-e5f6-7890-abcd-1234567890ab",
+   "current_status": "completed",
+   "allowed_statuses": ["queued", "printing"]
+ }
+}
+
+Output 3: Lỗi không có quyền
+{
+ "status": "error",
+ "error_code": "UNAUTHORIZED",
+ "message": "Bạn không có quyền hủy công việc này",
+ "details": {
+   "job_id": "a1b2c3d4-e5f6-7890-abcd-1234567890ab"
+ }
+}
+
+Output 4: Lỗi không tìm thấy công việc
+{
+ "status": "error",
+ "error_code": "JOB_NOT_FOUND",
+ "message": "Không tìm thấy công việc in",
+ "details": {
+   "job_id": "a1b2c3d4-e5f6-7890-abcd-1234567890ab"
+ }
+}
+
+Output 5: Lỗi database
+{
+ "status": "error",
+ "error_code": "DATABASE_ERROR",
+ "message": "Không thể hủy công việc. Vui lòng thử lại",
+ "details": {
+   "error": "Connection timeout",
+   "timestamp": "2024-12-04T10:45:15Z"
+ }
+}
+
+Use Case SV-5-3: In lại công việc
+Mục
+Nội dung
+Usecase ID
+SV-5-3
+Tên
+In lại công việc
+Mô tả
+Sinh viên tạo một công việc in mới với cùng cấu hình như một công việc đã hoàn thành, thất bại, hoặc đã hủy trước đó
+Actor
+Sinh viên
+Trigger
+Sinh viên click nút "In lại" trong modal chi tiết của một công việc đã hoàn thành, thất bại, hoặc đã hủy
+Quy định nghiệp vụ
+1. Chỉ có thể in lại công việc có trạng thái completed (hoàn thành), failed (thất bại), hoặc cancelled (đã hủy)
+
+2. Không thể in lại công việc có trạng thái queued (đang chờ) hoặc printing (đang in)
+
+3. Công việc mới được tạo với CÙNG cấu hình như công việc cũ:
+- Cùng file (file_name từ Supabase Storage)
+- Cùng khổ giấy (paper_size_id)
+- Cùng danh sách trang (copy từ print_job_page)
+- Cùng orientation (page_orientation)
+- Cùng print side (print_side)
+- Cùng color mode (color_mode)
+- Cùng số bản sao (number_of_copy)
+
+4. Máy in CÓ THỂ khác với công việc cũ nếu máy in cũ không còn khả dụng
+
+5. Trước khi tạo công việc, hệ thống PHẢI kiểm tra số dư trang của sinh viên
+
+6. Tính số trang cần in (A4 equivalent) = COUNT(print_job_page) × number_of_copy × conversion_factor
+
+7. Nếu số dư không đủ:
+- Hiển thị warning trong confirm dialog
+- Không cho phép xác nhận
+- Hiển thị nút "Mua thêm trang"
+
+8. Nếu số dư đủ:
+- Tạo record mới trong print_job với print_status = 'queued'
+- Copy tất cả records từ print_job_page của công việc cũ sang công việc mới
+- Gửi lệnh in đến print queue/service
+
+9. File gốc phải vẫn tồn tại trong Supabase Storage. Nếu file đã bị xóa, không cho phép in lại
+
+10. Hành động in lại phải được log vào system_audit_log với action_type = 'print_job_created' và reference đến job_id cũ
+
+11. Sinh viên phải xác nhận trước khi tạo công việc in mới
+
+12. Số dư chỉ bị trừ khi công việc in hoàn thành (print_status = completed), không trừ ngay khi tạo
+Main Flow
+Bước 1: Sinh viên mở modal chi tiết công việc
+1. Sinh viên đang ở trang danh sách công việc in
+2. Sinh viên click "Xem chi tiết" trên một công việc có trạng thái completed, failed, hoặc cancelled
+3. Modal chi tiết mở ra với đầy đủ thông tin công việc
+4. Nút "In lại" hiển thị trong footer của modal
+
+Bước 2: Sinh viên khởi động in lại
+5. Sinh viên đọc thông tin chi tiết công việc
+6. Sinh viên quyết định in lại với cùng cấu hình
+7. Sinh viên click nút "In lại"
+
+Bước 3: Hệ thống kiểm tra điều kiện
+8. Hệ thống gửi request đến API với job_id
+9. Backend query thông tin công việc cũ từ print_job:
+- Kiểm tra job_id tồn tại
+- Kiểm tra student_id khớp với session
+- Kiểm tra print_status là completed, failed, hoặc cancelled
+10. Backend kiểm tra file còn tồn tại trong Supabase Storage
+11. Backend query danh sách trang từ print_job_page của công việc cũ
+12. Backend tính số trang cần in:
+- page_count = COUNT từ print_job_page
+- total_pages = page_count × number_of_copy
+- Lấy conversion_factor từ page_size (A3=2, A4=1, A5=0.5)
+- a4_equivalent = total_pages × conversion_factor
+13. Backend query số dư hiện tại của sinh viên:
+- Tổng đã mua từ student_page_purchase (payment_status = completed), chuyển sang A4 equivalent
+- Tổng đã in từ print_job (print_status = completed), chuyển sang A4 equivalent
+- balance = đã mua - đã in
+14. Backend so sánh: balance >= a4_equivalent
+
+Bước 4: Hiển thị confirm dialog
+15. Backend trả về thông tin:
+- Chi tiết công việc (file name, pages, copies, a4_equivalent)
+- Số dư hiện tại
+- Số trang cần in
+- Số dư còn lại sau khi in
+- Có đủ số dư hay không (sufficient_balance: true/false)
+16. Frontend hiển thị confirm dialog "Xác nhận in lại":
+- Icon thông tin
+- Text: "Bạn có chắc muốn in lại tài liệu này?"
+- Thông tin công việc: tên file, số trang, A4 equivalent
+- Hiển thị số dư:
+ - "Số dư hiện tại: X trang"
+ - "Cần: Y trang"
+ - "Còn lại sau khi in: Z trang"
+
+Bước 5a: Trường hợp đủ số dư
+17. Nếu sufficient_balance = true:
+- Hiển thị nút "Hủy bỏ" và "Xác nhận in" (enabled)
+- Sinh viên click "Xác nhận in"
+18. Nút "Xác nhận in" hiển thị loading spinner
+19. Text nút: "Đang tạo..."
+
+Bước 6: Tạo công việc in mới
+20. Frontend gửi request xác nhận đến API
+21. Backend tạo record mới trong print_job:
+- job_id: UNIQUEIDENTIFIER mới
+- student_id: từ session
+- printer_id: từ công việc cũ (hoặc tìm máy in khác nếu cũ không available)
+- file_name: copy từ công việc cũ
+- file_type: copy từ công việc cũ
+- file_size_kb: copy từ công việc cũ
+- paper_size_id: copy từ công việc cũ
+- page_orientation: copy từ công việc cũ
+- print_side: copy từ công việc cũ
+- color_mode: copy từ công việc cũ
+- number_of_copy: copy từ công việc cũ
+- print_status: 'queued'
+- start_time: NULL
+- end_time: NULL
+- created_at: thời điểm hiện tại
+22. Backend copy tất cả records từ print_job_page:
+- Query tất cả page_number từ công việc cũ
+- INSERT vào print_job_page với job_id mới
+23. Backend ghi log vào system_audit_log:
+- user_id: từ session
+- action_type: 'print_job_created'
+- table_name: 'print_job'
+- record_id: job_id mới
+- changed_field: JSON với old_job_id (để biết đây là reprint)
+- action_timestamp: thời điểm hiện tại
+24. Backend gửi lệnh in đến print queue/service
+25. Backend trả về success response với job_id mới
+
+Bước 7: Cập nhật giao diện
+26. Frontend đóng confirm dialog
+27. Frontend đóng modal chi tiết
+28. Frontend reload danh sách công việc in
+29. Công việc mới xuất hiện ở đầu danh sách với:
+- Trạng thái: "Đang chờ" (badge màu vàng)
+- Nút "Hủy" hiển thị
+- Nút "In lại" ẩn
+30. Hiển thị success toast notification:
+- Icon thành công
+- Text: "Đã tạo công việc in mới: #{job_id_short}"
+- Auto dismiss sau 3 giây
+31. Cập nhật thẻ thống kê nếu cần
+32. Use case kết thúc
+Alternative Flow
+Alt 1: Sinh viên hủy bỏ việc in lại
+1. Tại bước 17 của Main Flow, sau khi confirm dialog hiển thị
+2. Sinh viên đọc thông tin và quyết định không in lại
+3. Sinh viên click nút "Hủy bỏ" trong dialog
+4. Confirm dialog đóng lại
+5. Không có thay đổi nào trong database
+6. Ở lại modal chi tiết
+7. Use case kết thúc
+
+Alt 2: Không đủ số dư - Sinh viên mua thêm trang
+1. Tại bước 15 của Main Flow, backend phát hiện balance < a4_equivalent
+2. Backend trả về sufficient_balance = false
+3. Frontend hiển thị confirm dialog với warning:
+- Icon cảnh báo màu đỏ
+- Text: "Không đủ số dư"
+- Breakdown:
+ - "Số dư hiện tại: X trang"
+ - "Cần: Y trang"
+ - "Thiếu: (Y - X) trang"
+- Nút "Xác nhận in" disabled (màu xám)
+- Nút "Mua thêm trang" (enabled, màu xanh)
+- Nút "Hủy bỏ"
+4. Sinh viên click "Mua thêm trang"
+5. Mở trang mua trang trong tab/window mới
+6. Giữ nguyên modal chi tiết và confirm dialog
+7. Sinh viên mua trang trong tab mới
+8. Sau khi mua xong, sinh viên quay lại tab cũ
+9. Sinh viên đóng confirm dialog và click "In lại" lại lần nữa
+10. Hệ thống kiểm tra số dư mới
+11. Nếu đủ: tiếp tục từ bước 17 của Main Flow
+
+Alt 3: Máy in cũ không còn khả dụng
+1. Tại bước 21 của Main Flow, khi tạo record mới
+2. Backend kiểm tra printer_id từ công việc cũ
+3. Query printer_physical: is_enabled = 0 hoặc status = offline
+4. Backend tìm máy in thay thế:
+- Cùng location (campus, building) nếu có
+- Hỗ trợ paper_size cần thiết
+- is_enabled = 1 và status != offline
+5. Nếu tìm thấy máy in thay thế:
+- Sử dụng printer_id mới
+- Ghi log: "Printer changed due to unavailability"
+- Tiếp tục từ bước 22
+6. Nếu không tìm thấy máy in nào:
+- Chuyển sang Exception Flow Exc 3
+
+Alt 4: In lại từ công việc thất bại
+1. Công việc cũ có print_status = 'failed'
+2. Modal chi tiết hiển thị lý do thất bại (ví dụ: "Paper jam", "Out of toner")
+3. Sinh viên vẫn có thể click "In lại"
+4. Tiếp tục Main Flow bình thường
+5. Công việc mới được tạo và có cơ hội thành công
+
+Alt 5: In lại từ công việc đã hủy
+1. Công việc cũ có print_status = 'cancelled'
+2. Sinh viên click "In lại"
+3. Tiếp tục Main Flow bình thường
+4. Tạo công việc mới hoàn toàn
+Exception Flow
+Exc 1: File không còn tồn tại trong Storage
+1. Tại bước 10 của Main Flow, backend kiểm tra file trong Supabase Storage
+2. File đã bị xóa hoặc không tìm thấy
+3. Backend trả về error response:
+- error_code: "FILE_NOT_FOUND"
+- message: "File gốc không còn tồn tại"
+4. Frontend hiển thị error modal:
+- Icon lỗi
+- Text: "Không thể in lại"
+- Detail: "File gốc đã bị xóa khỏi hệ thống"
+- Suggestion: "Vui lòng upload file mới và tạo công việc in mới"
+- Nút "Đóng"
+5. Không hiển thị confirm dialog
+6. Không tạo print_job mới
+7. Sinh viên phải upload file mới để in
+
+Exc 2: Công việc có trạng thái không hợp lệ
+1. Tại bước 9 của Main Flow, backend phát hiện print_status là queued hoặc printing
+2. Backend trả về error response:
+- error_code: "INVALID_STATUS"
+- message: "Không thể in lại công việc đang chờ hoặc đang in"
+3. Frontend hiển thị error modal:
+- Text: "Công việc này đang được xử lý"
+- Suggestion: "Vui lòng đợi công việc hoàn thành hoặc hủy trước"
+- Nút "Đóng"
+4. Không tạo print_job mới
+
+Exc 3: Không tìm thấy máy in khả dụng
+1. Tại Alt 3 bước 6, không tìm thấy máy in nào khả dụng
+2. Backend trả về error response:
+- error_code: "NO_PRINTER_AVAILABLE"
+- message: "Không có máy in khả dụng"
+3. Frontend hiển thị error modal:
+- Icon cảnh báo
+- Text: "Không thể tạo công việc in"
+- Detail: "Không có máy in nào khả dụng tại thời điểm này"
+- Suggestion: "Vui lòng thử lại sau hoặc liên hệ quản trị viên"
+- Nút "Đóng"
+4. Không tạo print_job mới
+
+Exc 4: Không đủ số dư và không mua thêm
+1. Tại Alt 2 bước 3, confirm dialog hiển thị warning không đủ số dư
+2. Sinh viên không muốn mua thêm trang
+3. Sinh viên click "Hủy bỏ"
+4. Đóng confirm dialog
+5. Không có thay đổi trong database
+6. Ở lại modal chi tiết
+7. Số dư không thay đổi
+
+Exc 5: Lỗi tạo công việc (Database error)
+1. Tại bước 21 của Main Flow, database operation thất bại
+2. Backend rollback transaction
+3. Không tạo record nào trong print_job hoặc print_job_page
+4. Backend trả về error response:
+- error_code: "DATABASE_ERROR"
+- message: "Không thể tạo công việc in"
+5. Frontend hiển thị error modal:
+- Icon lỗi
+- Text: "Có lỗi xảy ra"
+- Detail: "Không thể tạo công việc in. Vui lòng thử lại."
+- Nút "Thử lại" và "Đóng"
+6. Nếu sinh viên click "Thử lại":
+- Gọi lại API từ bước 20
+- Nếu thành công: tiếp tục từ bước 26
+- Nếu vẫn thất bại: hiển thị lại error
+7. Nếu sinh viên click "Đóng":
+- Đóng error modal và confirm dialog
+- Ở lại modal chi tiết
+8. Ghi log error vào system_audit_log
+
+Exc 6: Không có quyền in lại
+1. Tại bước 9 của Main Flow, backend phát hiện student_id không khớp
+2. Backend trả về error response:
+- error_code: "UNAUTHORIZED"
+- message: "Bạn không có quyền in lại công việc này"
+3. Frontend hiển thị error modal
+4. Ghi log vào system_audit_log với action_type = 'unauthorized_reprint_attempt'
+
+Exc 7: Session timeout
+1. Tại bước 8 hoặc 20 của Main Flow, khi gửi request đến API
+2. API trả về 401 Unauthorized (session hết hạn)
+3. Frontend hiển thị notification: "Phiên đăng nhập đã hết hạn"
+4. Redirect về trang login
+5. Không có thay đổi trong database
+Tiền điều kiện
+1. Sinh viên đã đăng nhập thành công qua HCMSIU_SSO
+2. Session còn hiệu lực với student_id hợp lệ
+3. Công việc in gốc tồn tại trong bảng print_job
+4. Công việc in gốc thuộc về sinh viên (student_id khớp)
+5. Công việc in gốc có trạng thái completed, failed, hoặc cancelled
+6. File gốc vẫn tồn tại trong Supabase Storage
+7. Database connection ổn định
+8. Sinh viên đang xem modal chi tiết của công việc
+9. Có ít nhất một máy in khả dụng trong hệ thống
+Hậu điều kiện
+Khi thành công:
+1. Record mới được tạo trong bảng print_job với:
+- job_id mới
+- Cùng cấu hình như công việc cũ
+- print_status = 'queued'
+- created_at = thời điểm hiện tại
+2. Records mới được tạo trong print_job_page (copy từ công việc cũ)
+3. Log được tạo trong system_audit_log với:
+- action_type = 'print_job_created'
+- Reference đến old_job_id
+4. Lệnh in được gửi đến print queue/service
+5. Giao diện được cập nhật:
+- Modal chi tiết đóng lại
+- Danh sách được reload
+- Công việc mới xuất hiện ở đầu với status "Đang chờ"
+6. Success toast notification hiển thị
+7. Số dư trang CHƯA bị trừ (chỉ trừ khi print_status = completed)
+
+Khi thất bại:
+1. Không có record nào được tạo trong print_job hoặc print_job_page
+2. Số dư trang không thay đổi
+3. Error được log vào system_audit_log với action_type phù hợp
+4. Sinh viên nhận thông báo lỗi cụ thể với hướng dẫn
+5. Modal chi tiết vẫn mở, sinh viên có thể thử lại hoặc đóng
+Input
+1. job_id: UNIQUEIDENTIFIER của công việc cần in lại
+2. student_id: UNIQUEIDENTIFIER từ authenticated session (để verify quyền)
+3. Confirmation: BOOLEAN (true khi sinh viên click "Xác nhận in" trong dialog)
+Output
+Output 1: Kiểm tra số dư - Đủ số dư
+{
+ "status": "success",
+ "sufficient_balance": true,
+ "job_details": {
+   "file_name": "Assignment_Report.pdf",
+   "pages_count": 15,
+   "copies": 2,
+   "total_pages": 30,
+   "a4_equivalent": 30
+ },
+ "balance_info": {
+   "current_balance": 150,
+   "required_pages": 30,
+   "remaining_after": 120
+ }
+}
+
+Output 2: Kiểm tra số dư - Không đủ
+{
+ "status": "success",
+ "sufficient_balance": false,
+ "job_details": {
+   "file_name": "Assignment_Report.pdf",
+   "pages_count": 15,
+   "copies": 2,
+   "total_pages": 30,
+   "a4_equivalent": 30
+ },
+ "balance_info": {
+   "current_balance": 20,
+   "required_pages": 30,
+   "shortage": 10
+ },
+ "message": "Không đủ số dư. Vui lòng mua thêm trang."
+}
+
+Output 3: Tạo công việc thành công
+{
+ "status": "success",
+ "message": "Đã tạo công việc in mới thành công",
+ "new_job": {
+   "job_id": "c3d4e5f6-a7b8-9012-cdef-3456789012cd",
+   "old_job_id": "a1b2c3d4-e5f6-7890-abcd-1234567890ab",
+   "file_name": "Assignment_Report.pdf",
+   "printer_location": "CS1 - H1 - 101",
+   "print_status": "queued",
+   "estimated_completion": "2024-12-04T11:05:00Z",
+   "pages_to_print": 30,
+   "a4_equivalent": 30,
+   "created_at": "2024-12-04T10:50:00Z"
+ },
+ "balance": {
+   "previous_balance": 150,
+   "pages_reserved": 0,
+   "current_balance": 150
+ }
+}
+
+Output 4: Lỗi file không tồn tại
+{
+ "status": "error",
+ "error_code": "FILE_NOT_FOUND",
+ "message": "File gốc không còn tồn tại",
+ "details": {
+   "job_id": "a1b2c3d4-e5f6-7890-abcd-1234567890ab",
+   "file_name": "Assignment_Report.pdf"
+ },
+ "suggestion": "Vui lòng upload file mới và tạo công việc in mới"
+}
+
+Output 5: Lỗi không có máy in
+{
+ "status": "error",
+ "error_code": "NO_PRINTER_AVAILABLE",
+ "message": "Không có máy in khả dụng",
+ "details": {
+   "required_paper_size": "A4",
+   "preferred_location": "CS1 - H1"
+ },
+ "suggestion": "Vui lòng thử lại sau hoặc liên hệ quản trị viên"
+}
+
+Output 6: Lỗi trạng thái không hợp lệ
+{
+ "status": "error",
+ "error_code": "INVALID_STATUS",
+ "message": "Không thể in lại công việc đang chờ hoặc đang in",
+ "details": {
+   "job_id": "a1b2c3d4-e5f6-7890-abcd-1234567890ab",
+   "current_status": "printing",
+   "allowed_statuses": ["completed", "failed", "cancelled"]
+ }
+}
+
+Output 7: Lỗi database
+{
+ "status": "error",
+ "error_code": "DATABASE_ERROR",
+ "message": "Không thể tạo công việc in. Vui lòng thử lại",
+ "details": {
+   "error": "Connection timeout",
+   "timestamp": "2024-12-04T10:50:15Z"
+ }
+}
+
+
