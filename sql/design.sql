@@ -18,7 +18,6 @@ CREATE TABLE [user] (
     email VARCHAR(100) NOT NULL UNIQUE,
     full_name VARCHAR(100) NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
-    password_salt VARCHAR(255) NOT NULL,
     user_type VARCHAR(10) NOT NULL CHECK (user_type IN ('student', 'staff')),
     phone_number VARCHAR(15),
     created_at DATETIME DEFAULT GETDATE(),
@@ -358,18 +357,49 @@ GO
 -- Audit and Logging Tables
 -- ============================================
 
-CREATE TABLE printer_activity_log (
+CREATE TABLE printer_log (
     log_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     printer_id UNIQUEIDENTIFIER NOT NULL,
-    action_type VARCHAR(20) NOT NULL CHECK (action_type IN ('added', 'enabled', 'disabled', 'updated', 'removed')),
-    performed_by UNIQUEIDENTIFIER NOT NULL,
-    action_detail TEXT,
-    action_timestamp DATETIME DEFAULT GETDATE(),
+    log_type VARCHAR(30) NOT NULL CHECK (log_type IN 
+        ('print_job', 'error', 'maintenance', 'status_change', 'configuration', 'admin_action')),
+    severity VARCHAR(20) NOT NULL DEFAULT 'info' CHECK (severity IN 
+        ('info', 'warning', 'error', 'critical')),
+    description NVARCHAR(500) NOT NULL,
+    
+    -- Optional reference to related entities
+    job_id UNIQUEIDENTIFIER NULL, -- Link to print_job if log_type = 'print_job'
+    user_id UNIQUEIDENTIFIER NULL, -- User who triggered the action (student or staff)
+    
+    -- Additional details stored as JSON for flexibility
+    details NVARCHAR(MAX) NULL, -- JSON field for additional context
+    
+    -- Error/issue tracking
+    error_code VARCHAR(50) NULL,
+    is_resolved BIT DEFAULT 0,
+    resolved_at DATETIME NULL,
+    resolved_by UNIQUEIDENTIFIER NULL,
+    resolution_notes NVARCHAR(500) NULL,
+    
+    -- Metadata
+    ip_address VARCHAR(45) NULL,
+    created_at DATETIME DEFAULT GETDATE(),
+    
+    -- Foreign Keys
     FOREIGN KEY (printer_id) REFERENCES printer_physical(printer_id) ON DELETE CASCADE,
-    FOREIGN KEY (performed_by) REFERENCES staff(staff_id)
+    FOREIGN KEY (job_id) REFERENCES print_job(job_id),
+    FOREIGN KEY (user_id) REFERENCES [user](user_id),
+    FOREIGN KEY (resolved_by) REFERENCES [user](user_id)
 );
-CREATE INDEX idx_printer_log ON printer_activity_log (printer_id);
-CREATE INDEX idx_action_timestamp ON printer_activity_log (action_timestamp);
+-- Indexes for efficient querying
+CREATE INDEX idx_printer_log_printer ON printer_log(printer_id);
+CREATE INDEX idx_printer_log_type ON printer_log(log_type);
+CREATE INDEX idx_printer_log_severity ON printer_log(severity);
+CREATE INDEX idx_printer_log_created ON printer_log(created_at);
+CREATE INDEX idx_printer_log_job ON printer_log(job_id);
+CREATE INDEX idx_printer_log_user ON printer_log(user_id);
+CREATE INDEX idx_printer_log_resolved ON printer_log(is_resolved);
+CREATE INDEX idx_printer_log_type_severity ON printer_log(log_type, severity);
+CREATE INDEX idx_printer_log_printer_date ON printer_log(printer_id, created_at);
 GO
 
 CREATE TABLE system_audit_log (
@@ -732,4 +762,50 @@ LEFT JOIN print_job pj ON pp.printer_id = pj.printer_id
 WHERE pp.is_enabled = 1
 GROUP BY pp.printer_id, b.brand_name, pm.model_name, bld.campus_name, 
          bld.building_code, bld.address, r.room_code, r.room_type, pp.installed_date, pp.last_maintenance_date;
+GO
+
+-- ============================================
+-- View for Dashboard Log Display
+-- ============================================
+
+CREATE VIEW printer_log_dashboard AS
+SELECT 
+    pl.log_id,
+    pl.created_at AS timestamp,
+    pp.printer_id,
+    CONCAT(bld.building_code, '-', r.room_code) AS printer_location,
+    b.brand_name + ' ' + pm.model_name AS printer_name,
+    pl.log_type AS type,
+    pl.severity,
+    pl.description,
+    pl.error_code,
+    pl.is_resolved,
+    u.full_name AS user_name,
+    u.user_type,
+    pj.file_name AS related_file,
+    pl.details
+FROM printer_log pl
+JOIN printer_physical pp ON pl.printer_id = pp.printer_id
+JOIN printer_model pm ON pp.model_id = pm.model_id
+JOIN brand b ON pm.brand_id = b.brand_id
+JOIN room r ON pp.room_id = r.room_id
+JOIN building bld ON r.building_id = bld.building_id
+LEFT JOIN [user] u ON pl.user_id = u.user_id
+LEFT JOIN print_job pj ON pl.job_id = pj.job_id;
+GO
+
+-- ============================================
+-- View for Log Statistics (for dashboard summary)
+-- ============================================
+
+CREATE VIEW printer_log_statistics AS
+SELECT 
+    COUNT(*) AS total_entries,
+    SUM(CASE WHEN severity = 'error' THEN 1 ELSE 0 END) AS error_count,
+    SUM(CASE WHEN severity = 'warning' THEN 1 ELSE 0 END) AS warning_count,
+    SUM(CASE WHEN severity = 'critical' THEN 1 ELSE 0 END) AS critical_count,
+    SUM(CASE WHEN severity = 'info' THEN 1 ELSE 0 END) AS info_count,
+    SUM(CASE WHEN severity IN ('error', 'critical') AND is_resolved = 0 THEN 1 ELSE 0 END) AS unresolved_critical_count
+FROM printer_log
+WHERE created_at >= DATEADD(DAY, -30, GETDATE()); -- Last 30 days
 GO

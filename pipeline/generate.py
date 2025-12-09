@@ -88,10 +88,9 @@ def get_media_files(folder_path):
     return files
 
 def generate_password_hash(password="123456"):
-    """Generate a password hash and salt."""
-    salt = hashlib.sha256(str(random.random()).encode()).hexdigest()[:32]
-    hash_val = hashlib.sha256(f"{password}{salt}".encode()).hexdigest()
-    return hash_val, salt
+    """Generate a password hash."""
+    hash_val = hashlib.sha256(password.encode()).hexdigest()
+    return hash_val
 
 def generate_uuid():
     """Generate a UUID string for SQL Server.""" 
@@ -350,15 +349,68 @@ class PrintingServiceDataGenerator:
         used_emails = set()
         
         # Generate shared password hash for all users
-        shared_password_hash, shared_password_salt = generate_password_hash("123456")
+        shared_password_hash = generate_password_hash("123456")
+        
+        # Test account password hash
+        test_password_hash = generate_password_hash("SmartPrint@123!")
         
         bulk = BulkInsertHelper("user", [
-            "user_id", "email", "full_name", "password_hash", "password_salt",
+            "user_id", "email", "full_name", "password_hash",
             "user_type", "phone_number", "created_at", "is_active"
         ])
         
         phone_prefixes = self.spec['phone_prefixes']
         
+        # Add test accounts first
+        # Test student account
+        test_student_id = generate_uuid()
+        test_student_email = "student.test@edu.vn"
+        used_emails.add(test_student_email)
+        test_student_phone = generate_phone_number(phone_prefixes)
+        test_student_created_at = random_date_in_range(365, 30)
+        
+        test_student_data = {
+            'user_id': test_student_id,
+            'email': test_student_email,
+            'full_name': 'Test Student',
+            'user_type': 'student',
+            'phone_number': test_student_phone,
+            'created_at': test_student_created_at,
+            'is_active': 1
+        }
+        self.users.append(test_student_data)
+        self.user_by_id[test_student_id] = test_student_data
+        
+        bulk.add_row([
+            test_student_id, test_student_email, 'Test Student', test_password_hash,
+            'student', test_student_phone, test_student_created_at.strftime('%Y-%m-%d %H:%M:%S'), 1
+        ])
+        
+        # Test staff account
+        test_staff_id = generate_uuid()
+        test_staff_email = "staff.test@edu.vn"
+        used_emails.add(test_staff_email)
+        test_staff_phone = generate_phone_number(phone_prefixes)
+        test_staff_created_at = random_date_in_range(365, 30)
+        
+        test_staff_data = {
+            'user_id': test_staff_id,
+            'email': test_staff_email,
+            'full_name': 'Test Staff',
+            'user_type': 'staff',
+            'phone_number': test_staff_phone,
+            'created_at': test_staff_created_at,
+            'is_active': 1
+        }
+        self.users.append(test_staff_data)
+        self.user_by_id[test_staff_id] = test_staff_data
+        
+        bulk.add_row([
+            test_staff_id, test_staff_email, 'Test Staff', test_password_hash,
+            'staff', test_staff_phone, test_staff_created_at.strftime('%Y-%m-%d %H:%M:%S'), 1
+        ])
+        
+        # Generate regular users
         for i in range(num_users):
             user_id = generate_uuid()
             first_name = random.choice(first_names)
@@ -399,7 +451,7 @@ class PrintingServiceDataGenerator:
             self.user_by_id[user_id] = user_data
             
             bulk.add_row([
-                user_id, email, full_name, shared_password_hash, shared_password_salt,
+                user_id, email, full_name, shared_password_hash,
                 user_type, phone, created_at.strftime('%Y-%m-%d %H:%M:%S'), is_active
             ])
         
@@ -590,14 +642,16 @@ class PrintingServiceDataGenerator:
         
         student_index = 0
         
+        # Find a suitable class for assignment (current/recent academic year)
+        suitable_classes = [
+            class_info for class_info in self.classes
+            if any(ay['academic_year_id'] == class_info['academic_year_id'] and 
+                  ay['year_name'] in ['2023-2024', '2024-2025'] 
+                  for ay in self.academic_years)
+        ]
+        
         # Distribute students across classes
-        for class_info in self.classes:
-            # Only assign students to current and recent academic years
-            if not any(ay['academic_year_id'] == class_info['academic_year_id'] and 
-                      ay['year_name'] in ['2023-2024', '2024-2025'] 
-                      for ay in self.academic_years):
-                continue
-                
+        for class_info in suitable_classes:
             # Assign students to this class
             class_size = min(students_per_class, len(student_users) - student_index)
             if class_size <= 0:
@@ -609,11 +663,16 @@ class PrintingServiceDataGenerator:
                     
                 user = student_users[student_index]
                 student_id = generate_uuid()
-                student_code = generate_student_code(
-                    self.spec['student_code_prefix'],
-                    self.spec['student_code_start'],
-                    student_index
-                )
+                
+                # Check if this is the test student account
+                if user['email'] == 'student.test@edu.vn':
+                    student_code = 'TEST001'
+                else:
+                    student_code = generate_student_code(
+                        self.spec['student_code_prefix'],
+                        self.spec['student_code_start'],
+                        student_index
+                    )
                 
                 # Enrollment date based on class year level
                 enrollment_date = random_date_in_range(365 * class_info['year_level'], 365 * (class_info['year_level'] - 1))
@@ -1333,21 +1392,24 @@ class PrintingServiceDataGenerator:
             self.add_sql(stmt)
     
     def generate_activity_logs(self):
-        """Generate printer activity logs."""
+        """Generate printer logs for the printer_log table."""
         self.add_sql("\n-- ============================================")
-        self.add_sql("-- PRINTER ACTIVITY LOGS DATA")
+        self.add_sql("-- PRINTER LOGS DATA")
         self.add_sql("-- ============================================")
         
-        bulk = BulkInsertHelper("printer_activity_log", [
-            "log_id", "printer_id", "action_type", "performed_by",
-            "action_detail", "action_timestamp"
+        bulk = BulkInsertHelper("printer_log", [
+            "log_id", "printer_id", "log_type", "severity", "description",
+            "job_id", "user_id", "details", "error_code", "is_resolved",
+            "resolved_at", "resolved_by", "resolution_notes", "ip_address", "created_at"
         ])
         
-        actions = ['added', 'enabled', 'disabled', 'updated', 'removed']
+        log_types = ['print_job', 'error', 'maintenance', 'status_change', 'configuration', 'admin_action']
+        severities = ['info', 'warning', 'error', 'critical']
         
+        # Generate logs for each printer
         for printer in self.printers:
-            # Each printer has 2-5 activity logs
-            num_logs = random.randint(2, 5)
+            # Each printer has 5-15 logs
+            num_logs = random.randint(5, 15)
             
             # Look up room and building information
             room = next((r for r in self.rooms if r['room_id'] == printer['room_id']), None)
@@ -1358,26 +1420,154 @@ class PrintingServiceDataGenerator:
             building_name = building['building_name'] if building else printer.get('building_code', 'Unknown Building')
             room_code = printer.get('room_code', 'Unknown Room')
             
+            # Get print jobs for this printer
+            printer_jobs = [job for job in self.print_jobs if job.get('printer_id') == printer['printer_id']]
+            
             for _ in range(num_logs):
                 log_id = generate_uuid()
-                action = random.choice(actions)
-                staff_member = random.choice(self.staff) if self.staff else None
+                log_type = random.choice(log_types)
                 
-                details = {
-                    'added': f"Printer installed in {building_name} Room {room_code}",
-                    'enabled': "Printer enabled for student use",
-                    'disabled': "Printer temporarily disabled for maintenance",
-                    'updated': "Printer configuration updated",
-                    'removed': "Printer removed from service"
-                }
+                # Determine severity based on log type
+                if log_type == 'error':
+                    severity = random.choice(['error', 'critical'])
+                elif log_type == 'maintenance':
+                    severity = random.choice(['info', 'warning'])
+                elif log_type == 'print_job':
+                    severity = 'info'
+                else:
+                    severity = random.choice(severities)
                 
-                action_detail = details[action]
-                timestamp = random_date_in_range(365, 0)
+                # Generate description based on log type
+                job_id = None
+                user_id = None
+                error_code = None
+                details = None
+                description = ""
+                
+                if log_type == 'print_job':
+                    # Link to an actual print job if available
+                    if printer_jobs and random.random() < 0.7:  # 70% chance to link to real job
+                        job = random.choice(printer_jobs)
+                        job_id = job['job_id']
+                        # Get student for this job
+                        student = next((s for s in self.students if s['student_id'] == job['student_id']), None)
+                        if student:
+                            user_id = student['user_id']
+                        num_pages = job.get('num_pages', 1)
+                        description = f"Print job submitted: {num_pages} page(s)"
+                    else:
+                        description = "Print job queued successfully"
+                    severity = 'info'
+                
+                elif log_type == 'error':
+                    error_types = [
+                        ('PAPER_JAM', 'Paper jam detected in paper path'),
+                        ('OUT_OF_TONER', 'Toner cartridge is empty'),
+                        ('LOW_TONER', 'Toner level is low'),
+                        ('OUT_OF_PAPER', 'Paper tray is empty'),
+                        ('DOOR_OPEN', 'Printer door is open'),
+                        ('NETWORK_ERROR', 'Network connection lost'),
+                        ('OFFLINE', 'Printer went offline'),
+                        ('HARDWARE_ERROR', 'Hardware malfunction detected')
+                    ]
+                    error_code, error_desc = random.choice(error_types)
+                    description = error_desc
+                    details = f'{{"error_type": "{error_code}", "location": "{building_name} Room {room_code}"}}'
+                
+                elif log_type == 'maintenance':
+                    maintenance_actions = [
+                        "Scheduled maintenance performed",
+                        "Toner cartridge replaced",
+                        "Paper tray refilled",
+                        "Cleaning cycle completed",
+                        "Firmware update installed",
+                        "Calibration completed"
+                    ]
+                    description = random.choice(maintenance_actions)
+                    # Maintenance logs are usually performed by staff
+                    staff_member = random.choice(self.staff) if self.staff else None
+                    if staff_member:
+                        user_id = staff_member['user_id']
+                    details = f'{{"maintenance_type": "routine", "location": "{building_name} Room {room_code}"}}'
+                
+                elif log_type == 'status_change':
+                    status_changes = [
+                        "Printer status changed to idle",
+                        "Printer enabled for student use",
+                        "Printer disabled for maintenance",
+                        "Printer status changed to printing",
+                        "Printer status changed to maintained"
+                    ]
+                    description = random.choice(status_changes)
+                    # Status changes can be by staff or system
+                    if random.random() < 0.6:  # 60% by staff
+                        staff_member = random.choice(self.staff) if self.staff else None
+                        if staff_member:
+                            user_id = staff_member['user_id']
+                
+                elif log_type == 'configuration':
+                    config_changes = [
+                        "Printer network settings updated",
+                        "Default paper size changed",
+                        "Print quality settings adjusted",
+                        "Printer name updated",
+                        "Access permissions modified"
+                    ]
+                    description = random.choice(config_changes)
+                    # Configuration changes are always by staff
+                    staff_member = random.choice(self.staff) if self.staff else None
+                    if staff_member:
+                        user_id = staff_member['user_id']
+                
+                elif log_type == 'admin_action':
+                    admin_actions = [
+                        "Printer added to system",
+                        "Printer removed from system",
+                        "Printer location updated",
+                        "Printer model information updated",
+                        "Printer access logs reviewed"
+                    ]
+                    description = random.choice(admin_actions)
+                    # Admin actions are always by staff
+                    staff_member = random.choice(self.staff) if self.staff else None
+                    if staff_member:
+                        user_id = staff_member['user_id']
+                
+                # Generate resolution info for errors
+                is_resolved = 0
+                resolved_at = None
+                resolved_by = None
+                resolution_notes = None
+                
+                if log_type == 'error' and random.random() < 0.6:  # 60% of errors are resolved
+                    is_resolved = 1
+                    created_at = random_date_in_range(365, 7)
+                    resolved_at = created_at + timedelta(hours=random.randint(1, 48))
+                    staff_member = random.choice(self.staff) if self.staff else None
+                    if staff_member:
+                        resolved_by = staff_member['user_id']
+                    resolution_notes = random.choice([
+                        "Issue resolved by clearing paper jam",
+                        "Toner cartridge replaced",
+                        "Paper tray refilled",
+                        "Network connection restored",
+                        "Hardware reset performed",
+                        "Issue resolved after maintenance"
+                    ])
+                else:
+                    created_at = random_date_in_range(365, 0)
+                
+                # Generate IP address (some logs have it, some don't)
+                ip_address = None
+                if log_type in ['print_job', 'admin_action', 'configuration'] and random.random() < 0.7:
+                    ip_address = f"{random.randint(192, 255)}.{random.randint(168, 255)}.{random.randint(1, 255)}.{random.randint(1, 255)}"
                 
                 bulk.add_row([
-                    log_id, printer['printer_id'], action,
-                    staff_member['staff_id'] if staff_member else None,
-                    action_detail, timestamp.strftime('%Y-%m-%d %H:%M:%S')
+                    log_id, printer['printer_id'], log_type, severity, description,
+                    job_id, user_id, details, error_code, is_resolved,
+                    resolved_at.strftime('%Y-%m-%d %H:%M:%S') if resolved_at else None,
+                    resolved_by, resolution_notes, ip_address,
+                    created_at.strftime('%Y-%m-%d %H:%M:%S')
                 ])
         
         for stmt in bulk.get_statements():

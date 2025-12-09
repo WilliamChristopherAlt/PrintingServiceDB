@@ -192,7 +192,6 @@ class "user" {
   email
   full_name
   password_hash
-  password_salt
   user_type
   phone_number
   created_at
