@@ -1,0 +1,969 @@
+NV-8: Quản lý quỹ tiền in
+
+1. Thành phần giao diện (What’s on the page)
+- Tiêu đề trang: "Fund Management"
+- Mô tả ngắn: "View fund sources, track amounts, and export summaries"
+- Thống kê tổng quan (3 cards ngang):
+  • Tổng quỹ: Tổng số tiền của tất cả fund_source (VNĐ)
+  • Số nguồn quỹ: Đếm fund_source
+  • Quỹ theo loại: mini-legend (school_budget / donation / revenue / other)
+- Khu vực hành động chính:
+  • Nút "New Fund" (primary) mở modal tạo mới
+  • Nút "Export Excel" (secondary)
+  • Nút "Export PDF" (secondary)
+- Bộ lọc và tìm kiếm:
+  • Ô tìm kiếm (placeholder: "Tìm theo tên quỹ hoặc mô tả")
+  • Dropdown "Loại quỹ" (All, School budget, Donation, Revenue, Other)
+  • Date range: From / To (theo received_date)
+  • Nút "Apply" (chính) và "Clear" (phụ)
+- Bảng danh sách quỹ:
+  • Tiêu đề: "Funds" + subtext "Showing [X] of [Y] entries"
+  • Cột (sortable): Fund Name, Type, Amount, Received Date, Recorded By, Description, Actions
+  • Cột Actions (phải): View (mở modal chi tiết), Update (mở modal cập nhật), Delete (mở modal xác nhận)
+- Modal chi tiết quỹ:
+  • Fund ID (badge), Name, Type, Amount, Received Date, Description, Created At, Created By
+  • Actions: Close
+- Modal tạo mới quỹ:
+  • Trường nhập: Name, Type, Amount, Received Date, Description
+  • Actions: Cancel, Create
+- Modal cập nhật quỹ:
+  • Trường nhập có sẵn dữ liệu: Name, Type, Amount, Received Date, Description
+  • Actions: Cancel, Update
+- Modal xác nhận xóa:
+  • Nội dung: "Delete fund <name>?"
+  • Actions: Cancel, Delete
+- Phân trang:
+  • Rows per page: 10, 25, 50
+  • Page indicator: "Page [X] of [Y]"
+  • Nút: First, Prev, Next, Last
+
+2. Luồng tương tác (Interactive flow)
+- Tải trang:
+  • Lấy danh sách quỹ từ fund_source, sắp xếp mặc định theo received_date DESC, page size = 10.
+  • Tính thống kê tổng quan và hiển thị 3 cards.
+- Tìm kiếm:
+  • Nhập từ khóa; sau 500ms không gõ thì lọc theo fund_source_name hoặc description (case-insensitive).
+  • Bảng + thống kê cập nhật theo kết quả lọc.
+- Lọc:
+  • Chọn Loại quỹ (type) và/hoặc Date From/To, nhấn "Apply" → truy vấn lại với điều kiện AND.
+  • Nhấn "Clear" để reset tất cả bộ lọc và tìm kiếm.
+- Sắp xếp:
+  • Click header cột để đổi thứ tự (Amount, Received Date, Name). Chu kỳ: DESC → ASC → none (trở về mặc định).
+- Phân trang:
+  • Chọn rows per page (10/25/50) → tải lại trang 1.
+  • Dùng Prev/Next/First/Last để di chuyển; giữ bộ lọc và sắp xếp hiện tại.
+- Xem chi tiết:
+  • Click nút "View" (cột Actions) → mở modal chi tiết quỹ.
+- Tạo mới:
+  • Nhấn "New Fund" → mở modal tạo; nhập Name, Type, Amount, Received Date, Description → Create → thêm bản ghi mới (giả lập).
+- Cập nhật:
+  • Nhấn "Update" ở hàng quỹ → mở modal cập nhật với dữ liệu sẵn; chỉnh sửa → Update → lưu thay đổi (giả lập).
+- Xóa:
+  • Nhấn "Delete" → mở modal xác nhận; Confirm → xóa bản ghi (giả lập).
+- Xuất file:
+  • "Export Excel": Xuất các quỹ đang hiển thị (sau lọc) tối đa 1000 bản ghi.
+  • "Export PDF": Xuất các quỹ đang hiển thị (sau lọc) tối đa 200 bản ghi; gồm summary + bảng.
+
+3. Use Cases
+Use Case Index | Tên | MoSCoW
+NV-8-1 | Xem danh sách & chi tiết quỹ | Must Have
+NV-8-2 | Tạo mới quỹ | Must Have
+NV-8-3 | Cập nhật quỹ | Should Have
+NV-8-4 | Xóa quỹ | Should Have
+NV-8-5 | Xuất Excel/PDF danh sách quỹ | Should Have
+
+NV-8-1: Xem danh sách & chi tiết quỹ
+- Mô tả: Nhân viên xem, tìm kiếm, lọc, sắp xếp, phân trang danh sách quỹ; xem chi tiết một quỹ.
+- Actor: Nhân viên
+- Trigger: Nhấn menu "Fund Management"
+- Quy định nghiệp vụ:
+  • Chỉ nhân viên được xem toàn bộ quỹ.
+  • Mặc định sắp xếp theo received_date DESC.
+  • Tìm kiếm không phân biệt hoa/thường, trên name/description.
+  • Bộ lọc kết hợp (type + date range + search) với logic AND.
+- Main Flow:
+  1) Mở trang: tải quỹ, thống kê, hiển thị bảng (page 1, 10 rows).
+  2) Tìm kiếm: nhập từ khóa → bảng & thống kê cập nhật.
+  3) Lọc: chọn type, date range → Apply → bảng & thống kê cập nhật.
+  4) Sắp xếp: click header (Amount/Date/Name) để đổi thứ tự.
+  5) Phân trang: đổi page size hoặc điều hướng trang.
+  6) Xem chi tiết: click "View" → mở modal chi tiết quỹ → đóng modal.
+- Alternative/Exception:
+  • Không có dữ liệu sau lọc: hiển thị empty state "No funds found" + nút "Clear".
+  • Date range không hợp lệ (From > To): thông báo lỗi và vô hiệu Apply.
+
+NV-8-2: Tạo mới quỹ
+- Mô tả: Nhân viên tạo một quỹ mới.
+- Actor: Nhân viên
+- Trigger: Nhấn "New Fund"
+- Quy định nghiệp vụ:
+  • Bắt buộc: Name, Type, Amount, Received Date.
+  • Amount > 0.
+- Main Flow:
+  1) Nhấn "New Fund" → mở modal tạo.
+  2) Nhập Name, Type, Amount, Received Date, Description.
+  3) Nhấn "Create" → quỹ mới được thêm (giả lập) và bảng cập nhật.
+- Alternative/Exception:
+  • Thiếu trường bắt buộc hoặc Amount <= 0: hiển thị lỗi, không cho submit.
+
+NV-8-3: Cập nhật quỹ
+- Mô tả: Nhân viên chỉnh sửa một quỹ hiện có.
+- Actor: Nhân viên
+- Trigger: Nhấn "Update" trên hàng quỹ
+- Quy định nghiệp vụ:
+  • Bắt buộc: Name, Type, Amount, Received Date.
+  • Amount > 0.
+- Main Flow:
+  1) Nhấn "Update" → mở modal cập nhật với dữ liệu sẵn.
+  2) Chỉnh sửa trường cần thiết.
+  3) Nhấn "Update" → lưu thay đổi (giả lập) và bảng cập nhật.
+- Alternative/Exception:
+  • Thiếu trường hoặc Amount <= 0: hiển thị lỗi, không cho submit.
+
+NV-8-4: Xóa quỹ
+- Mô tả: Nhân viên xóa một quỹ.
+- Actor: Nhân viên
+- Trigger: Nhấn "Delete" trên hàng quỹ
+- Main Flow:
+  1) Nhấn "Delete" → mở modal xác nhận.
+  2) Nhấn "Delete" trong modal → quỹ bị xóa (giả lập), bảng cập nhật.
+- Alternative/Exception:
+  • Nhấn "Cancel": hủy thao tác, đóng modal.
+
+NV-8-5: Xuất Excel/PDF danh sách quỹ
+- Mô tả: Nhân viên xuất danh sách quỹ đang hiển thị (sau lọc) ra Excel/PDF.
+- Actor: Nhân viên
+- Trigger: Nhấn "Export Excel" hoặc "Export PDF"
+- Quy định nghiệp vụ:
+  • Excel tối đa 1000 bản ghi; PDF tối đa 200 bản ghi.
+  • File chỉ bao gồm dữ liệu sau khi áp dụng tìm kiếm/lọc/sắp xếp hiện tại.
+- Main Flow (Excel):
+  1) Nhấn "Export Excel".
+  2) Nếu số bản ghi ≤ 1000: tạo file Excel (columns: Fund ID, Name, Type, Amount, Received Date, Description, Created By, Created At) và tải xuống.
+  3) Nếu >1000: hiển thị cảnh báo yêu cầu lọc bớt.
+- Main Flow (PDF):
+  1) Nhấn "Export PDF".
+  2) Nếu số bản ghi ≤ 200: tạo PDF với summary (tổng quỹ, số quỹ, phân bổ theo loại) + bảng quỹ; tải xuống.
+  3) Nếu >200: cảnh báo yêu cầu lọc bớt.
+- Exception:
+  • Không có bản ghi để xuất: thông báo "No funds to export".
+  • Lỗi tạo file: thông báo lỗi và gợi ý thử lại.
+
+
+NV-8: Quản lý quỹ tiền in
+
+1. Thành phần giao diện
+Phần đầu trang (Header)
+Tiêu đề trang: "Fund Management"
+Mô tả: "View fund sources, track amounts, and export summaries"
+
+Phần thống kê (3 cards ngang)
+Hiển thị số liệu tổng quan:
+Card 1: Tổng quỹ
+Số liệu: Tổng số tiền từ tất cả nguồn quỹ (sum của amount)
+Hiển thị: Format nghìn với ký hiệu ₫
+Label phụ: "All fund sources"
+Card 2: Số nguồn quỹ
+Số liệu: Tổng số bản ghi fund_source
+Label phụ: "school / donation / revenue / other"
+Card 3: Phân bổ theo loại
+Số liệu: Phần trăm phân bổ theo từng loại
+Hiển thị: "X% / Y% / Z% / W%" cho school / donation / revenue / other
+Label phụ: "school / donation / revenue / other"
+
+Phần lọc và tìm kiếm (Filter Section)
+
+Thanh tìm kiếm
+Ô input
+Placeholder: "Search by fund name or description"
+Tìm kiếm theo: tên quỹ, mô tả
+Không phân biệt chữ hoa chữ thường
+Debounce 500ms
+Bộ lọc dropdown (2 cột)
+Cột 1:
+Dropdown loại quỹ
+Label: "Fund type"
+Các lựa chọn:
+All types (mặc định)
+School budget
+Donation
+Revenue
+Other
+Chỉ chọn được 1 option
+Bộ lọc khoảng thời gian (2 cột)
+Date From: Date picker với label "Date from"
+Date To: Date picker với label "Date to"
+Lọc theo received_date
+Nút hành động
+Nút "Apply": Button chính, áp dụng các bộ lọc đã chọn
+Nút "Clear": Button phụ, xóa tất cả bộ lọc và reset về mặc định
+Bảng danh sách quỹ (Table)
+
+Tiêu đề bảng
+Text "Funds"
+Hiển thị "Showing [X] of [Y] entries" (X = số bản ghi hiện tại, Y = tổng số sau khi lọc)
+Action bar (cùng dòng với tiêu đề bảng)
+Nút "New Fund": Button chính, mở modal tạo mới
+Nút "Export PDF": Button phụ
+Nút "Export Excel": Button phụ
+Các cột trong bảng
+Fund Name: Tên quỹ
+
+
+Có thể sắp xếp (icon ↕️)
+Type: Loại quỹ
+
+
+Hiển thị dạng badge:
+School budget
+Donation
+Revenue
+Other
+Amount: Số tiền
+
+
+Có thể sắp xếp (icon ↕️)
+Format nghìn với ký hiệu ₫
+Received Date: Ngày nhận
+
+
+Có thể sắp xếp (icon ↕️)
+Định dạng: YYYY-MM-DD
+Mặc định: Sắp xếp giảm dần (mới nhất ở trên)
+Recorded By: Người ghi nhận
+
+
+Tên nhân viên
+Description: Mô tả
+
+
+Text có thể bị cắt nếu quá dài
+Actions: Cột hành động
+
+
+Nút View: Xem chi tiết
+Nút Update: Chỉnh sửa
+Nút Delete: Xóa
+Tính năng của bảng
+Hiệu ứng hover trên mỗi hàng
+Chu kỳ sắp xếp cho các cột có thể sort: DESC → ASC → default
+Default sort: received_date DESC
+Phân trang (Pagination)
+Hiển thị ở cuối bảng:
+Dropdown số hàng mỗi trang: (10, 25, 50)
+Thông tin trang: "Page [X] of [Y]"
+Nút điều hướng:
+First (⏮️)
+Previous (◀️)
+Next (▶️)
+Last (⏭️)
+Label "Rows per page" (nowrap)
+Modal chi tiết (View/Detail Modal)
+
+Header:
+Tiêu đề: "Fund Details"
+Nút đóng (X)
+Body - Hiển thị thông tin:
+Fund Name
+Type
+Amount (format nghìn + ₫)
+Received Date
+Created By (Recorded By)
+Description
+Created At (nếu có)
+Footer:
+Nút "Close"
+Modal tạo mới (Create Modal)
+
+Header:
+Tiêu đề: "New Fund"
+Nút đóng (X)
+Body - Form fields:
+Fund Name: Text input (required)
+Type: Dropdown select (required)
+School budget
+Donation
+Revenue
+Other
+Amount: Number input (required, > 0)
+Received Date: Date picker (required)
+Description: Textarea (optional)
+Footer:
+Nút "Cancel"
+Nút "Create": Button chính
+Validation:
+Name: bắt buộc, trim không rỗng
+Type: bắt buộc
+Amount: bắt buộc, phải > 0
+Received Date: bắt buộc, định dạng ngày hợp lệ
+Lỗi: highlight field + hiển thị message, không đóng modal
+Modal cập nhật (Update Modal)
+
+Header:
+Tiêu đề: "Update Fund"
+Nút đóng (X)
+Body:
+Các field giống Create Modal
+Dữ liệu được prefill từ bản ghi đã chọn
+Footer:
+Nút "Cancel"
+Nút "Update": Button chính
+Validation: Giống Create Modal
+Modal xóa (Delete Confirm Modal)
+
+Header:
+Tiêu đề: "Delete Fund"
+Nút đóng (X)
+Body:
+Text chính: "Delete fund '[tên_quỹ]'?"
+Text phụ: "This action cannot be undone."
+Footer:
+Nút "Cancel"
+Nút "Delete": Button nguy hiểm
+Trạng thái không có dữ liệu (Empty State)
+Hiển thị khi không tìm thấy quỹ (sau khi lọc):
+Text: "No funds found"
+Nút "Clear" để reset filter/search
+Trạng thái đang tải (Loading State)
+Hiển thị khi đang tải dữ liệu:
+Skeleton loader cho các hàng trong bảng
+Text: "Loading..."
+Thông báo (Toast/Alert)
+Hiển thị sau các hành động:
+Success: Sau Create/Update/Delete/Export thành công
+Warning: Khi vượt giới hạn export
+Info: Khi không có dữ liệu để export
+Error: Khi có lỗi không mong muốn
+
+2. Flow tương tác
+2.1 Tải trang lần đầu
+Người dùng (Nhân viên) truy cập trang "Fund Management"
+
+
+Hệ thống query database:
+
+
+Lấy tất cả funds từ bảng fund_source
+Sắp xếp theo received_date giảm dần (mới nhất trước)
+Giới hạn 10 bản ghi (kích thước trang mặc định)
+Hệ thống tính toán thống kê:
+
+
+Tổng số tiền: SUM(amount) từ tất cả fund_source
+Số nguồn quỹ: COUNT(*) từ fund_source
+Phân bổ theo loại: COUNT(*) GROUP BY type, tính phần trăm
+Hiển thị 3 cards thống kê với số liệu
+
+
+Hiển thị bảng với 10 funds đầu tiên
+
+
+Hiển thị pagination: "Page 1 of [tổng_số_trang]"
+
+
+Tất cả bộ lọc ở trạng thái mặc định (All types, không có ngày, search rỗng)
+
+
+2.2 Tìm kiếm funds
+Người dùng nhập text vào ô tìm kiếm
+
+
+Hệ thống tự động tìm kiếm (sau 500ms không nhập):
+
+
+Tìm trong cột name (tên quỹ)
+Tìm trong cột description (mô tả)
+Không phân biệt chữ hoa chữ thường
+Reset về trang 1
+Bảng cập nhật với kết quả tìm kiếm
+
+
+Text "Showing [X] of [Y] entries" cập nhật
+
+
+Các cards thống kê cập nhật theo kết quả lọc
+
+
+Nếu không tìm thấy:
+
+
+Hiển thị empty state
+Text: "No funds found"
+Nút "Clear"
+2.3 Lọc funds
+2.3.1 Lọc theo loại quỹ
+Người dùng click vào dropdown "Fund type"
+Hiển thị danh sách các lựa chọn
+Người dùng chọn một loại (ví dụ: "Donation")
+Dropdown hiển thị "Donation" (thay vì "All types")
+Người dùng click nút "Apply"
+Hệ thống query lại với điều kiện type = 'donation'
+Bảng cập nhật với kết quả lọc
+Cards thống kê cập nhật
+Text "Showing [X] of [Y] entries" cập nhật
+Reset về trang 1
+2.3.2 Lọc theo khoảng thời gian
+Người dùng click vào ô "Date from"
+Hiển thị date picker
+Người dùng chọn ngày bắt đầu
+Người dùng click vào ô "Date to"
+Hiển thị date picker
+Người dùng chọn ngày kết thúc
+Hệ thống validate: Date From ≤ Date To
+Nếu sai: hiển thị lỗi, disable nút Apply
+Người dùng click nút "Apply"
+Hệ thống query lại với điều kiện received_date BETWEEN date_from AND date_to
+Bảng cập nhật với kết quả lọc
+Cards thống kê cập nhật
+Reset về trang 1
+2.3.3 Kết hợp nhiều bộ lọc
+Người dùng có thể chọn nhiều bộ lọc cùng lúc:
+Type + Date Range + Search
+Người dùng click nút "Apply"
+Hệ thống query với điều kiện AND cho tất cả bộ lọc đã chọn
+Bảng cập nhật
+Nếu không có kết quả: hiển thị empty state
+
+
+2.3.4 Xóa bộ lọc
+Người dùng click nút "Clear"
+Tất cả dropdowns reset về mặc định (All types)
+Date pickers bị xóa (trống)
+Ô tìm kiếm bị xóa
+Hệ thống query lại dữ liệu ban đầu (không có bộ lọc)
+Bảng hiển thị tất cả funds (trang 1)
+Cards thống kê hiển thị số liệu đầy đủ
+
+
+2.4 Sắp xếp funds
+Người dùng click vào header cột có thể sort (Amount / Received Date / Fund Name)
+Icon thay đổi theo chu kỳ:
+Lần 1: DESC (giảm dần)
+Lần 2: ASC (tăng dần)
+Lần 3: default (received_date DESC)
+Bảng sắp xếp lại theo thứ tự đã chọn
+Giữ nguyên các bộ lọc đang áp dụng
+Reset về trang 1
+2.5 Thay đổi số hàng mỗi trang
+Người dùng click vào dropdown "Rows per page"
+Hiển thị các lựa chọn: 10, 25, 50
+Người dùng chọn một số (ví dụ: 25)
+Hệ thống query lại với LIMIT = 25
+Bảng hiển thị 25 hàng
+Pagination cập nhật số trang
+Reset về trang 1
+2.6 Điều hướng giữa các trang
+Người dùng click nút điều hướng (Next/Previous/First/Last)
+Hệ thống tăng/giảm số trang hiện tại
+Query dữ liệu với OFFSET tương ứng
+Bảng hiển thị dữ liệu trang mới
+Thông tin trang cập nhật: "Page [X] of [Y]"
+Giữ nguyên bộ lọc, sort, search hiện tại
+2.7 Xem chi tiết fund
+Người dùng click nút "View" trên hàng fund
+Hệ thống query chi tiết fund với fund_id
+Mở modal "Fund Details"
+Hiển thị đầy đủ thông tin:
+Fund Name
+Type (với badge màu)
+Amount (format)
+Received Date
+Created By / Recorded By
+Description
+Created At (nếu có)
+Người dùng xem chi tiết
+Click nút "Close" hoặc X để đóng modal
+Quay lại trang danh sách, giữ nguyên vị trí
+2.8 Tạo mới fund
+Người dùng click nút "New Fund"
+Mở modal "New Fund"
+Hiển thị form với các field trống
+Người dùng nhập thông tin:
+Fund Name (required)
+Type (required, chọn từ dropdown)
+Amount (required, number > 0)
+Received Date (required, chọn từ date picker)
+Description (optional)
+Người dùng click nút "Create"
+Hệ thống validate:
+Name: không rỗng sau trim
+Type: phải chọn 1 trong 4 loại
+Amount: phải > 0
+Received Date: phải là ngày hợp lệ
+Nếu có lỗi:
+Highlight field lỗi
+Hiển thị message lỗi
+Giữ modal mở
+Người dùng sửa lại → quay lại bước 5
+Nếu hợp lệ:
+Gọi API tạo fund mới (mock)
+Đóng modal
+Hiển thị toast success: "Fund created successfully"
+Refresh bảng và stats
+Có thể reset về trang 1 để thấy bản ghi mới
+Người dùng có thể click "Cancel" bất kỳ lúc nào:
+Đóng modal
+Không lưu dữ liệu
+Quay lại trang danh sách
+2.9 Cập nhật fund
+Người dùng click nút "Update" trên hàng fund
+Hệ thống query chi tiết fund với fund_id
+Mở modal "Update Fund"
+Hiển thị form với dữ liệu prefill:
+Fund Name: giá trị hiện tại
+Type: option hiện tại được chọn
+Amount: giá trị hiện tại
+Received Date: ngày hiện tại
+Description: mô tả hiện tại
+Người dùng chỉnh sửa các field cần thiết
+Người dùng click nút "Update"
+Hệ thống validate (giống Create):
+Name: không rỗng
+Type: hợp lệ
+Amount: > 0
+Received Date: hợp lệ
+Nếu có lỗi:
+Highlight field lỗi
+Hiển thị message lỗi
+Giữ modal mở
+Người dùng sửa lại → quay lại bước 6
+Nếu hợp lệ:
+Gọi API update fund (mock)
+Đóng modal
+Hiển thị toast success: "Fund updated successfully"
+Refresh bảng và stats
+Giữ vị trí hiện tại (hoặc chấp nhận reload trang 1)
+Người dùng có thể click "Cancel" bất kỳ lúc nào:
+Đóng modal
+Không lưu thay đổi
+Quay lại trang danh sách
+2.10 Xóa fund
+Người dùng click nút "Delete" trên hàng fund
+Mở modal xác nhận "Delete Fund"
+Hiển thị:
+Text: "Delete fund '[tên_quỹ]'?"
+Text phụ: "This action cannot be undone."
+Người dùng có 2 lựa chọn:
+ Option A: Xác nhận xóa
+Click nút "Delete"
+Gọi API xóa fund (mock)
+Đóng modal
+Hiển thị toast success: "Fund deleted successfully"
+Refresh bảng và stats
+Nếu trang hiện tại trở nên rỗng: lùi về trang trước
+Nếu đây là bản ghi cuối cùng ở trang 1: hiển thị empty state
+Option B: Hủy
+Click nút "Cancel" hoặc X
+Đóng modal
+Không xóa fund
+Quay lại trang danh sách
+2.11 Xuất Excel/PDF
+2.11.1 Kiểm tra trước khi xuất
+Người dùng click nút "Export PDF" hoặc "Export Excel"
+Hệ thống kiểm tra số lượng funds hiện tại (sau khi áp dụng filter/search):
+Đếm tổng số funds trong kết quả hiện tại
+Nếu số lượng = 0:
+Hiển thị toast info: "No funds to export"
+Không mở dialog
+Dừng flow
+Nếu Export Excel và số lượng > 1000:
+Hiển thị toast warning: "Too many records ([X]). Maximum 1000 for Excel. Please filter."
+Không xuất
+Dừng flow
+Nếu Export PDF và số lượng > 200:
+Hiển thị toast warning: "Too many records ([X]). Maximum 200 for PDF. Please filter."
+Không xuất
+Dừng flow
+Nếu số lượng hợp lệ: tiếp tục flow xuất
+2.11.2 Xuất Excel
+Hệ thống hiển thị loading overlay:
+Spinner
+Text: "Generating Excel..."
+Hệ thống query dữ liệu:
+Lấy tất cả funds theo filter/sort/search hiện tại
+Giới hạn tối đa 1000 records
+Tạo file Excel với cấu trúc:
+Sheet 1 "Summary": thống kê, bộ lọc, metadata
+Sheet 2 "Funds": bảng dữ liệu với tất cả cột
+File được tạo và tự động tải xuống:
+Tên file: fund_management_[YYYY-MM-DD_HH-MM].xlsx
+Đóng loading overlay
+Hiển thị toast success: "Excel exported successfully - [X] funds exported"
+(Nếu có backend) Ghi vào audit log:
+action_type: 'export_funds_excel'
+user_id, timestamp, filter details
+2.11.3 Xuất PDF
+Hệ thống hiển thị loading overlay:
+Spinner
+Text: "Generating PDF..."
+Hệ thống query dữ liệu:
+Lấy tất cả funds theo filter/sort/search hiện tại
+Giới hạn tối đa 200 records
+Tạo file PDF với cấu trúc:
+Header: logo, tiêu đề, ngày xuất, người xuất
+Trang tóm tắt: thống kê, bộ lọc
+Bảng dữ liệu
+Footer: số trang, timestamp
+File được tạo và tự động tải xuống:
+Tên file: fund_management_[YYYY-MM-DD_HH-MM].pdf
+Đóng loading overlay
+Hiển thị toast success: "PDF exported successfully - [X] funds exported"
+(Nếu có backend) Ghi vào audit log:
+action_type: 'export_funds_pdf'
+user_id, timestamp, filter details
+2.11.4 Lỗi khi xuất
+Nếu có lỗi trong quá trình tạo file:
+Đóng loading overlay
+Hiển thị toast error: "Failed to generate [format]. Please try again."
+Không tạo file
+(Nếu có backend) Ghi lỗi vào audit log
+Nếu timeout (quá 60 giây):
+Đóng loading overlay
+Hiển thị toast error: "Export timeout. Please try again or reduce dataset."
+Không tạo file
+3. Use Cases
+3.1 Danh sách Use Cases
+Use Case ID
+Tên Use Case
+Mô tả ngắn gọn
+NV-8-1
+Xem danh sách và chi tiết quỹ
+Nhân viên xem danh sách các nguồn quỹ, có thể tìm kiếm, lọc, sắp xếp và xem chi tiết từng quỹ
+NV-8-2
+Xuất báo cáo quỹ
+Nhân viên xuất danh sách quỹ ra file Excel hoặc PDF theo bộ lọc đã chọn
+NV-8-3
+Tạo mới nguồn quỹ
+Nhân viên ghi nhận nguồn quỹ mới vào hệ thống
+NV-8-4
+Cập nhật thông tin quỹ
+Nhân viên chỉnh sửa thông tin của nguồn quỹ đã có
+NV-8-5
+Xóa nguồn quỹ
+Nhân viên xóa nguồn quỹ khỏi hệ thống
+
+
+3.2 Chi tiết Use Cases
+NV-8-1: Xem danh sách và chi tiết quỹ
+
+Thuộc tính
+Nội dung
+Use Case ID
+NV-8-1
+Tên
+Xem danh sách và chi tiết quỹ
+Mô tả
+Nhân viên xem danh sách các nguồn quỹ với khả năng tìm kiếm, lọc theo loại và thời gian, sắp xếp, phân trang, và xem chi tiết từng quỹ
+Actor
+Staff
+Trigger
+Staff truy cập trang Fund Management
+Quy định nghiệp vụ
+- Chỉ staff có quyền truy cập
+- Mặc định hiển thị 10 records/page, sort theo ngày nhận mới nhất
+- Search không phân biệt hoa thường, debounce 500ms
+- Statistics tính theo dữ liệu đã filter
+- Có thể sort theo Fund Name, Amount, Received Date
+Main Flow
+1. Staff truy cập trang
+2. Hệ thống hiển thị 3 stat cards (total funds, fund sources count, distribution by type)
+3. Hệ thống hiển thị bảng với 10 quỹ đầu tiên, sort theo received date giảm dần
+4. Staff có thể search theo tên/mô tả, filter theo type/date range, sort các cột, chuyển trang
+5. Bảng và stats cập nhật theo filter/search
+6. Staff click View trên một quỹ
+7. Hệ thống mở modal hiển thị chi tiết quỹ
+Alternative Flow
+Alt 1: Không tìm thấy kết quả
+- Tại bước 4, nếu search/filter không có kết quả
+- Hiển thị empty state với text "No funds found" và nút Clear
+
+Alt 2: Clear filters
+- Tại bước 4, Staff click nút Clear
+- Reset tất cả filter/search về mặc định
+- Reload bảng với dữ liệu ban đầu
+Exception Flow
+Exc 1: Lỗi load dữ liệu
+- Hiển thị toast error "Failed to load funds"
+- Hiển thị empty state với nút Retry
+Tiền điều kiện
+- User đã login với user_type = 'staff'
+Hậu điều kiện
+- Danh sách quỹ được hiển thị theo filter đã chọn
+- Statistics được cập nhật
+- Modal chi tiết đóng sau khi xem xong
+Input
+- Search text (optional)
+- Fund type filter (optional)
+- Date range filter (optional)
+- Sort column & direction
+- Page number
+- Rows per page
+Output
+- Table hiển thị danh sách quỹ
+- 3 stat cards
+- Pagination info
+- Modal chi tiết quỹ (khi click View)
+
+
+NV-8-2: Xuất báo cáo quỹ
+
+Thuộc tính
+Nội dung
+Use Case ID
+NV-8-2
+Tên
+Xuất báo cáo quỹ
+Mô tả
+Nhân viên xuất danh sách quỹ ra file Excel hoặc PDF theo filter/search hiện tại
+Actor
+Staff
+Trigger
+Staff click nút Export Excel hoặc Export PDF
+Quy định nghiệp vụ
+- Export theo filter/search/sort hiện tại
+- Excel: tối đa 1000 records
+- PDF: tối đa 200 records
+- File name format: fund_management_[YYYY-MM-DD_HH-MM].[xlsx/pdf]
+- Timeout sau 60 giây
+Main Flow
+1. Staff đang xem danh sách quỹ (có thể đã filter/search)
+2. Staff click nút "Export Excel"
+3. Hệ thống kiểm tra số lượng records hiện tại
+4. Hiển thị loading overlay "Generating Excel..."
+5. Hệ thống tạo file Excel với 2 sheets: Summary (stats + filters) và Funds (data table)
+6. File tự động download về máy
+7. Hiển thị toast success "[X] funds exported successfully"
+8. Đóng loading overlay
+Alternative Flow
+Alt 1: Export PDF
+- Tại bước 2, Staff click "Export PDF"
+- Tại bước 4, loading text là "Generating PDF..."
+- Tại bước 5, tạo file PDF với header, summary, table, footer
+- Các bước còn lại giống Main Flow
+
+Alt 2: Không có dữ liệu
+- Tại bước 3, nếu số records = 0
+- Hiển thị toast info "No funds to export"
+- Không mở loading, dừng flow
+Exception Flow
+Exc 1: Vượt giới hạn records
+- Tại bước 3, nếu Excel > 1000 hoặc PDF > 200
+- Hiển thị toast warning "Too many records ([X]). Maximum [limit]. Please filter."
+- Dừng flow
+
+Exc 2: Lỗi tạo file
+- Tại bước 5, nếu có lỗi
+- Đóng loading
+- Hiển thị toast error "Failed to generate file. Please try again."
+
+Exc 3: Timeout
+- Sau 60 giây vẫn chưa xong
+- Đóng loading
+- Hiển thị toast error "Export timeout. Please try again or reduce dataset."
+Tiền điều kiện
+- User đã login với user_type = 'staff'
+- Có ít nhất 1 record để export
+Hậu điều kiện
+- File Excel/PDF được download về máy
+- Audit log ghi nhận action (nếu có backend)
+Input
+- Danh sách quỹ hiện tại (đã filter/search/sort)
+- Export format (Excel/PDF)
+Output
+- File Excel (.xlsx) hoặc PDF (.pdf)
+- Toast notification
+
+
+NV-8-3: Tạo mới nguồn quỹ
+
+Thuộc tính
+Nội dung
+Use Case ID
+NV-8-3
+Tên
+Tạo mới nguồn quỹ
+Mô tả
+Nhân viên ghi nhận nguồn quỹ mới vào hệ thống
+Actor
+Staff
+Trigger
+Staff click nút "New Fund"
+Quy định nghiệp vụ
+- Fund Name: bắt buộc, không rỗng sau trim
+- Type: bắt buộc, chọn 1 trong 4 (school_budget, donation, revenue, other)
+- Amount: bắt buộc, phải > 0
+- Received Date: bắt buộc, định dạng hợp lệ
+- Description: optional
+- created_by tự động lấy từ user đang login
+Main Flow
+1. Staff click nút "New Fund"
+2. Hệ thống mở modal "New Fund" với form trống
+3. Staff nhập: Fund Name, chọn Type, nhập Amount, chọn Received Date, nhập Description (optional)
+4. Staff click "Create"
+5. Hệ thống validate tất cả fields
+6. Hệ thống lưu record mới vào fund_source
+7. Đóng modal
+8. Refresh bảng và stats
+9. Hiển thị toast success "Fund created successfully"
+Alternative Flow
+Alt 1: Cancel
+- Tại bước 3 hoặc sau khi có lỗi validation, Staff click "Cancel" hoặc X
+- Đóng modal mà không lưu
+- Quay lại danh sách
+Exception Flow
+Exc 1: Validation failed
+- Tại bước 5, nếu có field không hợp lệ
+- Highlight field lỗi màu đỏ
+- Hiển thị error message bên dưới field
+- Giữ modal mở
+- Staff sửa lại và quay bước 4
+
+Exc 2: Lỗi lưu dữ liệu
+- Tại bước 6, nếu có lỗi server/network
+- Hiển thị toast error "Failed to create fund. Please try again."
+- Giữ modal mở với data đã nhập
+Tiền điều kiện
+- User đã login với user_type = 'staff'
+Hậu điều kiện
+- Record mới được thêm vào fund_source
+- Bảng và stats được refresh
+- Modal được đóng
+Input
+- Fund Name (text)
+- Type (dropdown selection)
+- Amount (number)
+- Received Date (date)
+- Description (textarea, optional)
+Output
+- Record mới trong fund_source
+- Toast notification
+- Bảng và stats được cập nhật
+
+
+NV-8-4: Cập nhật thông tin quỹ
+
+Thuộc tính
+Nội dung
+Use Case ID
+NV-8-4
+Tên
+Cập nhật thông tin quỹ
+Mô tả
+Nhân viên chỉnh sửa thông tin của nguồn quỹ đã có
+Actor
+Staff
+Trigger
+Staff click nút "Update" trên một hàng quỹ
+Quy định nghiệp vụ
+- Validation giống NV-8-3
+- Không được update fund_id, created_by, created_at
+- Chỉ update các field: fund_source_name, fund_source_type, amount, received_date, description
+Main Flow
+1. Staff click nút "Update" trên một quỹ
+2. Hệ thống load chi tiết quỹ
+3. Mở modal "Update Fund" với form prefill dữ liệu hiện tại
+4. Staff chỉnh sửa các field cần thiết
+5. Staff click "Update"
+6. Hệ thống validate tất cả fields
+7. Hệ thống cập nhật record trong fund_source
+8. Đóng modal
+9. Refresh bảng và stats
+10. Hiển thị toast success "Fund updated successfully"
+Alternative Flow
+Alt 1: Cancel
+- Tại bước 4 hoặc sau khi có lỗi validation, Staff click "Cancel" hoặc X
+- Đóng modal mà không lưu thay đổi
+- Quay lại danh sách
+Exception Flow
+Exc 1: Validation failed
+- Tại bước 6, nếu có field không hợp lệ
+- Highlight field lỗi màu đỏ
+- Hiển thị error message
+- Giữ modal mở
+- Staff sửa lại và quay bước 5
+
+Exc 2: Lỗi load dữ liệu
+- Tại bước 2, nếu không load được
+- Hiển thị toast error "Failed to load fund details"
+- Không mở modal
+
+Exc 3: Lỗi update
+- Tại bước 7, nếu có lỗi server/network
+- Hiển thị toast error "Failed to update fund. Please try again."
+- Giữ modal mở
+Tiền điều kiện
+- User đã login với user_type = 'staff'
+- Fund cần update tồn tại trong fund_source
+Hậu điều kiện
+- Record được cập nhật trong fund_source
+- Bảng và stats được refresh
+- Modal được đóng
+Input
+- fund_id (từ hàng được chọn)
+- Các field cần update: Fund Name, Type, Amount, Received Date, Description
+Output
+- Record được update trong fund_source
+- Toast notification
+- Bảng và stats được cập nhật
+
+
+NV-8-5: Xóa nguồn quỹ
+
+Thuộc tính
+Nội dung
+Use Case ID
+NV-8-5
+Tên
+Xóa nguồn quỹ
+Mô tả
+Nhân viên xóa nguồn quỹ khỏi hệ thống sau khi xác nhận
+Actor
+Staff
+Trigger
+Staff click nút "Delete" trên một hàng quỹ
+Quy định nghiệp vụ
+- Phải có confirmation trước khi xóa
+- Action không thể undo
+- Nếu trang hiện tại trống sau khi xóa, lùi về trang trước
+Main Flow
+1. Staff click nút "Delete" trên một quỹ
+2. Hệ thống mở modal xác nhận "Delete Fund"
+3. Modal hiển thị tên quỹ và cảnh báo "This action cannot be undone"
+4. Staff click "Delete" để xác nhận
+5. Hệ thống xóa record khỏi fund_source
+6. Đóng modal
+7. Refresh bảng và stats
+8. Nếu trang hiện tại rỗng, lùi về trang trước
+9. Hiển thị toast success "Fund deleted successfully"
+Alternative Flow
+Alt 1: Cancel
+- Tại bước 4, Staff click "Cancel" hoặc X
+- Đóng modal mà không xóa
+- Quay lại danh sách
+Exception Flow
+Exc 1: Lỗi xóa
+- Tại bước 5, nếu có lỗi server/network
+- Hiển thị toast error "Failed to delete fund. Please try again."
+- Giữ modal mở
+
+Exc 2: Record không tồn tại
+- Tại bước 5, nếu fund_id không còn trong database
+- Hiển thị toast error "Fund not found or already deleted"
+- Đóng modal
+- Refresh bảng
+Tiền điều kiện
+- User đã login với user_type = 'staff'
+- Fund cần xóa tồn tại trong fund_source
+Hậu điều kiện
+- Record bị xóa khỏi fund_source
+- Bảng và stats được refresh
+- Modal được đóng
+- Pagination điều chỉnh nếu cần
+Input
+- fund_id (từ hàng được chọn)
+Output
+- Record bị xóa khỏi fund_source
+- Toast notification
+- Bảng và stats được cập nhật
+
+

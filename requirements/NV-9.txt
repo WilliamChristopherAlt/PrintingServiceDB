@@ -1,0 +1,965 @@
+NV-9: Quản lý chi tiền mua giấy
+
+1. Thành phần giao diện (What’s on the page)
+- Tiêu đề trang: "Paper Purchase Management"
+- Mô tả ngắn: "Track paper purchases, payment status, and export summaries"
+- Thống kê tổng quan (3 cards ngang):
+  • Tổng chi: Tổng `total_amount_paid` của tất cả supplier_paper_purchase (VNĐ)
+  • Số giao dịch: Đếm supplier_paper_purchase
+  • Theo trạng thái: mini-legend (pending / completed / failed / refunded)
+- Khu vực hành động chính:
+  • Nút "New Purchase" (primary) mở modal tạo mới
+  • Nút "Export Excel" (secondary)
+  • Nút "Export PDF" (secondary)
+- Bộ lọc và tìm kiếm:
+  • Ô tìm kiếm (placeholder: "Tìm theo nhà cung cấp, invoice hoặc ghi chú")
+  • Dropdown "Trạng thái thanh toán" (All, Pending, Completed, Failed, Refunded)
+  • Dropdown "Phương thức thanh toán" (All, Cash, Bank Transfer, Card, Other)
+  • Date range: From / To (theo purchase_date)
+  • Nút "Apply" (chính) và "Clear" (phụ)
+- Bảng danh sách giao dịch:
+  • Tiêu đề: "Purchases" + subtext "Showing [X] of [Y] entries"
+  • Cột (sortable): Supplier, Amount, Purchase Date, Payment Method, Status, Invoice No., Created By, Notes, Actions
+  • Cột Actions (phải): View (mở modal chi tiết), Update (mở modal cập nhật), Delete (mở modal xác nhận)
+- Modal chi tiết giao dịch:
+  • Purchase ID (badge), Supplier, Contact, Amount, Purchase Date, Payment Method, Payment Status, Payment Ref, Invoice No., Description/Notes, Created At, Created By
+  • Actions: Close
+- Modal tạo mới giao dịch:
+  • Trường nhập: Supplier, Contact (optional), Amount, Purchase Date, Payment Method, Payment Status, Invoice No. (optional), Payment Ref (optional), Notes
+  • Actions: Cancel, Create
+- Modal cập nhật giao dịch:
+  • Trường nhập có sẵn dữ liệu: Supplier, Contact, Amount, Purchase Date, Payment Method, Payment Status, Invoice No., Payment Ref, Notes
+  • Actions: Cancel, Update
+- Modal xác nhận xóa:
+  • Nội dung: "Delete purchase from <supplier>?"
+  • Actions: Cancel, Delete
+- Phân trang:
+  • Rows per page: 10, 25, 50
+  • Page indicator: "Page [X] of [Y]"
+  • Nút: First, Prev, Next, Last
+
+2. Luồng tương tác (Interactive flow)
+- Tải trang:
+  • Lấy danh sách giao dịch từ supplier_paper_purchase, sắp xếp mặc định theo purchase_date DESC, page size = 10.
+  • Tính thống kê tổng quan và hiển thị 3 cards.
+- Tìm kiếm:
+  • Nhập từ khóa; sau 500ms không gõ thì lọc theo supplier_name, invoice_number hoặc notes (case-insensitive).
+  • Bảng + thống kê cập nhật theo kết quả lọc.
+- Lọc:
+  • Chọn Trạng thái +/hoặc Phương thức +/hoặc Date From/To, nhấn "Apply" → truy vấn lại với điều kiện AND.
+  • Nhấn "Clear" để reset tất cả bộ lọc và tìm kiếm.
+- Sắp xếp:
+  • Click header cột để đổi thứ tự (Amount, Purchase Date, Supplier). Chu kỳ: DESC → ASC → none (trở về mặc định).
+- Phân trang:
+  • Chọn rows per page (10/25/50) → tải lại trang 1.
+  • Dùng Prev/Next/First/Last để di chuyển; giữ bộ lọc và sắp xếp hiện tại.
+- Xem chi tiết:
+  • Click nút "View" (cột Actions) → mở modal chi tiết giao dịch.
+- Tạo mới:
+  • Nhấn "New Purchase" → mở modal tạo; nhập Supplier, Amount, Purchase Date, Payment Method, Payment Status; các field khác optional → Create → thêm bản ghi mới (giả lập).
+- Cập nhật:
+  • Nhấn "Update" ở hàng giao dịch → mở modal cập nhật với dữ liệu sẵn; chỉnh sửa → Update → lưu thay đổi (giả lập).
+- Xóa:
+  • Nhấn "Delete" → mở modal xác nhận; Confirm → xóa bản ghi (giả lập).
+- Xuất file:
+  • "Export Excel": Xuất các giao dịch đang hiển thị (sau lọc) tối đa 1000 bản ghi.
+  • "Export PDF": Xuất các giao dịch đang hiển thị (sau lọc) tối đa 200 bản ghi; gồm summary + bảng.
+
+3. Use Cases
+Use Case Index | Tên | MoSCoW
+NV-9-1 | Xem danh sách & chi tiết giao dịch | Must Have
+NV-9-2 | Tạo mới giao dịch | Must Have
+NV-9-3 | Cập nhật giao dịch | Should Have
+NV-9-4 | Xóa giao dịch | Should Have
+NV-9-5 | Xuất Excel/PDF giao dịch | Should Have
+
+NV-9-1: Xem danh sách & chi tiết giao dịch
+- Mô tả: Nhân viên xem, tìm kiếm, lọc, sắp xếp, phân trang danh sách giao dịch mua giấy; xem chi tiết một giao dịch.
+- Actor: Nhân viên
+- Trigger: Nhấn menu "Paper Purchase Management"
+- Quy định nghiệp vụ:
+  • Chỉ nhân viên được xem toàn bộ giao dịch.
+  • Mặc định sắp xếp theo purchase_date DESC.
+  • Tìm kiếm không phân biệt hoa/thường, trên supplier_name / invoice_number / notes.
+  • Bộ lọc kết hợp (status + method + date range + search) với logic AND.
+- Main Flow:
+  1) Mở trang: tải giao dịch, thống kê, hiển thị bảng (page 1, 10 rows).
+  2) Tìm kiếm: nhập từ khóa → bảng & thống kê cập nhật.
+  3) Lọc: chọn status/method/date range → Apply → bảng & thống kê cập nhật.
+  4) Sắp xếp: click header (Amount/Date/Supplier) để đổi thứ tự.
+  5) Phân trang: đổi page size hoặc điều hướng trang.
+  6) Xem chi tiết: click "View" → mở modal chi tiết giao dịch → đóng modal.
+- Alternative/Exception:
+  • Không có dữ liệu sau lọc: hiển thị empty state "No purchases found" + nút "Clear".
+  • Date range không hợp lệ (From > To): thông báo lỗi và vô hiệu Apply.
+
+NV-9-2: Tạo mới giao dịch
+- Mô tả: Nhân viên ghi nhận một giao dịch mua giấy mới.
+- Actor: Nhân viên
+- Trigger: Nhấn "New Purchase"
+- Quy định nghiệp vụ:
+  • Bắt buộc: Supplier, Amount, Purchase Date, Payment Method, Payment Status.
+  • Amount ≥ 0.
+- Main Flow:
+  1) Nhấn "New Purchase" → mở modal tạo.
+  2) Nhập Supplier, Contact (optional), Amount, Purchase Date, Payment Method, Payment Status, Invoice No. (optional), Payment Ref (optional), Notes.
+  3) Nhấn "Create" → giao dịch mới được thêm (giả lập) và bảng cập nhật.
+- Alternative/Exception:
+  • Thiếu trường bắt buộc hoặc Amount < 0: hiển thị lỗi, không cho submit.
+
+NV-9-3: Cập nhật giao dịch
+- Mô tả: Nhân viên chỉnh sửa một giao dịch hiện có.
+- Actor: Nhân viên
+- Trigger: Nhấn "Update" trên hàng giao dịch
+- Quy định nghiệp vụ:
+  • Bắt buộc: Supplier, Amount, Purchase Date, Payment Method, Payment Status.
+  • Amount ≥ 0.
+- Main Flow:
+  1) Nhấn "Update" → mở modal cập nhật với dữ liệu sẵn.
+  2) Chỉnh sửa trường cần thiết.
+  3) Nhấn "Update" → lưu thay đổi (giả lập) và bảng cập nhật.
+- Alternative/Exception:
+  • Thiếu trường hoặc Amount < 0: hiển thị lỗi, không cho submit.
+
+NV-9-4: Xóa giao dịch
+- Mô tả: Nhân viên xóa một giao dịch mua giấy.
+- Actor: Nhân viên
+- Trigger: Nhấn "Delete" trên hàng giao dịch
+- Main Flow:
+  1) Nhấn "Delete" → mở modal xác nhận.
+  2) Nhấn "Delete" trong modal → giao dịch bị xóa (giả lập), bảng cập nhật.
+- Alternative/Exception:
+  • Nhấn "Cancel": hủy thao tác, đóng modal.
+
+NV-9-5: Xuất Excel/PDF giao dịch
+- Mô tả: Nhân viên xuất danh sách giao dịch đang hiển thị (sau lọc) ra Excel/PDF.
+- Actor: Nhân viên
+- Trigger: Nhấn "Export Excel" hoặc "Export PDF"
+- Quy định nghiệp vụ:
+  • Excel tối đa 1000 bản ghi; PDF tối đa 200 bản ghi.
+  • File chỉ bao gồm dữ liệu sau khi áp dụng tìm kiếm/lọc/sắp xếp hiện tại.
+- Main Flow (Excel):
+  1) Nhấn "Export Excel".
+  2) Nếu số bản ghi ≤ 1000: tạo file Excel (columns: Purchase ID, Supplier, Contact, Amount, Purchase Date, Payment Method, Payment Status, Payment Ref, Invoice, Notes, Created By, Created At) và tải xuống.
+  3) Nếu >1000: hiển thị cảnh báo yêu cầu lọc bớt.
+- Main Flow (PDF):
+  1) Nhấn "Export PDF".
+  2) Nếu số bản ghi ≤ 200: tạo PDF với summary (tổng chi, số giao dịch, phân bổ theo trạng thái) + bảng giao dịch; tải xuống.
+  3) Nếu >200: cảnh báo yêu cầu lọc bớt.
+- Exception:
+  • Không có bản ghi để xuất: thông báo "No purchases to export".
+  • Lỗi tạo file: thông báo lỗi và gợi ý thử lại.
+
+
+NV-9: Quản lý chi tiền mua giấy
+
+1. Thành phần giao diện
+Phần đầu trang (Header)
+Tiêu đề trang: "Paper Purchase Management"
+Mô tả: "Track paper purchases, payment status, and export summaries"
+
+Phần thống kê (3 cards ngang)
+Hiển thị số liệu tổng quan:
+Card 1: Tổng chi
+Số liệu: Tổng số tiền từ tất cả giao dịch (sum của total_amount_paid)
+Hiển thị: Format nghìn với ký hiệu ₫
+Label phụ: "All paper purchases"
+Card 2: Số giao dịch
+Số liệu: Tổng số bản ghi supplier_paper_purchase
+Label phụ: "pending / completed / failed / refunded"
+Card 3: Phân bổ theo trạng thái
+Số liệu: Phần trăm phân bổ theo từng trạng thái thanh toán
+Hiển thị: "X% / Y% / Z% / W%" cho pending / completed / failed / refunded
+Label phụ: "payment status distribution"
+
+Phần lọc và tìm kiếm (Filter Section)
+
+Thanh tìm kiếm
+Ô input
+Placeholder: "Search by supplier, invoice number, or notes"
+Tìm kiếm theo: supplier_name, invoice_number, notes
+Không phân biệt chữ hoa chữ thường
+Debounce 500ms
+Bộ lọc dropdown (3 cột)
+Cột 1:
+Dropdown trạng thái thanh toán
+Label: "Payment status"
+Các lựa chọn:
+All statuses (mặc định)
+Pending
+Completed
+Failed
+Refunded
+Chỉ chọn được 1 option
+Cột 2:
+Dropdown phương thức thanh toán
+Label: "Payment method"
+Các lựa chọn:
+All methods
+Cash
+Bank transfer
+Card
+Other
+Cột 3:
+Bộ lọc khoảng thời gian
+Date From: Date picker với label "Date from"
+Date To: Date picker với label "Date to"
+Lọc theo purchase_date
+Nút hành động
+Nút "Apply": Button chính, áp dụng các bộ lọc đã chọn
+Nút "Clear": Button phụ, xóa tất cả bộ lọc và reset về mặc định
+
+Bảng danh sách giao dịch (Table)
+
+Tiêu đề bảng
+Text "Purchases"
+Hiển thị "Showing [X] of [Y] entries" (X = số bản ghi hiện tại, Y = tổng số sau khi lọc)
+Action bar (cùng dòng với tiêu đề bảng)
+Nút "New Purchase": Button chính, mở modal tạo mới
+Nút "Export PDF": Button phụ
+Nút "Export Excel": Button phụ
+
+Các cột trong bảng
+Supplier: Nhà cung cấp (bắt buộc)
+Có thể sắp xếp (icon ↕️)
+Amount: Tổng tiền thanh toán
+Có thể sắp xếp (icon ↕️)
+Format nghìn với ký hiệu ₫
+Purchase Date: Ngày mua
+Có thể sắp xếp (icon ↕️)
+Định dạng: YYYY-MM-DD
+Mặc định: Sắp xếp giảm dần (mới nhất ở trên)
+Payment Method: Phương thức (badge)
+Payment Status: Trạng thái (badge màu: pending=yellow, completed=green, failed=red, refunded=blue/gray)
+Invoice No.: Số hóa đơn (có thể trống, hiển thị "-" nếu null)
+Created By: Người ghi nhận
+Notes: Ghi chú (text có thể bị cắt nếu dài)
+Actions: Cột hành động
+Nút View: Xem chi tiết
+Nút Update: Chỉnh sửa
+Nút Delete: Xóa
+
+Tính năng của bảng
+Hiệu ứng hover trên mỗi hàng
+Chu kỳ sắp xếp cho các cột có thể sort: DESC → ASC → default
+Default sort: purchase_date DESC
+
+Phân trang (Pagination)
+Hiển thị ở cuối bảng:
+Dropdown số hàng mỗi trang: (10, 25, 50)
+Thông tin trang: "Page [X] of [Y]"
+Nút điều hướng:
+First (⏮️)
+Previous (◀️)
+Next (▶️)
+Last (⏭️)
+Label "Rows per page" (nowrap)
+
+Modal chi tiết (View/Detail Modal)
+
+Header:
+Tiêu đề: "Purchase Details"
+Nút đóng (X)
+Body - Hiển thị thông tin:
+Purchase ID (badge)
+Supplier
+Supplier Contact (nếu có)
+Amount (format nghìn + ₫)
+Purchase Date
+Payment Method
+Payment Status (badge)
+Payment Reference (nếu có)
+Invoice Number (nếu có)
+Created By (Recorded By)
+Description/Notes
+Created At (nếu có)
+Footer:
+Nút "Close"
+
+Modal tạo mới (Create Modal)
+
+Header:
+Tiêu đề: "New Purchase"
+Nút đóng (X)
+Body - Form fields:
+Supplier: Text input (required)
+Supplier Contact: Text input (optional)
+Amount: Number input (required, ≥ 0)
+Purchase Date: Date picker (required)
+Payment Method: Dropdown select (required)
+Cash
+Bank transfer
+Card
+Other
+Payment Status: Dropdown select (required)
+Pending
+Completed
+Failed
+Refunded
+Payment Reference: Text input (optional)
+Invoice No.: Text input (optional)
+Notes: Textarea (optional)
+Footer:
+Nút "Cancel"
+Nút "Create": Button chính
+Validation:
+Supplier: bắt buộc, trim không rỗng
+Amount: bắt buộc, phải ≥ 0
+Purchase Date: bắt buộc, định dạng ngày hợp lệ
+Payment Method: bắt buộc
+Payment Status: bắt buộc
+Lỗi: highlight field + hiển thị message, không đóng modal
+
+Modal cập nhật (Update Modal)
+
+Header:
+Tiêu đề: "Update Purchase"
+Nút đóng (X)
+Body:
+Các field giống Create Modal
+Dữ liệu được prefill từ bản ghi đã chọn
+Footer:
+Nút "Cancel"
+Nút "Update": Button chính
+Validation: Giống Create Modal
+
+Modal xóa (Delete Confirm Modal)
+
+Header:
+Tiêu đề: "Delete Purchase"
+Nút đóng (X)
+Body:
+Text chính: "Delete purchase from '[supplier_name]'?"
+Text phụ: "This action cannot be undone."
+Footer:
+Nút "Cancel"
+Nút "Delete": Button nguy hiểm
+
+Trạng thái không có dữ liệu (Empty State)
+Hiển thị khi không tìm thấy giao dịch (sau khi lọc):
+Text: "No purchases found"
+Nút "Clear" để reset filter/search
+
+Trạng thái đang tải (Loading State)
+Hiển thị khi đang tải dữ liệu:
+Skeleton loader cho các hàng trong bảng
+Text: "Loading..."
+
+Thông báo (Toast/Alert)
+Hiển thị sau các hành động:
+Success: Sau Create/Update/Delete/Export thành công
+Warning: Khi vượt giới hạn export
+Info: Khi không có dữ liệu để export
+Error: Khi có lỗi không mong muốn
+
+2. Flow tương tác
+2.1 Tải trang lần đầu
+Người dùng (Nhân viên) truy cập trang "Paper Purchase Management"
+Hệ thống query database:
+Lấy tất cả purchases từ bảng supplier_paper_purchase
+Sắp xếp theo purchase_date giảm dần (mới nhất trước)
+Giới hạn 10 bản ghi (kích thước trang mặc định)
+Hệ thống tính toán thống kê:
+Tổng số tiền: SUM(total_amount_paid) từ tất cả supplier_paper_purchase
+Số giao dịch: COUNT(*) từ supplier_paper_purchase
+Phân bổ theo trạng thái: COUNT(*) GROUP BY payment_status, tính phần trăm
+Hiển thị 3 cards thống kê với số liệu
+Hiển thị bảng với 10 purchases đầu tiên
+Hiển thị pagination: "Page 1 of [tổng_số_trang]"
+Tất cả bộ lọc ở trạng thái mặc định (All statuses/methods, không có ngày, search rỗng)
+
+2.2 Tìm kiếm purchases
+Người dùng nhập text vào ô tìm kiếm
+Hệ thống tự động tìm kiếm (sau 500ms không nhập):
+Tìm trong supplier_name
+Tìm trong invoice_number
+Tìm trong notes
+Không phân biệt chữ hoa chữ thường
+Reset về trang 1
+Bảng cập nhật với kết quả tìm kiếm
+Text "Showing [X] of [Y] entries" cập nhật
+Các cards thống kê cập nhật theo kết quả lọc
+Nếu không tìm thấy:
+Hiển thị empty state
+Text: "No purchases found"
+Nút "Clear"
+
+2.3 Lọc purchases
+2.3.1 Lọc theo trạng thái thanh toán
+Người dùng click vào dropdown "Payment status"
+Hiển thị danh sách các lựa chọn
+Người dùng chọn một trạng thái (ví dụ: "Completed")
+Dropdown hiển thị "Completed" (thay vì "All statuses")
+Người dùng click nút "Apply"
+Hệ thống query lại với điều kiện payment_status = 'completed'
+Bảng cập nhật với kết quả lọc
+Cards thống kê cập nhật
+Text "Showing [X] of [Y] entries" cập nhật
+Reset về trang 1
+
+2.3.2 Lọc theo phương thức thanh toán
+Người dùng chọn "Payment method" (Cash/Bank transfer/Card/Other)
+Nhấn "Apply"
+Hệ thống query với điều kiện payment_method = lựa_chọn
+Bảng + stats cập nhật, reset về trang 1
+
+2.3.3 Lọc theo khoảng thời gian
+Người dùng chọn Date from / Date to
+Hệ thống validate: Date From ≤ Date To
+Nếu sai: hiển thị lỗi, disable nút Apply
+Nhấn "Apply": query với purchase_date BETWEEN date_from AND date_to
+Update bảng, stats, reset page 1
+
+2.3.4 Kết hợp nhiều bộ lọc
+Người dùng có thể chọn nhiều bộ lọc cùng lúc: Status + Method + Date Range + Search
+Nhấn "Apply": query với điều kiện AND
+Bảng cập nhật
+Nếu không có kết quả: hiển thị empty state
+
+2.3.5 Xóa bộ lọc
+Nhấn "Clear"
+Reset dropdowns về mặc định (All statuses/methods)
+Date pickers trống
+Ô tìm kiếm trống
+Query lại dữ liệu ban đầu (không bộ lọc)
+Bảng hiển thị tất cả purchases (trang 1)
+Cards thống kê hiển thị số liệu đầy đủ
+
+2.4 Sắp xếp purchases
+Click header cột có thể sort (Amount / Purchase Date / Supplier)
+Icon thay đổi theo chu kỳ:
+Lần 1: DESC (giảm dần)
+Lần 2: ASC (tăng dần)
+Lần 3: default (purchase_date DESC)
+Bảng sắp xếp lại theo thứ tự đã chọn
+Giữ nguyên các bộ lọc đang áp dụng
+Reset về trang 1
+
+2.5 Thay đổi số hàng mỗi trang
+Người dùng click vào dropdown "Rows per page"
+Các lựa chọn: 10, 25, 50
+Chọn một số → query lại với LIMIT tương ứng
+Bảng hiển thị đúng số hàng
+Pagination cập nhật số trang
+Reset về trang 1
+
+2.6 Điều hướng giữa các trang
+Người dùng click nút điều hướng (Next/Previous/First/Last)
+Hệ thống tăng/giảm số trang hiện tại
+Query dữ liệu với OFFSET tương ứng
+Bảng hiển thị dữ liệu trang mới
+Thông tin trang cập nhật: "Page [X] of [Y]"
+Giữ nguyên bộ lọc, sort, search hiện tại
+
+2.7 Xem chi tiết purchase
+Người dùng click nút "View" trên hàng purchase
+Hệ thống query chi tiết purchase với purchase_id
+Mở modal "Purchase Details"
+Hiển thị đầy đủ thông tin:
+Supplier
+Contact
+Amount (format)
+Purchase Date
+Payment Method
+Payment Status (badge)
+Payment Reference
+Invoice Number
+Created By / Recorded By
+Notes
+Created At (nếu có)
+Người dùng xem chi tiết
+Click nút "Close" hoặc X để đóng modal
+Quay lại trang danh sách, giữ nguyên vị trí
+
+2.8 Tạo mới purchase
+Người dùng click nút "New Purchase"
+Mở modal "New Purchase"
+Hiển thị form với các field trống
+Người dùng nhập thông tin:
+Supplier (required)
+Contact (optional)
+Amount (required, number ≥ 0)
+Purchase Date (required, date picker)
+Payment Method (required)
+Payment Status (required)
+Payment Reference (optional)
+Invoice Number (optional)
+Notes (optional)
+Người dùng click nút "Create"
+Hệ thống validate:
+Supplier: không rỗng sau trim
+Amount: phải ≥ 0
+Purchase Date: ngày hợp lệ
+Payment Method: hợp lệ
+Payment Status: hợp lệ
+Nếu có lỗi:
+Highlight field lỗi
+Hiển thị message lỗi
+Giữ modal mở
+Người dùng sửa lại → quay lại bước 5
+Nếu hợp lệ:
+Gọi API tạo purchase (mock)
+Đóng modal
+Hiển thị toast success: "Purchase created successfully"
+Refresh bảng và stats
+Có thể reset về trang 1 để thấy bản ghi mới
+Người dùng có thể click "Cancel" bất kỳ lúc nào:
+Đóng modal
+Không lưu dữ liệu
+Quay lại trang danh sách
+
+2.9 Cập nhật purchase
+Người dùng click nút "Update" trên hàng purchase
+Hệ thống query chi tiết purchase với purchase_id
+Mở modal "Update Purchase" với form prefill dữ liệu hiện tại
+Người dùng chỉnh sửa các field cần thiết
+Người dùng click nút "Update"
+Hệ thống validate (giống Create):
+Supplier: không rỗng
+Amount: ≥ 0
+Purchase Date: hợp lệ
+Payment Method/Status: hợp lệ
+Nếu có lỗi:
+Highlight field lỗi
+Hiển thị message lỗi
+Giữ modal mở
+Người dùng sửa lại → quay lại bước 6
+Nếu hợp lệ:
+Gọi API update purchase (mock)
+Đóng modal
+Hiển thị toast success: "Purchase updated successfully"
+Refresh bảng và stats
+Giữ vị trí hiện tại (hoặc chấp nhận reload trang 1)
+Người dùng có thể click "Cancel" bất kỳ lúc nào:
+Đóng modal
+Không lưu thay đổi
+Quay lại danh sách
+
+2.10 Xóa purchase
+Người dùng click nút "Delete" trên hàng purchase
+Mở modal xác nhận "Delete Purchase"
+Hiển thị:
+Text: "Delete purchase from '[supplier_name]'?"
+Text phụ: "This action cannot be undone."
+Người dùng có 2 lựa chọn:
+ Option A: Xác nhận xóa
+Click nút "Delete"
+Gọi API xóa purchase (mock)
+Đóng modal
+Hiển thị toast success: "Purchase deleted successfully"
+Refresh bảng và stats
+Nếu trang hiện tại trở nên rỗng: lùi về trang trước
+Nếu đây là bản ghi cuối cùng ở trang 1: hiển thị empty state
+ Option B: Hủy
+Click nút "Cancel" hoặc X
+Đóng modal
+Không xóa purchase
+Quay lại danh sách
+
+2.11 Xuất Excel/PDF
+2.11.1 Kiểm tra trước khi xuất
+Người dùng click nút "Export PDF" hoặc "Export Excel"
+Hệ thống kiểm tra số lượng purchases hiện tại (sau khi áp dụng filter/search):
+Đếm tổng số purchases trong kết quả hiện tại
+Nếu số lượng = 0:
+Hiển thị toast info: "No purchases to export"
+Không mở dialog
+Dừng flow
+Nếu Export Excel và số lượng > 1000:
+Hiển thị toast warning: "Too many records ([X]). Maximum 1000 for Excel. Please filter."
+Không xuất
+Dừng flow
+Nếu Export PDF và số lượng > 200:
+Hiển thị toast warning: "Too many records ([X]). Maximum 200 for PDF. Please filter."
+Không xuất
+Dừng flow
+Nếu số lượng hợp lệ: tiếp tục flow xuất
+
+2.11.2 Xuất Excel
+Hệ thống hiển thị loading overlay:
+Spinner
+Text: "Generating Excel..."
+Hệ thống query dữ liệu:
+Lấy tất cả purchases theo filter/sort/search hiện tại
+Giới hạn tối đa 1000 records
+Tạo file Excel với cấu trúc:
+Sheet 1 "Summary": thống kê, bộ lọc, metadata
+Sheet 2 "Purchases": bảng dữ liệu với tất cả cột
+File được tạo và tự động tải xuống:
+Tên file: paper_purchase_[YYYY-MM-DD_HH-MM].xlsx
+Đóng loading overlay
+Hiển thị toast success: "Excel exported successfully - [X] purchases exported"
+(Nếu có backend) Ghi vào audit log:
+action_type: 'export_purchases_excel'
+user_id, timestamp, filter details
+
+2.11.3 Xuất PDF
+Hệ thống hiển thị loading overlay:
+Spinner
+Text: "Generating PDF..."
+Hệ thống query dữ liệu:
+Lấy tất cả purchases theo filter/sort/search hiện tại
+Giới hạn tối đa 200 records
+Tạo file PDF với cấu trúc:
+Header: logo, tiêu đề, ngày xuất, người xuất
+Trang tóm tắt: thống kê, bộ lọc
+Bảng dữ liệu
+Footer: số trang, timestamp
+File được tạo và tự động tải xuống:
+Tên file: paper_purchase_[YYYY-MM-DD_HH-MM].pdf
+Đóng loading overlay
+Hiển thị toast success: "PDF exported successfully - [X] purchases exported"
+(Nếu có backend) Ghi vào audit log:
+action_type: 'export_purchases_pdf'
+user_id, timestamp, filter details
+
+2.11.4 Lỗi khi xuất
+Nếu có lỗi trong quá trình tạo file:
+Đóng loading overlay
+Hiển thị toast error: "Failed to generate [format]. Please try again."
+Không tạo file
+(Nếu có backend) Ghi lỗi vào audit log
+Nếu timeout (quá 60 giây):
+Đóng loading overlay
+Hiển thị toast error: "Export timeout. Please try again or reduce dataset."
+Không tạo file
+
+3. Use Cases
+3.1 Danh sách Use Cases
+Use Case ID
+Tên Use Case
+Mô tả ngắn gọn
+NV-9-1
+Xem danh sách và chi tiết giao dịch
+Nhân viên xem danh sách các giao dịch mua giấy, có thể tìm kiếm, lọc, sắp xếp và xem chi tiết từng giao dịch
+NV-9-2
+Xuất báo cáo giao dịch
+Nhân viên xuất danh sách giao dịch ra file Excel hoặc PDF theo bộ lọc đã chọn
+NV-9-3
+Tạo mới giao dịch mua giấy
+Nhân viên ghi nhận giao dịch mua giấy mới vào hệ thống
+NV-9-4
+Cập nhật thông tin giao dịch
+Nhân viên chỉnh sửa thông tin của giao dịch đã có
+NV-9-5
+Xóa giao dịch mua giấy
+Nhân viên xóa giao dịch khỏi hệ thống
+
+3.2 Chi tiết Use Cases
+NV-9-1: Xem danh sách và chi tiết giao dịch
+
+Thuộc tính
+Nội dung
+Use Case ID
+NV-9-1
+Tên
+Xem danh sách và chi tiết giao dịch
+Mô tả
+Nhân viên xem danh sách các giao dịch mua giấy với khả năng tìm kiếm, lọc theo trạng thái/phương thức và thời gian, sắp xếp, phân trang, và xem chi tiết từng giao dịch
+Actor
+Staff
+Trigger
+Staff truy cập trang Paper Purchase Management
+Quy định nghiệp vụ
+- Chỉ staff có quyền truy cập
+- Mặc định hiển thị 10 records/page, sort theo ngày mua mới nhất
+- Search không phân biệt hoa thường, debounce 500ms
+- Statistics tính theo dữ liệu đã filter
+- Có thể sort theo Supplier, Amount, Purchase Date
+Main Flow
+1. Staff truy cập trang
+2. Hệ thống hiển thị 3 stat cards (total spend, purchase count, distribution by status)
+3. Hệ thống hiển thị bảng với 10 giao dịch đầu tiên, sort theo purchase date giảm dần
+4. Staff có thể search theo supplier/invoice/notes, filter theo status/method/date range, sort các cột, chuyển trang
+5. Bảng và stats cập nhật theo filter/search
+6. Staff click View trên một giao dịch
+7. Hệ thống mở modal hiển thị chi tiết giao dịch
+Alternative Flow
+Alt 1: Không tìm thấy kết quả
+- Tại bước 4, nếu search/filter không có kết quả
+- Hiển thị empty state với text "No purchases found" và nút Clear
+Alt 2: Clear filters
+- Tại bước 4, Staff click nút Clear
+- Reset tất cả filter/search về mặc định
+- Reload bảng với dữ liệu ban đầu
+Exception Flow
+Exc 1: Lỗi load dữ liệu
+- Hiển thị toast error "Failed to load purchases"
+- Hiển thị empty state với nút Retry
+Tiền điều kiện
+- User đã login với user_type = 'staff'
+Hậu điều kiện
+- Danh sách giao dịch được hiển thị theo filter đã chọn
+- Statistics được cập nhật
+- Modal chi tiết đóng sau khi xem xong
+Input
+- Search text (optional)
+- Payment status filter (optional)
+- Payment method filter (optional)
+- Date range filter (optional)
+- Sort column & direction
+- Page number
+- Rows per page
+Output
+- Table hiển thị danh sách giao dịch
+- 3 stat cards
+- Pagination info
+- Modal chi tiết giao dịch (khi click View)
+
+NV-9-2: Xuất báo cáo giao dịch
+
+Thuộc tính
+Nội dung
+Use Case ID
+NV-9-2
+Tên
+Xuất báo cáo giao dịch
+Mô tả
+Nhân viên xuất danh sách giao dịch ra file Excel hoặc PDF theo filter/search hiện tại
+Actor
+Staff
+Trigger
+Staff click nút Export Excel hoặc Export PDF
+Quy định nghiệp vụ
+- Export theo filter/search/sort hiện tại
+- Excel: tối đa 1000 records
+- PDF: tối đa 200 records
+- File name format: paper_purchase_[YYYY-MM-DD_HH-MM].[xlsx/pdf]
+- Timeout sau 60 giây
+Main Flow
+1. Staff đang xem danh sách giao dịch (có thể đã filter/search)
+2. Staff click nút "Export Excel"
+3. Hệ thống kiểm tra số lượng records hiện tại
+4. Hiển thị loading overlay "Generating Excel..."
+5. Hệ thống tạo file Excel với 2 sheets: Summary (stats + filters) và Purchases (data table)
+6. File tự động download về máy
+7. Hiển thị toast success "[X] purchases exported successfully"
+8. Đóng loading overlay
+Alternative Flow
+Alt 1: Export PDF
+- Tại bước 2, Staff click "Export PDF"
+- Tại bước 4, loading text là "Generating PDF..."
+- Tại bước 5, tạo file PDF với header, summary, table, footer
+- Các bước còn lại giống Main Flow
+Alt 2: Không có dữ liệu
+- Tại bước 3, nếu số records = 0
+- Hiển thị toast info "No purchases to export"
+- Không mở loading, dừng flow
+Exception Flow
+Exc 1: Vượt giới hạn records
+- Tại bước 3, nếu Excel > 1000 hoặc PDF > 200
+- Hiển thị toast warning "Too many records ([X]). Maximum [limit]. Please filter."
+- Dừng flow
+Exc 2: Lỗi tạo file
+- Tại bước 5, nếu có lỗi
+- Đóng loading
+- Hiển thị toast error "Failed to generate file. Please try again."
+Exc 3: Timeout
+- Sau 60 giây vẫn chưa xong
+- Đóng loading
+- Hiển thị toast error "Export timeout. Please try again or reduce dataset."
+Tiền điều kiện
+- User đã login với user_type = 'staff'
+- Có ít nhất 1 record để export
+Hậu điều kiện
+- File Excel/PDF được download về máy
+- Audit log ghi nhận action (nếu có backend)
+Input
+- Danh sách giao dịch hiện tại (đã filter/search/sort)
+- Export format (Excel/PDF)
+Output
+- File Excel (.xlsx) hoặc PDF (.pdf)
+- Toast notification
+
+NV-9-3: Tạo mới giao dịch mua giấy
+
+Thuộc tính
+Nội dung
+Use Case ID
+NV-9-3
+Tên
+Tạo mới giao dịch mua giấy
+Mô tả
+Nhân viên ghi nhận giao dịch mua giấy mới vào hệ thống
+Actor
+Staff
+Trigger
+Staff click nút "New Purchase"
+Quy định nghiệp vụ
+- Supplier: bắt buộc, không rỗng sau trim
+- Amount: bắt buộc, phải ≥ 0
+- Purchase Date: bắt buộc, định dạng hợp lệ
+- Payment Method: bắt buộc, chọn 1 trong 4 (cash, bank transfer, card, other)
+- Payment Status: bắt buộc, chọn 1 trong 4 (pending, completed, failed, refunded)
+- Invoice/Payment Ref/Notes: optional
+- created_by tự động lấy từ user đang login
+Main Flow
+1. Staff click nút "New Purchase"
+2. Hệ thống mở modal "New Purchase" với form trống
+3. Staff nhập: Supplier, Contact, Amount, Purchase Date, Payment Method, Payment Status, Payment Ref (optional), Invoice No. (optional), Notes (optional)
+4. Staff click "Create"
+5. Hệ thống validate tất cả fields
+6. Hệ thống lưu record mới vào supplier_paper_purchase
+7. Đóng modal
+8. Refresh bảng và stats
+9. Hiển thị toast success "Purchase created successfully"
+Alternative Flow
+Alt 1: Cancel
+- Tại bước 3 hoặc sau khi có lỗi validation, Staff click "Cancel" hoặc X
+- Đóng modal mà không lưu
+- Quay lại danh sách
+Exception Flow
+Exc 1: Validation failed
+- Tại bước 5, nếu có field không hợp lệ
+- Highlight field lỗi màu đỏ
+- Hiển thị error message bên dưới field
+- Giữ modal mở
+- Staff sửa lại và quay bước 4
+Exc 2: Lỗi lưu dữ liệu
+- Tại bước 6, nếu có lỗi server/network
+- Hiển thị toast error "Failed to create purchase. Please try again."
+- Giữ modal mở với data đã nhập
+Tiền điều kiện
+- User đã login với user_type = 'staff'
+Hậu điều kiện
+- Record mới được thêm vào supplier_paper_purchase
+- Bảng và stats được refresh
+- Modal được đóng
+Input
+- Supplier (text)
+- Contact (text, optional)
+- Amount (number)
+- Purchase Date (date)
+- Payment Method (dropdown selection)
+- Payment Status (dropdown selection)
+- Payment Ref (text, optional)
+- Invoice No. (text, optional)
+- Notes (textarea, optional)
+Output
+- Record mới trong supplier_paper_purchase
+- Toast notification
+- Bảng và stats được cập nhật
+
+NV-9-4: Cập nhật thông tin giao dịch
+
+Thuộc tính
+Nội dung
+Use Case ID
+NV-9-4
+Tên
+Cập nhật thông tin giao dịch
+Mô tả
+Nhân viên chỉnh sửa thông tin của giao dịch đã có
+Actor
+Staff
+Trigger
+Staff click nút "Update" trên một hàng giao dịch
+Quy định nghiệp vụ
+- Validation giống NV-9-3
+- Không được update purchase_id, created_by, created_at
+- Chỉ update các field: supplier_name, supplier_contact, total_amount_paid, purchase_date, payment_method, payment_status, invoice_number, payment_reference, notes, payment_reference
+Main Flow
+1. Staff click nút "Update" trên một giao dịch
+2. Hệ thống load chi tiết giao dịch
+3. Mở modal "Update Purchase" với form prefill dữ liệu hiện tại
+4. Staff chỉnh sửa các field cần thiết
+5. Staff click "Update"
+6. Hệ thống validate tất cả fields
+7. Hệ thống cập nhật record trong supplier_paper_purchase
+8. Đóng modal
+9. Refresh bảng và stats
+10. Hiển thị toast success "Purchase updated successfully"
+Alternative Flow
+Alt 1: Cancel
+- Tại bước 4 hoặc sau khi có lỗi validation, Staff click "Cancel" hoặc X
+- Đóng modal mà không lưu thay đổi
+- Quay lại danh sách
+Exception Flow
+Exc 1: Validation failed
+- Tại bước 6, nếu có field không hợp lệ
+- Highlight field lỗi màu đỏ
+- Hiển thị error message
+- Giữ modal mở
+- Staff sửa lại và quay bước 5
+Exc 2: Lỗi load dữ liệu
+- Tại bước 2, nếu không load được
+- Hiển thị toast error "Failed to load purchase details"
+- Không mở modal
+Exc 3: Lỗi update
+- Tại bước 7, nếu có lỗi server/network
+- Hiển thị toast error "Failed to update purchase. Please try again."
+- Giữ modal mở
+Tiền điều kiện
+- User đã login với user_type = 'staff'
+- Purchase cần update tồn tại trong supplier_paper_purchase
+Hậu điều kiện
+- Record được cập nhật trong supplier_paper_purchase
+- Bảng và stats được refresh
+- Modal được đóng
+Input
+- purchase_id (từ hàng được chọn)
+- Các field cần update: Supplier, Contact, Amount, Purchase Date, Payment Method, Payment Status, Invoice No., Payment Ref, Notes
+Output
+- Record được update trong supplier_paper_purchase
+- Toast notification
+- Bảng và stats được cập nhật
+
+NV-9-5: Xóa giao dịch mua giấy
+
+Thuộc tính
+Nội dung
+Use Case ID
+NV-9-5
+Tên
+Xóa giao dịch mua giấy
+Mô tả
+Nhân viên xóa giao dịch khỏi hệ thống sau khi xác nhận
+Actor
+Staff
+Trigger
+Staff click nút "Delete" trên một hàng giao dịch
+Quy định nghiệp vụ
+- Phải có confirmation trước khi xóa
+- Action không thể undo
+- Nếu trang hiện tại trống sau khi xóa, lùi về trang trước
+Main Flow
+1. Staff click nút "Delete" trên một giao dịch
+2. Hệ thống mở modal xác nhận "Delete Purchase"
+3. Modal hiển thị tên nhà cung cấp và cảnh báo "This action cannot be undone"
+4. Staff click "Delete" để xác nhận
+5. Hệ thống xóa record khỏi supplier_paper_purchase
+6. Đóng modal
+7. Refresh bảng và stats
+8. Nếu trang hiện tại rỗng, lùi về trang trước
+9. Hiển thị toast success "Purchase deleted successfully"
+Alternative Flow
+Alt 1: Cancel
+- Tại bước 4, Staff click "Cancel" hoặc X
+- Đóng modal mà không xóa
+- Quay lại danh sách
+Exception Flow
+Exc 1: Lỗi xóa
+- Tại bước 5, nếu có lỗi server/network
+- Hiển thị toast error "Failed to delete purchase. Please try again."
+- Giữ modal mở
+Exc 2: Record không tồn tại
+- Tại bước 5, nếu purchase_id không còn trong database
+- Hiển thị toast error "Purchase not found or already deleted"
+- Đóng modal
+- Refresh bảng
+Tiền điều kiện
+- User đã login với user_type = 'staff'
+- Purchase cần xóa tồn tại trong supplier_paper_purchase
+Hậu điều kiện
+- Record bị xóa khỏi supplier_paper_purchase
+- Bảng và stats được refresh
+- Modal được đóng
+- Pagination điều chỉnh nếu cần
+Input
+- purchase_id (từ hàng được chọn)
+Output
+- Record bị xóa khỏi supplier_paper_purchase
+- Toast notification
+- Bảng và stats được cập nhật
+
+
