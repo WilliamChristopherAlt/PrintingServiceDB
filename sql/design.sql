@@ -809,3 +809,33 @@ SELECT
 FROM printer_log
 WHERE created_at >= DATEADD(DAY, -30, GETDATE()); -- Last 30 days
 GO
+
+CREATE TABLE refresh_token (
+    token_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    token NVARCHAR(500) NOT NULL UNIQUE,
+    user_id UNIQUEIDENTIFIER NOT NULL,
+    expiry_date DATETIME NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT GETDATE(),
+    revoked BIT NULL DEFAULT 0,
+    CONSTRAINT FK_refresh_token_user FOREIGN KEY (user_id) REFERENCES [user](user_id)
+);
+
+CREATE INDEX idx_token ON refresh_token(token);
+CREATE INDEX idx_user_id ON refresh_token(user_id);
+CREATE INDEX idx_expiry_date ON refresh_token(expiry_date);
+
+
+CREATE TABLE password_reset_token (
+    token_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    token NVARCHAR(500) NOT NULL UNIQUE,
+    user_id UNIQUEIDENTIFIER NOT NULL,
+    expiry_date DATETIME NOT NULL,
+    used BIT NOT NULL DEFAULT 0,
+    created_at DATETIME NOT NULL DEFAULT GETDATE(),
+    CONSTRAINT FK_password_reset_token_user FOREIGN KEY (user_id) REFERENCES [user](user_id)
+);
+
+-- Indexes
+CREATE INDEX idx_reset_token ON password_reset_token(token);
+CREATE INDEX idx_reset_user_id ON password_reset_token(user_id);
+CREATE INDEX idx_reset_expiry_date ON password_reset_token(expiry_date);

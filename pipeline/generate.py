@@ -7,7 +7,7 @@ Generates comprehensive, realistic test data for the HCMIU Smart Printing Servic
 
 import random
 import string
-import hashlib
+import bcrypt
 import uuid
 import yaml
 import os
@@ -88,9 +88,12 @@ def get_media_files(folder_path):
     return files
 
 def generate_password_hash(password="123456"):
-    """Generate a password hash."""
-    hash_val = hashlib.sha256(password.encode()).hexdigest()
-    return hash_val
+    """
+    Generate a bcrypt password hash compatible with Spring's BCryptPasswordEncoder
+    (default strength 10).
+    """
+    salt = bcrypt.gensalt(rounds=10)
+    return bcrypt.hashpw(password.encode(), salt).decode()
 
 def generate_uuid():
     """Generate a UUID string for SQL Server.""" 
@@ -351,8 +354,9 @@ class PrintingServiceDataGenerator:
         # Generate shared password hash for all users
         shared_password_hash = generate_password_hash("123456")
         
-        # Test account password hash
-        test_password_hash = generate_password_hash("SmartPrint@123!")
+        # Test account password hashes
+        student_test_password_hash = generate_password_hash("SmartPrint@123")
+        staff_test_password_hash = generate_password_hash("SmartPrint@123!")
         
         bulk = BulkInsertHelper("user", [
             "user_id", "email", "full_name", "password_hash",
@@ -362,34 +366,52 @@ class PrintingServiceDataGenerator:
         phone_prefixes = self.spec['phone_prefixes']
         
         # Add test accounts first
-        # Test student account
-        test_student_id = generate_uuid()
-        test_student_email = "student.test@edu.vn"
-        used_emails.add(test_student_email)
-        test_student_phone = generate_phone_number(phone_prefixes)
-        test_student_created_at = random_date_in_range(365, 30)
+        def name_from_email(email):
+            local = email.split("@")[0]
+            return local.replace('.', ' ').title()
         
-        test_student_data = {
-            'user_id': test_student_id,
-            'email': test_student_email,
-            'full_name': 'Test Student',
-            'user_type': 'student',
-            'phone_number': test_student_phone,
-            'created_at': test_student_created_at,
-            'is_active': 1
-        }
-        self.users.append(test_student_data)
-        self.user_by_id[test_student_id] = test_student_data
+        # Seeded student test accounts (all use SmartPrint@123)
+        test_student_emails = [
+            "student.test@edu.vn",
+            "phandienmanhthienk16@siu.edu.vn",
+            "leanhtuank16@siu.edu.vn",
+            "nguyenhongbaongock16@siu.edu.vn",
+            "phanthanhthaituank16@siu.edu.vn",
+            "lengocdangkhoak16@siu.edu.vn",
+            "lyhieuvyk17@siu.edu.vn",
+        ]
         
-        bulk.add_row([
-            test_student_id, test_student_email, 'Test Student', test_password_hash,
-            'student', test_student_phone, test_student_created_at.strftime('%Y-%m-%d %H:%M:%S'), 1
-        ])
+        for test_email in test_student_emails:
+            if test_email in used_emails:
+                continue
+            test_id = generate_uuid()
+            used_emails.add(test_email)
+            test_phone = generate_phone_number(phone_prefixes)
+            test_created_at = random_date_in_range(365, 30)
+            test_full_name = name_from_email(test_email)
+            
+            test_data = {
+                'user_id': test_id,
+                'email': test_email,
+                'full_name': test_full_name,
+                'user_type': 'student',
+                'phone_number': test_phone,
+                'created_at': test_created_at,
+                'is_active': 1
+            }
+            self.users.append(test_data)
+            self.user_by_id[test_id] = test_data
+            
+            bulk.add_row([
+                test_id, test_email, test_full_name, student_test_password_hash,
+                'student', test_phone, test_created_at.strftime('%Y-%m-%d %H:%M:%S'), 1
+            ])
         
-        # Test staff account
+        # Test staff account (password SmartPrint@123!)
         test_staff_id = generate_uuid()
         test_staff_email = "staff.test@edu.vn"
-        used_emails.add(test_staff_email)
+        if test_staff_email not in used_emails:
+            used_emails.add(test_staff_email)
         test_staff_phone = generate_phone_number(phone_prefixes)
         test_staff_created_at = random_date_in_range(365, 30)
         
@@ -406,7 +428,7 @@ class PrintingServiceDataGenerator:
         self.user_by_id[test_staff_id] = test_staff_data
         
         bulk.add_row([
-            test_staff_id, test_staff_email, 'Test Staff', test_password_hash,
+            test_staff_id, test_staff_email, 'Test Staff', staff_test_password_hash,
             'staff', test_staff_phone, test_staff_created_at.strftime('%Y-%m-%d %H:%M:%S'), 1
         ])
         
@@ -650,6 +672,17 @@ class PrintingServiceDataGenerator:
                   for ay in self.academic_years)
         ]
         
+        # Map specific test student emails to fixed student codes
+        test_student_codes = {
+            'student.test@edu.vn': 'TEST001',
+            'phandienmanhthienk16@siu.edu.vn': 'TEST002',
+            'leanhtuank16@siu.edu.vn': 'TEST003',
+            'nguyenhongbaongock16@siu.edu.vn': 'TEST004',
+            'phanthanhthaituank16@siu.edu.vn': 'TEST005',
+            'lengocdangkhoak16@siu.edu.vn': 'TEST006',
+            'lyhieuvyk17@siu.edu.vn': 'TEST007',
+        }
+        
         # Distribute students across classes
         for class_info in suitable_classes:
             # Assign students to this class
@@ -664,9 +697,9 @@ class PrintingServiceDataGenerator:
                 user = student_users[student_index]
                 student_id = generate_uuid()
                 
-                # Check if this is the test student account
-                if user['email'] == 'student.test@edu.vn':
-                    student_code = 'TEST001'
+                # Check if this is one of the seeded test student accounts
+                if user['email'] in test_student_codes:
+                    student_code = test_student_codes[user['email']]
                 else:
                     student_code = generate_student_code(
                         self.spec['student_code_prefix'],

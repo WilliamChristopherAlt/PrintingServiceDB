@@ -1,0 +1,862 @@
+Trang Log Máy In
+1. Thành phần giao diện
+Phần đầu trang (Header)
+Tiêu đề trang: "System Logs & Audit"
+Mô tả: "View and search system logs for troubleshooting and auditing"
+Thông báo cảnh báo (nếu có lỗi hoặc cảnh báo trong hệ thống):
+Icon: ⚠️
+Text: "[X] error(s) and [Y] warning(s) in the system. Please review."
+Màu nền: Vàng nhạt (warning) hoặc Đỏ nhạt (error)
+Có nút đóng (X) ở góc phải
+Phần thống kê (3 cards ngang)
+Hiển thị số liệu tổng quan:
+Card 1: Tổng số bản ghi
+Số lượng: Tổng số log entries
+Icon: 📊
+Màu: Xanh dương
+Card 2: Lỗi
+Số lượng: Số log có severity = 'error' hoặc 'critical'
+Icon: ❌
+Màu: Đỏ
+Card 3: Cảnh báo
+Số lượng: Số log có severity = 'warning'
+Icon: ⚠️
+Màu: Vàng
+Phần lọc và tìm kiếm (Filter Section)
+Thanh tìm kiếm
+Ô input với icon tìm kiếm (🔍)
+Placeholder: "Search by printer, description, error code..."
+Tìm kiếm theo: vị trí máy in, mô tả, mã lỗi
+Bộ lọc dropdown (2 cột)
+Cột 1:
+Dropdown loại log
+Label: "Type"
+Các lựa chọn:
+All Types (mặc định)
+Print Job
+Error
+Maintenance
+Status Change
+Configuration
+Admin Action
+Chỉ chọn được 1 option
+Cột 2:
+Dropdown mức độ
+Label: "Severity"
+Các lựa chọn:
+All Levels (mặc định)
+Info
+Warning
+Error
+Critical
+Chỉ chọn được 1 option
+Bộ lọc khoảng thời gian (2 cột)
+Date From: Date picker với placeholder "From date"
+Date To: Date picker với placeholder "To date"
+Icon lịch (📅) bên trong input
+Nút hành động
+Nút "Apply": Button chính, áp dụng các bộ lọc đã chọn
+Nút "Clear": Button phụ, xóa tất cả bộ lọc và reset về mặc định
+Bảng danh sách log (Table)
+Tiêu đề bảng
+Text "Log Entries"
+Hiển thị "Showing [X] of [Y] entries" (X = số bản ghi hiện tại, Y = tổng số sau khi lọc)
+Nút "Export": Button phụ, xuất danh sách hiện tại ra file PDF
+Các cột trong bảng
+Timestamp: Ngày giờ (định dạng: YYYY-MM-DD HH:MM)
+Có thể sắp xếp (icon ↕️)
+Mặc định: Sắp xếp giảm dần (mới nhất ở trên)
+Printer: Vị trí máy in
+Định dạng: "MÃ-TÒA-PHÒNG" (ví dụ: "LB-101", "SCI-202")
+Có thể hover để xem thông tin chi tiết máy in
+Type: Loại log
+Hiển thị dạng badge với màu tương ứng:
+Print Job: Xanh dương
+Error: Đỏ
+Maintenance: Xanh lá
+Status Change: Vàng
+Configuration: Tím
+Admin Action: Xám
+Severity: Mức độ nghiêm trọng
+Hiển thị dạng badge với màu và icon:
+Info: Xanh nhạt, icon ℹ️
+Warning: Vàng, icon ⚠️
+Error: Đỏ, icon ❌
+Critical: Đỏ đậm, icon 🔴
+Description: Mô tả ngắn gọn
+Text bị cắt nếu quá dài (tối đa 80 ký tự)
+Có "..." nếu bị cắt
+Actions: Cột hành động
+Icon "👁️ View" hoặc text "Details"
+Click để mở modal chi tiết
+Tính năng của bảng
+Hiệu ứng hover trên mỗi hàng (màu nền xám nhạt)
+Click vào hàng để xem chi tiết (không chỉ nút Actions)
+Responsive: Trên mobile hiển thị dạng card thay vì table
+Phân trang (Pagination)
+Hiển thị ở cuối bảng:
+Dropdown số hàng mỗi trang: (10, 25, 50, 100)
+Thông tin trang: "Page [X] of [Y]"
+Nút điều hướng:
+Trang đầu (⏮️)
+Trang trước (◀️)
+Số trang (1, 2, 3, ...)
+Trang sau (▶️)
+Trang cuối (⏭️)
+Trạng thái không có dữ liệu (Empty State)
+Hiển thị khi không tìm thấy log (sau khi lọc):
+Icon: 📋 với dấu X
+Text: "No logs found"
+Text phụ: "Try adjusting your filters or search criteria"
+Nút "Clear Filters"
+Trạng thái đang tải (Loading State)
+Hiển thị khi đang tải dữ liệu:
+Skeleton loader cho các hàng trong bảng
+Spinner ở giữa bảng
+Text: "Loading logs..."
+Modal chi tiết Log:
+Header:
+Tiêu đề: "Log Details"
+Badge hiển thị Log ID (màu xám, font mono)
+Nút đóng (X) góc phải
+Body - Chia thành 6 sections:
+Section 1: Basic Information
+Timestamp: Hiển thị đầy đủ ngày giờ (YYYY-MM-DD HH:MM:SS)
+Log Type: Badge màu tương ứng loại
+Severity: Badge màu (Info: xanh, Warning: vàng, Error: đỏ, Critical: đỏ đậm)
+Status: Badge trạng thái (New/In Progress/Resolved/Closed)
+Section 2: Printer Information
+Printer ID
+Location: [Building]-[Room]
+Printer Name: [Brand] [Model]
+Serial Number
+IP Address (nếu có)
+Section 3: Description & Details
+Description: Text đầy đủ, xuống dòng
+Error Code: Badge đỏ (nếu có)
+Additional Details: JSON formatted với syntax highlighting (nếu có)
+Section 4: Print Information (nếu log có liên  quan tới một công việc in)
+Print Job ID: Link có thể click
+User: Tên ([ID])
+Pages Printed
+File Name
+Section 5: Resolution Information (chỉ hiện nếu đã resolved)
+Resolved At: Timestamp
+Resolved By: Tên Nhân viên ([Position])
+Resolution Notes: Text
+Actions Taken: Danh sách bullet points
+Section 6: Datetime
+Created At: Timestamp
+Last Updated: Timestamp (nếu có)
+Footer:
+Nút "Close" (xám)
+Nút "Mark as Resolved" (xanh, chỉ hiện nếu chưa resolved)
+Nút "Add Note" (vàng)
+2. Flow tương tác
+2.1 Tải trang lần đầu
+Người dùng truy cập trang "System Logs & Audit"
+Hệ thống query database:
+Lấy tất cả logs từ bảng printer_log JOIN với printer_physical, room, building
+Sắp xếp theo created_at giảm dần (mới nhất trước)
+Giới hạn 10 bản ghi (kích thước trang mặc định)
+Hệ thống tính toán thống kê:
+Đếm tổng số logs
+Đếm số logs có severity = 'error' hoặc 'critical'
+Đếm số logs có severity = 'warning'
+Hiển thị 3 cards thống kê với số liệu
+Nếu có errors hoặc warnings:
+Hiển thị banner cảnh báo ở trên cùng
+Text: "[X] error(s) and [Y] warning(s) in the system. Please review."
+Hiển thị bảng với 10 logs đầu tiên
+Hiển thị pagination: "Page 1 of [tổng_số_trang]"
+Tất cả bộ lọc ở trạng thái mặc định (All Types, All Levels, không có ngày)
+2.2 Tìm kiếm logs
+Người dùng nhập text vào ô tìm kiếm
+Hệ thống tự động tìm kiếm (sau 500ms không nhập):
+Tìm trong cột vị trí máy in (MÃ-TÒA-PHÒNG)
+Tìm trong cột mô tả
+Tìm trong cột mã lỗi
+Không phân biệt chữ hoa chữ thường
+Bảng cập nhật với kết quả tìm kiếm
+Text "Showing [X] of [Y] entries" cập nhật
+Các cards thống kê cập nhật theo kết quả lọc
+Nếu không tìm thấy:
+Hiển thị empty state
+Text: "No logs found matching '[từ_khóa_tìm_kiếm]'"
+Nút "Clear Search"
+2.3 Lọc logs
+2.3.1 Lọc theo loại log
+Người dùng click vào dropdown "Type"
+Hiển thị danh sách các lựa chọn
+Người dùng chọn một loại (ví dụ: "Error")
+Dropdown hiển thị "Error" (thay vì "All Types")
+Người dùng click nút "Apply"
+Hệ thống query lại với điều kiện log_type = 'error'
+Bảng cập nhật với kết quả lọc
+Cards thống kê cập nhật
+Text "Showing [X] of [Y] entries" cập nhật
+2.3.2 Lọc theo mức độ
+Người dùng click vào dropdown "Severity"
+Hiển thị danh sách các lựa chọn
+Người dùng chọn một mức độ (ví dụ: "Warning")
+Dropdown hiển thị "Warning" (thay vì "All Levels")
+Người dùng click nút "Apply"
+Hệ thống query lại với điều kiện severity = 'warning'
+Bảng cập nhật với kết quả lọc
+Cards thống kê cập nhật
+2.3.3 Lọc theo khoảng thời gian
+Người dùng click vào ô "Date From"
+Hiển thị date picker
+Người dùng chọn ngày bắt đầu
+Người dùng click vào ô "Date To"
+Hiển thị date picker
+Người dùng chọn ngày kết thúc
+Người dùng click nút "Apply"
+Hệ thống query lại với điều kiện created_at BETWEEN date_from AND date_to
+Bảng cập nhật với kết quả lọc
+Cards thống kê cập nhật
+2.3.4 Kết hợp nhiều bộ lọc
+Người dùng có thể chọn nhiều bộ lọc cùng lúc (Type + Severity + Date Range + Search)
+Người dùng click nút "Apply"
+Hệ thống query với điều kiện AND cho tất cả bộ lọc đã chọn
+Bảng cập nhật
+Nếu không có kết quả: hiển thị empty state
+2.3.5 Xóa bộ lọc
+Người dùng click nút "Clear"
+Tất cả dropdowns reset về mặc định (All Types, All Levels)
+Date pickers bị xóa (trống)
+Ô tìm kiếm bị xóa
+Hệ thống query lại dữ liệu ban đầu (không có bộ lọc)
+Bảng hiển thị tất cả logs
+Cards thống kê hiển thị số liệu đầy đủ
+2.4 Sắp xếp logs
+Người dùng click vào header cột "Timestamp"
+Icon thay đổi:
+Lần 1: ↓ (giảm dần - mới nhất trước) - mặc định
+Lần 2: ↑ (tăng dần - cũ nhất trước)
+Lần 3: ↕️ (không sắp xếp)
+Bảng sắp xếp lại theo thứ tự đã chọn
+Giữ nguyên các bộ lọc đang áp dụng
+2.5 Thay đổi số hàng mỗi trang
+Người dùng click vào dropdown "Rows per page"
+Hiển thị các lựa chọn: 10, 25, 50, 100
+Người dùng chọn một số (ví dụ: 25)
+Hệ thống query lại với LIMIT = 25
+Bảng hiển thị 25 hàng
+Pagination cập nhật số trang
+Reset về trang 1
+2.6 Điều hướng giữa các trang
+Người dùng click nút "Next" (▶️)
+Hệ thống tăng số trang hiện tại lên 1
+Query dữ liệu với OFFSET tương ứng
+Bảng hiển thị dữ liệu trang tiếp theo
+Thông tin trang cập nhật: "Page [X+1] of [Y]"
+Tương tự cho các nút: Previous, First, Last, hoặc số trang cụ thể
+2.7 Đóng banner cảnh báo
+Người dùng click nút X trên banner cảnh báo
+Banner biến mất
+Không ảnh hưởng đến dữ liệu hoặc bộ lọc
+Cards thống kê vẫn hiển thị số lỗi và cảnh báo
+Use Cases - NV-5: Log Máy In
+Danh sách các Use Cases
+Use Case Index
+Tên Use Case
+MoSCoW
+NV-5-1
+Xem lịch sử log máy in
+Must Have
+NV-5-2
+Xuất báo cáo log
+Should Have
+
+
+NV-5-1: Xem lịch sử log máy in
+Mục
+Nội dung
+Use Case ID
+NV-5-1
+Tên
+Xem lịch sử log máy in
+Mô tả
+Nhân viên xem, tìm kiếm, lọc và sắp xếp lịch sử hoạt động của tất cả máy in trong hệ thống để giám sát, khắc phục sự cố và kiểm toán
+Actor
+Nhân viên
+Trigger
+Nhân viên nhấn vào menu "System Logs" hoặc "Logs & Audit" từ dashboard
+Quy định nghiệp vụ
+• Chỉ Nhân viên mới có quyền xem toàn bộ system logs
+• Logs được sắp xếp mặc định theo thời gian mới nhất trước
+• Mỗi trang hiển thị mặc định 10 logs, có thể điều chỉnh (10, 25, 50, 100)
+• Tìm kiếm không phân biệt chữ hoa chữ thường
+• Bộ lọc có thể kết hợp nhiều điều kiện (logic AND)
+• Các cards thống kê tự động cập nhật theo kết quả lọc
+• Logs được lấy từ bảng printer_log JOIN với các bảng liên quan
+• Hệ thống tự động làm mới thống kê khi có log mới (mỗi 30 giây)
+Main Flow
+Bước 1: Tải trang ban đầu
+1. Nhân viên truy cập trang "System Logs & Audit"
+2. Hệ thống truy vấn cơ sở dữ liệu:
+   • Lấy logs từ view printer_log_dashboard
+   • Kết nối (JOIN) với các bảng printer_physical, printer_model, brand, room, building
+   • Sắp xếp theo created_at giảm dần
+   • Giới hạn 10 bản ghi (kích thước trang mặc định)
+3. Hệ thống tính thống kê:
+   • Tổng số logs: Đếm tất cả từ bảng printer_log
+   • Số lỗi: Đếm các logs có severity là 'error' hoặc 'critical'
+   • Số cảnh báo: Đếm các logs có severity là 'warning'
+4. Hiển thị 3 cards thống kê với số liệu
+5. Nếu có lỗi hoặc cảnh báo trong 24 giờ gần nhất:
+   • Hiển thị banner cảnh báo màu đỏ/vàng
+   • Nội dung: "[X] error(s) and [Y] warning(s) in the system. Please review."
+6. Hiển thị bảng với 10 logs đầu tiên
+7. Hiển thị phân trang: "Page 1 of [tổng_số_trang]"
+8. Tất cả bộ lọc ở trạng thái mặc định
+
+Bước 2: Tìm kiếm logs
+9. Nhân viên nhập từ khóa vào ô tìm kiếm
+10. Hệ thống tự động tìm kiếm sau 500ms (không cần nhấn Enter):
+   • Truy vấn với điều kiện tìm trong:
+   • Vị trí máy in (printer_location) chứa từ khóa HOẶC
+   • Mô tả (description) chứa từ khóa HOẶC
+   • Mã lỗi (error_code) chứa từ khóa
+   • Không phân biệt chữ hoa chữ thường
+11. Bảng cập nhật hiển thị kết quả tìm kiếm
+12. Dòng chữ "Showing [X] of [Y] entries" được cập nhật
+13. Các cards thống kê cập nhật theo kết quả
+14. Nếu không tìm thấy: hiển thị trạng thái rỗng (empty state)
+
+Bước 3: Lọc theo loại log
+15. Nhân viên nhấn vào dropdown "Type"
+16. Chọn một loại (Print Job/Error/Maintenance/Status Change/Configuration/Admin Action)
+17. Nhân viên nhấn nút "Apply"
+18. Hệ thống truy vấn với điều kiện log_type bằng loại đã chọn
+19. Bảng và thống kê được cập nhật
+
+Bước 4: Lọc theo mức độ nghiêm trọng
+20. Nhân viên nhấn vào dropdown "Severity"
+21. Chọn mức độ (Info/Warning/Error/Critical)
+22. Nhân viên nhấn nút "Apply"
+23. Hệ thống truy vấn với điều kiện severity bằng mức độ đã chọn
+24. Bảng và thống kê được cập nhật
+
+Bước 5: Lọc theo khoảng thời gian
+25. Nhân viên nhấn vào date picker "Date From"
+26. Chọn ngày bắt đầu
+27. Nhân viên nhấn vào date picker "Date To"
+28. Chọn ngày kết thúc
+29. Nhân viên nhấn nút "Apply"
+30. Hệ thống truy vấn với điều kiện created_at nằm trong khoảng từ date_from đến date_to
+31. Bảng và thống kê được cập nhật
+
+Bước 6: Kết hợp nhiều bộ lọc
+32. Nhân viên có thể chọn đồng thời: Type + Severity + Date Range + Search
+33. Nhấn nút "Apply"
+34. Hệ thống truy vấn với tất cả điều kiện (logic AND)
+35. Bảng hiển thị kết quả đã lọc
+
+Bước 7: Sắp xếp logs
+36. Nhân viên nhấn vào tiêu đề cột "Timestamp"
+37. Icon thay đổi: ↓ (giảm dần) → ↑ (tăng dần) → ↕️ (mặc định)
+38. Hệ thống sắp xếp lại theo created_at tăng dần hoặc giảm dần
+39. Bảng cập nhật thứ tự hiển thị
+
+Bước 8: Thay đổi số hàng mỗi trang
+40. Nhân viên nhấn vào dropdown "Rows per page"
+41. Chọn số lượng (10/25/50/100)
+42. Hệ thống truy vấn lại với giới hạn bằng số đã chọn
+43. Bảng hiển thị số hàng mới
+44. Phân trang được cập nhật, quay về trang 1
+
+Bước 9: Điều hướng giữa các trang
+45. Nhân viên nhấn nút điều hướng (Previous/Next/số trang/First/Last)
+46. Hệ thống tính phần bù (OFFSET) = (số trang - 1) × kích thước trang
+47. Truy vấn dữ liệu với OFFSET và LIMIT
+48. Bảng hiển thị dữ liệu trang mới
+49. Thông tin trang cập nhật: "Page [X] of [Y]"
+
+Bước 10: Xem chi tiết log
+50. Nhân viên nhấn nút "View" hoặc nhấn vào hàng log
+51. Hệ thống truy vấn chi tiết từ printer_log_dashboard với điều kiện log_id bằng id đã chọn
+52. Hiển thị modal với đầy đủ thông tin
+53. Nhân viên xem chi tiết và đóng modal
+54. Quay lại trang danh sách, giữ nguyên vị trí
+Alternative Flow
+Alt 1: Xóa bộ lọc
+• Tại bất kỳ bước nào có bộ lọc, Nhân viên nhấn nút "Clear"
+• Tất cả các dropdown được đặt lại về "All Types", "All Levels"
+• Các date pickers bị xóa trống
+• Ô tìm kiếm bị xóa
+• Hệ thống truy vấn lại dữ liệu ban đầu (không có bộ lọc)
+• Bảng và thống kê hiển thị đầy đủ
+
+Alt 2: Đóng banner cảnh báo
+• Nhân viên nhấn nút X trên banner cảnh báo
+• Banner biến mất
+• Không ảnh hưởng đến dữ liệu và bộ lọc
+• Các cards thống kê vẫn hiển thị đầy đủ
+
+Alt 3: Tự động làm mới thống kê
+• Sau mỗi 30 giây, hệ thống tự động:
+   • Truy vấn lại số lượng logs mới
+   • Cập nhật các cards thống kê
+   • Cập nhật banner cảnh báo nếu có lỗi mới
+• Không tải lại toàn bộ bảng (tránh làm gián đoạn người dùng)
+• Hiển thị badge nhỏ "New" nếu có logs mới
+Exception Flow
+Exc 1: Không có logs trong hệ thống
+• Truy vấn trả về 0 kết quả
+• Hiển thị trạng thái rỗng:
+   • Icon: 📋 với dấu X
+   • Nội dung: "No logs found"
+   • Nội dung phụ: "System logs will appear here when printers are used"
+• Các cards thống kê hiển thị 0
+• Không hiển thị bảng và phân trang
+
+Exc 2: Không tìm thấy logs sau khi lọc
+• Truy vấn với bộ lọc trả về 0 kết quả
+• Hiển thị trạng thái rỗng:
+   • Icon: 🔍 với dấu X
+   • Nội dung: "No logs found matching your criteria"
+   • Nội dung phụ: "Try adjusting your filters or search criteria"
+   • Nút "Clear Filters"
+• Các cards thống kê vẫn hiển thị tổng số (không theo bộ lọc)
+
+Exc 3: Lỗi kết nối cơ sở dữ liệu
+• Truy vấn thất bại do mất kết nối
+• Hiển thị banner lỗi:
+   • Icon: ⚠️
+   • Nội dung: "Failed to load logs. Connection error."
+   • Nút "Retry"
+• Bảng hiển thị skeleton loader (trạng thái đang tải)
+• Nhân viên nhấn "Retry" → truy vấn lại
+
+Exc 4: Timeout khi truy vấn quá nhiều logs
+• Truy vấn mất quá 30 giây (quá nhiều dữ liệu)
+• Hiển thị cảnh báo:
+   • Nội dung: "Large dataset detected. Please apply date range filter to improve performance."
+• Tự động thêm bộ lọc khoảng thời gian = 30 ngày gần nhất
+• Truy vấn lại với điều kiện mới
+
+Exc 5: Khoảng thời gian không hợp lệ
+• Nhân viên chọn Date From lớn hơn Date To
+• Hiển thị thông báo lỗi dưới date pickers:
+   • Nội dung: "Start date must be before end date"
+   • Date To có viền màu đỏ
+• Vô hiệu hóa nút "Apply"
+• Nhân viên phải chọn lại ngày hợp lệ
+Tiền điều kiện
+• Nhân viên đã đăng nhập thành công (phiên làm việc hợp lệ)
+• Người dùng có user_type là 'staff' và position là 'manager', 'administrator', hoặc 'supervisor'
+• Có ít nhất 1 bản ghi trong bảng printer_log
+• Cơ sở dữ liệu đang hoạt động và có kết nối
+• View printer_log_dashboard đã được tạo và hoạt động
+Hậu điều kiện
+Khi thành công:
+• Nhân viên xem được danh sách logs với các thông tin:
+   • Thời gian, Vị trí máy in, Loại, Mức độ, Mô tả
+• Các cards thống kê hiển thị đúng số liệu
+• Các bộ lọc và tìm kiếm hoạt động chính xác
+• Phân trang hoạt động đúng
+• Modal chi tiết hiển thị đầy đủ thông tin log
+• Hệ thống ghi hoạt động vào system_audit_log:
+   • action_type: 'view_system_logs'
+   • user_id: ID người dùng Nhân viên
+   • timestamp: Thời gian hiện tại
+
+Khi thất bại:
+• Hiển thị thông báo lỗi phù hợp
+• Dữ liệu không bị thay đổi
+• Hệ thống ghi lỗi vào system_audit_log:
+   • action_type: 'view_logs_failed'
+   • error_details: thông tin lỗi
+Input
+• Dữ liệu phiên: user_id, user_type từ phiên đăng nhập đã xác thực
+• Từ khóa tìm kiếm (tùy chọn): Chuỗi ký tự, tìm trong máy in/mô tả/mã lỗi
+• Lọc loại (tùy chọn): Chuỗi, giá trị từ enum log_type
+• Lọc mức độ (tùy chọn): Chuỗi, giá trị từ enum severity
+• Từ ngày (tùy chọn): Ngày, ngày bắt đầu lọc
+• Đến ngày (tùy chọn): Ngày, ngày kết thúc lọc
+• Thứ tự sắp xếp (tùy chọn): Tăng dần hoặc giảm dần
+• Số trang: Số nguyên, trang hiện tại (mặc định: 1)
+• Kích thước trang: Số nguyên, số hàng mỗi trang (mặc định: 10, tùy chọn: 10/25/50/100)
+Output
+Thành công:
+json<br>{<br>  "status": "success",<br>  "statistics": {<br>    "total_entries": 156,<br>    "errors": 12,<br>    "warnings": 23,<br>    "info": 121<br>  },<br>  "alerts": {<br>    "has_recent_errors": true,<br>    "error_count_24h": 3,<br>    "warning_count_24h": 5<br>  },<br>  "logs": [<br>    {<br>      "log_id": "uuid-1",<br>      "timestamp": "2024-12-03T14:32:00",<br>      "printer_location": "LB-101",<br>      "printer_name": "HP LaserJet Pro M404dn",<br>      "log_type": "print_job",<br>      "severity": "info",<br>      "description": "Print job completed successfully",<br>      "error_code": null<br>    },<br>    {<br>      "log_id": "uuid-2",<br>      "timestamp": "2024-12-03T13:15:00",<br>      "printer_location": "SCI-202",<br>      "printer_name": "Canon imageCLASS MF445dw",<br>      "log_type": "error",<br>      "severity": "error",<br>      "description": "Hardware malfunction detected: toner unit error",<br>      "error_code": "E-TONER-001"<br>    }<br>  ],<br>  "pagination": {<br>    "current_page": 1,<br>    "page_size": 10,<br>    "total_pages": 16,<br>    "total_records": 156<br>  },<br>  "filters_applied": {<br>    "search": null,<br>    "type": "all",<br>    "severity": "all",<br>    "date_from": null,<br>    "date_to": null<br>  }<br>}<br>
+
+Thất bại - Không có quyền:
+json<br>{<br>  "status": "error",<br>  "error_code": "UNAUTHORIZED",<br>  "message": "Bạn không có quyền xem system logs.",<br>  "details": {<br>    "user_type": "student",<br>    "required_type": "staff"<br>  }<br>}<br>
+
+Thất bại - Lỗi cơ sở dữ liệu:
+json<br>{<br>  "status": "error",<br>  "error_code": "DATABASE_ERROR",<br>  "message": "Không thể tải logs. Vui lòng thử lại.",<br>  "details": {<br>    "error": "Connection timeout",<br>    "timestamp": "2024-12-03T14:30:00"<br>  }<br>}<br>
+
+
+NV-5-2: Xuất báo cáo log ra File
+Mục
+Nội dung
+Use Case ID
+NV-5-2
+Tên
+Xuất báo cáo log ra File
+Mô tả
+Nhân viên xuất danh sách logs đang hiển thị (sau khi lọc) thành file Excel hoặc PDF để lưu trữ, báo cáo hoặc phân tích offline
+Actor
+Nhân viên
+Trigger
+Nhân viên nhấn nút "Export" trên trang danh sách logs
+Quy định nghiệp vụ
+• Chỉ Nhân viên mới có quyền xuất báo cáo logs
+• File chỉ bao gồm logs đang hiển thị (sau khi áp dụng bộ lọc)
+• Giới hạn Excel: tối đa 1000 logs
+• Giới hạn PDF: tối đa 100 logs
+• Nếu vượt giới hạn: hiển thị lỗi và yêu cầu lọc
+• Excel bao gồm: Sheet "Summary" (thống kê, bộ lọc) và Sheet "Logs" (dữ liệu bảng đầy đủ 11 cột)
+• PDF bao gồm: phần đầu (logo, tiêu đề), tóm tắt (thống kê), bộ lọc đã áp dụng, dữ liệu bảng, phần cuối (số trang, thời gian, người xuất)
+• PDF có tùy chọn bao gồm chi tiết đầy đủ (detailed mode) hoặc chỉ tóm tắt
+• Định dạng tên file Excel: system_logs_[YYYY-MM-DD_HH-MM].xlsx
+• Định dạng tên file PDF: system_logs_[YYYY-MM-DD_HH-MM].pdf
+• Hành động xuất được ghi vào system_audit_log
+Main Flow
+Bước 1: Mở hộp thoại xuất
+1. Nhân viên đã xem danh sách logs (sau khi áp dụng bộ lọc)
+2. Nhân viên nhấn nút "Export" bên cạnh tiêu đề bảng
+3. Hệ thống đếm số logs hiện tại (sau khi lọc)
+4. Hiển thị hộp thoại "Export Logs":
+  • Tiêu đề: "Export Logs"
+  • Nội dung: "Export [X] logs currently displayed?"
+  • Hiển thị tóm tắt:
+    • Tổng số logs: [X]
+    • Khoảng thời gian: [từ ngày] to [đến ngày] (nếu có bộ lọc)
+    • Bộ lọc: [danh sách bộ lọc đã áp dụng]
+  • Radio buttons "Format":
+    • "Excel (max 1000 records)" (chọn mặc định)
+    • "PDF (max 100 records)"
+  • Checkbox "Include detailed information" (bị ẩn, chỉ hiện khi chọn PDF)
+  • Nút "Cancel" và "Export"
+
+Bước 2: Nhân viên chọn Excel format (Main Path)
+5. Radio button "Excel" được chọn (mặc định)
+6. Checkbox "Include detailed information" bị ẩn
+7. Hệ thống kiểm tra số logs:
+  • Nếu số logs ≤ 1000: cho phép xuất
+  • Nếu số logs > 1000: chuyển sang Exception Flow Exc 2
+
+Bước 3: Xuất Excel
+8. Nhân viên nhấn nút "Export"
+9. Hộp thoại đóng
+10. Hiển thị lớp phủ đang tải trên toàn màn hình:
+  • Hiệu ứng xoay vòng (spinner)
+  • Nội dung: "Generating Excel..."
+  • Thanh tiến trình (nếu có nhiều hơn 200 logs)
+  • Thời gian ước tính: "[X] seconds remaining"
+
+Bước 4: Tạo Excel
+11. Hệ thống truy vấn toàn bộ logs cần xuất:
+  • Áp dụng tất cả bộ lọc đang có
+  • Giới hạn tối đa 1000 logs
+  • Truy vấn tất cả cột: log_id, timestamp, type, severity, message, user_id, user_full_name, printer_id, printer_name, ip_address, metadata
+12. Hệ thống tạo file Excel (.xlsx) với cấu trúc:
+
+  Sheet 1: "Summary"
+  • Tiêu đề: "System Logs Export Summary" (A1, in đậm, 14pt)
+  • Export Information:
+    • Exported at: [YYYY-MM-DD HH:MM] (A3)
+    • Exported by: [Tên Nhân viên] (A4)
+    • Total logs: [X] (A5)
+  • Filters Applied (A7):
+    • Type: [loại hoặc "All"] (A8)
+    • Severity: [mức độ hoặc "All"] (A9)
+    • Search keyword: [từ khóa hoặc "None"] (A10)
+    • Date range: [ngày hoặc "All time"] (A11)
+  • Statistics (A13):
+    • Total logs: [X] (A14)
+    • Errors: [Y] (A15)
+    • Warnings: [Z] (A16)
+    • Info: [W] (A17)
+
+  Sheet 2: "Logs"
+  • Header row (Row 1, in đậm, nền xám nhạt, text căn giữa):
+    • A1: Log ID
+    • B1: Timestamp
+    • C1: Type
+    • D1: Severity
+    • E1: Message
+    • F1: User ID
+    • G1: User Name
+    • H1: Printer ID
+    • I1: Printer Name
+    • J1: IP Address
+    • K1: Metadata
+  • Data rows (từ Row 2):
+    • Mỗi row = 1 log
+    • Timestamp format: YYYY-MM-DD HH:MM:SS
+    • Severity: màu text theo mức độ (error=đỏ, warning=cam, info=xanh)
+    • Metadata: JSON string hoặc để trống
+  • Column widths:
+    • Log ID: 15
+    • Timestamp: 20
+    • Type: 15
+    • Severity: 12
+    • Message: 50
+    • User ID: 15
+    • User Name: 25
+    • Printer ID: 15
+    • Printer Name: 25
+    • IP Address: 15
+    • Metadata: 30
+  • Freeze panes: Header row (Row 1) luôn hiển thị khi scroll
+  • Auto-filter: Bật cho tất cả cột
+
+Bước 5: Hoàn tất
+13. File Excel được tạo thành công
+14. File tự động tải xuống về máy Nhân viên
+15. Tên file: system_logs_[YYYY-MM-DD_HH-MM].xlsx
+16. Lớp phủ đang tải đóng
+17. Hiển thị thông báo nổi thành công:
+  • Icon: ✓
+  • Nội dung: "Excel exported successfully"
+  • Nội dung phụ: "[X] logs exported"
+  • Tự động đóng sau 3 giây
+18. Hệ thống ghi vào system_audit_log:
+  • action_type: 'export_logs_excel'
+  • user_id: ID người dùng Nhân viên
+  • details: JSON {
+     "log_count": [X],
+     "format": "excel",
+     "filters": {...},
+     "file_size_kb": [Y]
+  }
+  • timestamp: Thời gian hiện tại
+Alternative Flow
+Alt 1: Xuất PDF thay vì Excel
+1. Tại hộp thoại xuất (Main Flow bước 4)
+2. Nhân viên chọn radio button "PDF"
+3. Checkbox "Include detailed information" hiển thị (không chọn mặc định)
+4. Hệ thống kiểm tra số logs:
+  • Nếu số logs ≤ 100: cho phép xuất
+  • Nếu số logs > 100: hiển thị cảnh báo trong hộp thoại:
+    • Icon: ⚠️
+    • Nội dung: "Cannot export [X] logs to PDF. Maximum: 100."
+    • Gợi ý: "Please either apply filters or switch to Excel format (max 1000)"
+    • Nút "Export" bị vô hiệu hóa
+5. Nhân viên chọn hoặc bỏ chọn "Include detailed information"
+6. Nhân viên nhấn nút "Export"
+7. Hộp thoại đóng
+8. Hiển thị lớp phủ đang tải:
+  • Nội dung: "Generating PDF..."
+  • Thanh tiến trình (nếu có nhiều hơn 50 logs)
+9. Hệ thống truy vấn logs:
+  • Áp dụng tất cả bộ lọc
+  • Giới hạn tối đa 100 logs
+  • Nếu chọn "Include details": truy vấn thêm thông tin chi tiết
+10. Hệ thống tạo PDF với cấu trúc:
+
+  Phần đầu (mỗi trang):
+  • Logo HCMSIU (trái)
+  • Tiêu đề "System Logs Report" (giữa, in đậm, 18pt)
+  • Ngày xuất: [YYYY-MM-DD HH:MM] (phải)
+  • Người xuất: [Tên Nhân viên] (phải)
+
+  Trang 1 - Tóm tắt:
+  • Phần "Filters Applied"
+    • Loại: [loại đã chọn hoặc "All"]
+    • Mức độ: [mức độ đã chọn hoặc "All"]
+    • Từ khóa tìm kiếm: [từ khóa hoặc "None"]
+    • Khoảng thời gian: [ngày hoặc "All time"]
+  • Phần "Statistics"
+    • Total logs: [X]
+    • Errors: [Y]
+    • Warnings: [Z]
+    • Info: [W]
+
+  Trang 2+ - Bảng:
+  • Bảng 5 cột:
+    • Timestamp (20%)
+    • Type (15%)
+    • Severity (15%)
+    • Message (40%)
+    • User (10%)
+  • Mỗi hàng hiển thị 1 log
+  • Tự động ngắt trang khi đầy
+
+  Trang cuối (nếu chọn Include details):
+  • Mỗi log chi tiết trên 1 trang riêng
+  • Bao gồm: full message, stack trace (nếu có), metadata, related data
+
+  Phần cuối (mỗi trang):
+  • Số trang: "Page [X] of [Y]" (phải)
+  • Thời gian tạo: [YYYY-MM-DD HH:MM] (trái)
+
+11. PDF được tạo thành công
+12. File tự động tải xuống: system_logs_[YYYY-MM-DD_HH-MM].pdf
+13. Lớp phủ đóng
+14. Hiển thị thông báo nổi: "PDF exported successfully - [X] logs exported"
+15. Ghi vào system_audit_log:
+  • action_type: 'export_logs_pdf'
+  • details: JSON { "log_count": [X], "format": "pdf", "include_details": true/false, "filters": {...}, "file_size_kb": [Y] }
+
+Alt 2: Hủy xuất
+• Tại hộp thoại xuất, Nhân viên nhấn "Cancel"
+• Hộp thoại đóng
+• Không tạo file
+• Không ghi log
+• Ở lại trang danh sách logs
+Exception Flow
+Exc 1: Không có logs để xuất
+• Nhân viên đã lọc đến không còn log nào
+• Nhấn "Export"
+• Hiển thị thông báo nổi:
+  • Icon: ℹ️
+  • Nội dung: "No logs to export"
+  • Nội dung phụ: "Please adjust your filters"
+• Không mở hộp thoại
+
+Exc 2: Quá nhiều logs cho Excel (> 1000)
+• Nhân viên chọn Excel khi có nhiều hơn 1000 logs
+• Hộp thoại hiển thị cảnh báo:
+  • Icon: ⚠️
+  • Nội dung: "Cannot export [X] logs to Excel. Maximum: 1000."
+  • Gợi ý: "Please apply filters to reduce dataset:"
+  • Danh sách gợi ý:
+    • "Use date range (e.g., last 30 days)"
+    • "Filter by specific printer or type"
+    • "Filter by severity level"
+• Nút "Export" bị vô hiệu hóa
+• Nhân viên phải đóng hộp thoại và lọc lại
+
+Exc 3: Lỗi khi tạo file
+• Trong quá trình tạo file, gặp lỗi (bộ nhớ, xử lý)
+• Lớp phủ đang tải đóng
+• Hiển thị thông báo nổi lỗi:
+  • Icon: ❌
+  • Nội dung: "Failed to generate [format]"
+  • Nội dung phụ: "Please try again or reduce dataset"
+  • Nút "Retry" và "Dismiss"
+• Nếu nhấn "Retry": mở lại hộp thoại xuất
+• Ghi lỗi vào system_audit_log:
+  • action_type: 'export_logs_failed'
+  • error_details: thông tin lỗi
+
+Exc 4: Timeout khi truy vấn dữ liệu
+• Truy vấn mất nhiều hơn 60 giây
+• Lớp phủ đang tải hiển thị cảnh báo:
+  • Nội dung: "This is taking longer than expected..."
+  • Nút "Cancel Export"
+• Sau 90 giây: timeout
+• Hiển thị lỗi: "Export timeout. Please try again."
+• Không tạo file
+
+Exc 5: Không có quyền xuất
+• Người dùng không phải Nhân viên
+• Nhấn "Export"
+• Hiển thị thông báo nổi:
+  • Icon: 🔒
+  • Nội dung: "Access denied"
+  • Nội dung phụ: "You don't have permission to export logs"
+• Không mở hộp thoại
+
+Exc 6: Lỗi tải xuống file
+• File được tạo thành công nhưng trình duyệt không thể tải xuống
+• Hiển thị lỗi:
+  • Nội dung: "Failed to download file. Please check browser settings."
+  • Nút "Try Again"
+• Nếu nhấn "Try Again": kích hoạt tải xuống lại
+• File vẫn được tạo ở server (có thể tải xuống từ link trực tiếp)
+Tiền điều kiện
+• Nhân viên đã đăng nhập thành công (phiên làm việc hợp lệ)
+• Người dùng có user_type là 'staff'
+• Có ít nhất 1 log trong kết quả hiện tại (sau khi lọc)
+• Số logs: ≤ 1000 cho Excel, ≤ 100 cho PDF
+• Server có đủ tài nguyên để tạo file (bộ nhớ, CPU)
+• Trình duyệt hỗ trợ tải xuống file
+Hậu điều kiện
+Khi thành công (Excel):
+• File Excel được tạo và tải xuống: system_logs_[YYYY-MM-DD_HH-MM].xlsx
+• Excel bao gồm:
+  • Sheet "Summary": thống kê, bộ lọc, metadata
+  • Sheet "Logs": bảng đầy đủ 11 cột với tất cả logs đã lọc, header row, auto-filter, freeze panes
+• Hành động được ghi vào system_audit_log với action_type: 'export_logs_excel'
+• Thông báo nổi hiển thị thành công
+
+Khi thành công (PDF):
+• File PDF được tạo và tải xuống: system_logs_[YYYY-MM-DD_HH-MM].pdf
+• PDF bao gồm:
+  • Phần đầu với logo, tiêu đề, ngày xuất, người xuất
+  • Trang tóm tắt với thống kê và bộ lọc
+  • Bảng với tất cả logs đã lọc
+  • Trang chi tiết (nếu được chọn)
+  • Phần cuối với số trang và metadata
+• Hành động được ghi vào system_audit_log với action_type: 'export_logs_pdf'
+• Thông báo nổi hiển thị thành công
+
+Khi thất bại:
+• Không tạo file
+• Hiển thị thông báo lỗi cụ thể
+• Hệ thống ghi lỗi vào system_audit_log
+• Nhân viên có thể thử lại hoặc điều chỉnh bộ lọc
+Input
+• Dữ liệu phiên: user_id, user_type từ phiên đăng nhập đã xác thực
+• Logs cần xuất: Danh sách logs sau khi áp dụng bộ lọc/tìm kiếm
+• Format: "excel" hoặc "pdf"
+• Bao gồm chi tiết (chỉ PDF): Boolean (mặc định: false)
+• Bộ lọc hiện tại: Object {
+  search: Chuỗi,
+  type: Chuỗi,
+  severity: Chuỗi,
+  date_from: Ngày,
+  date_to: Ngày
+}
+• Thống kê: Object {
+  total: Số nguyên,
+  errors: Số nguyên,
+  warnings: Số nguyên,
+  info: Số nguyên
+}
+Output
+Thành công (Excel):
+json<br>{<br>  "status": "success",<br>  "message": "Excel exported successfully",<br>  "file": {<br>    "filename": "system_logs_2024-12-09_15-30.xlsx",<br>    "size_kb": 1024,<br>    "download_url": "/downloads/system_logs_2024-12-09_15-30.xlsx",<br>    "expires_at": "2024-12-09T16:30:00"<br>  },<br>  "export_summary": {<br>    "format": "excel",<br>    "log_count": 645,<br>    "sheets": ["Summary", "Logs"],<br>    "columns": 11,<br>    "filters_applied": {...}<br>  },<br>  "exported_at": "2024-12-09T15:30:45",<br>  "exported_by": {<br>    "user_id": "uuid-staff",<br>    "full_name": "Nguyễn Văn A"<br>  }<br>}<br>
+
+Thành công (PDF):
+json<br>{<br>  "status": "success",<br>  "message": "PDF exported successfully",<br>  "file": {<br>    "filename": "system_logs_2024-12-09_15-30.pdf",<br>    "size_kb": 512,<br>    "download_url": "/downloads/system_logs_2024-12-09_15-30.pdf",<br>    "expires_at": "2024-12-09T16:30:00"<br>  },<br>  "export_summary": {<br>    "format": "pdf",<br>    "log_count": 87,<br>    "page_count": 5,<br>    "include_details": false,<br>    "filters_applied": {...}<br>  },<br>  "exported_at": "2024-12-09T15:30:45",<br>  "exported_by": {<br>    "user_id": "uuid-staff",<br>    "full_name": "Nguyễn Văn A"<br>  }<br>}<br>
+
+Thất bại - Quá nhiều logs:
+json<br>{<br>  "status": "error",<br>  "error_code": "TOO_MANY_LOGS",<br>  "message": "Không thể xuất quá nhiều logs.",<br>  "details": {<br>    "format": "excel",<br>    "current_count": 1543,<br>    "maximum_allowed": 1000,<br>    "exceeded_by": 543<br>  },<br>  "suggestion": "Vui lòng áp dụng bộ lọc để giảm số lượng logs."<br>}<br>
+
+Thất bại - Lỗi tạo file:
+json<br>{<br>  "status": "error",<br>  "error_code": "FILE_GENERATION_FAILED",<br>  "message": "Không thể tạo file.",<br>  "details": {<br>    "format": "excel",<br>    "error": "Memory allocation failed",<br>    "log_count": 890<br>  },<br>  "suggestion": "Vui lòng thử lại."<br>}<br>
+
+Thất bại - Không có quyền:
+json<br>{<br>  "status": "error",<br>  "error_code": "UNAUTHORIZED",<br>  "message": "Bạn không có quyền xuất logs.",<br>  "details": {<br>    "user_type": "student",<br>    "required_type": "staff"<br>  }<br>}<br>
+Technical Notes
+Thư viện:
+• Excel: ExcelJS (backend)
+• PDF: PDFKit (backend)
+• Tạo ở backend để tránh quá tải trình duyệt
+
+Excel - Cấu trúc:
+• 2 sheets: Summary và Logs
+• Sheet "Logs" - 11 cột:
+ • A: Log ID (width: 15)
+ • B: Timestamp (width: 20, format: YYYY-MM-DD HH:MM:SS)
+ • C: Type (width: 15)
+ • D: Severity (width: 12, colored text)
+ • E: Message (width: 50)
+ • F: User ID (width: 15)
+ • G: User Name (width: 25)
+ • H: Printer ID (width: 15)
+ • I: Printer Name (width: 25)
+ • J: IP Address (width: 15)
+ • K: Metadata (width: 30, JSON string)
+• Header row: in đậm, nền xám nhạt, text căn giữa
+• Freeze panes ở row 1
+• Auto-filter bật cho tất cả cột
+• Severity colors: error=#FF0000, warning=#FFA500, info=#0000FF
+
+PDF - Cấu trúc:
+• Định dạng: PDF 1.7, khổ A4, hướng dọc
+• Phần đầu: Logo HCMSIU, tiêu đề, ngày xuất, người xuất
+• Trang tóm tắt: thống kê và bộ lọc
+• Bảng 5 cột: Timestamp (20%), Type (15%), Severity (15%), Message (40%), User (10%)
+• Trang chi tiết (nếu được chọn): mỗi log trên 1 trang riêng
+• Phần cuối: số trang, thời gian tạo
+
+
