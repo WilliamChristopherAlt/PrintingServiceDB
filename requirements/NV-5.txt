@@ -1,6 +1,8 @@
 Trang Log Máy In
+
 1. Thành phần giao diện
 Phần đầu trang (Header)
+
 Tiêu đề trang: "System Logs & Audit"
 Mô tả: "View and search system logs for troubleshooting and auditing"
 Thông báo cảnh báo (nếu có lỗi hoặc cảnh báo trong hệ thống):
@@ -23,6 +25,7 @@ Số lượng: Số log có severity = 'warning'
 Icon: ⚠️
 Màu: Vàng
 Phần lọc và tìm kiếm (Filter Section)
+
 Thanh tìm kiếm
 Ô input với icon tìm kiếm (🔍)
 Placeholder: "Search by printer, description, error code..."
@@ -58,6 +61,7 @@ Nút hành động
 Nút "Apply": Button chính, áp dụng các bộ lọc đã chọn
 Nút "Clear": Button phụ, xóa tất cả bộ lọc và reset về mặc định
 Bảng danh sách log (Table)
+
 Tiêu đề bảng
 Text "Log Entries"
 Hiển thị "Showing [X] of [Y] entries" (X = số bản ghi hiện tại, Y = tổng số sau khi lọc)
@@ -94,6 +98,7 @@ Hiệu ứng hover trên mỗi hàng (màu nền xám nhạt)
 Click vào hàng để xem chi tiết (không chỉ nút Actions)
 Responsive: Trên mobile hiển thị dạng card thay vì table
 Phân trang (Pagination)
+
 Hiển thị ở cuối bảng:
 Dropdown số hàng mỗi trang: (10, 25, 50, 100)
 Thông tin trang: "Page [X] of [Y]"
@@ -115,6 +120,8 @@ Skeleton loader cho các hàng trong bảng
 Spinner ở giữa bảng
 Text: "Loading logs..."
 Modal chi tiết Log:
+
+
 Header:
 Tiêu đề: "Log Details"
 Badge hiển thị Log ID (màu xám, font mono)
@@ -148,6 +155,7 @@ Actions Taken: Danh sách bullet points
 Section 6: Datetime
 Created At: Timestamp
 Last Updated: Timestamp (nếu có)
+
 Footer:
 Nút "Close" (xám)
 Nút "Mark as Resolved" (xanh, chỉ hiện nếu chưa resolved)

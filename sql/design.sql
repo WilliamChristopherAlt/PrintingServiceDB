@@ -226,24 +226,39 @@ CREATE INDEX idx_status ON printer_physical (status);
 CREATE INDEX idx_printing_status ON printer_physical (printing_status);
 GO
 
--- Page Balance Management Tables
 -- ============================================
 
-CREATE TABLE page_allocation (
+-- Academic semesters (each academic year has Fall, Spring, Summer; academic year starts in September)
+CREATE TABLE semester (
+    semester_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    academic_year_id UNIQUEIDENTIFIER NOT NULL,
+    term_name VARCHAR(10) NOT NULL CHECK (term_name IN ('fall', 'spring', 'summer')),
+    start_date DATE NOT NULL,
+    end_date DATE NOT NULL,
+    created_at DATETIME DEFAULT GETDATE(),
+    UNIQUE (academic_year_id, term_name),
+    FOREIGN KEY (academic_year_id) REFERENCES academic_year(academic_year_id)
+);
+CREATE INDEX idx_semester_academic_year ON semester (academic_year_id, term_name);
+CREATE INDEX idx_semester_dates ON semester (start_date, end_date);
+GO
+
+-- Per-student semester allocation of free pages (A4-equivalent)
+CREATE TABLE student_page_allocation (
     allocation_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    semester VARCHAR(20) NOT NULL,
-    academic_year INT NOT NULL,
-    page_type_id UNIQUEIDENTIFIER NOT NULL,
-    default_page_count INT NOT NULL,
+    student_id UNIQUEIDENTIFIER NOT NULL,
+    semester_id UNIQUEIDENTIFIER NOT NULL,
+    a4_page_count INT NOT NULL,
     allocation_date DATE NOT NULL,
     created_at DATETIME DEFAULT GETDATE(),
     created_by UNIQUEIDENTIFIER,
-    UNIQUE (semester, academic_year, page_type_id),
-    FOREIGN KEY (created_by) REFERENCES staff(staff_id),
-    FOREIGN KEY (page_type_id) REFERENCES page_size(page_size_id)
+    UNIQUE (student_id, semester_id),
+    FOREIGN KEY (student_id) REFERENCES student(student_id) ON DELETE CASCADE,
+    FOREIGN KEY (semester_id) REFERENCES semester(semester_id),
+    FOREIGN KEY (created_by) REFERENCES staff(staff_id)
 );
-CREATE INDEX idx_semester ON page_allocation (semester, academic_year);
-CREATE INDEX idx_page_type ON page_allocation (page_type_id);
+CREATE INDEX idx_student_page_allocation_student ON student_page_allocation (student_id);
+CREATE INDEX idx_student_page_allocation_semester ON student_page_allocation (semester_id);
 GO
 
 CREATE TABLE discount_pack (
@@ -280,6 +295,62 @@ CREATE INDEX idx_transaction_date ON student_page_purchase (transaction_date);
 CREATE INDEX idx_payment_status ON student_page_purchase (payment_status);
 CREATE INDEX idx_page_size ON student_page_purchase (page_size_id);
 CREATE INDEX idx_discount_pack ON student_page_purchase (discount_pack_id);
+GO
+
+-- Fund and Supplier Paper Purchase Management Tables
+-- ============================================
+
+CREATE TABLE fund_source (
+    fund_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    fund_source_type VARCHAR(50) NOT NULL CHECK (fund_source_type IN ('school_budget', 'donation', 'revenue', 'other')),
+    fund_source_name VARCHAR(255),
+    amount DECIMAL(12, 2) NOT NULL CHECK (amount > 0),
+    received_date DATE NOT NULL,
+    description TEXT,
+    created_at DATETIME DEFAULT GETDATE(),
+    created_by UNIQUEIDENTIFIER,
+    FOREIGN KEY (created_by) REFERENCES staff(staff_id)
+);
+CREATE INDEX idx_fund_source_type ON fund_source (fund_source_type);
+CREATE INDEX idx_fund_received_date ON fund_source (received_date);
+GO
+
+CREATE TABLE supplier_paper_purchase (
+    purchase_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    supplier_name VARCHAR(255) NOT NULL,
+    supplier_contact VARCHAR(255),
+    purchase_date DATE NOT NULL,
+    total_amount_paid DECIMAL(12, 2) NOT NULL CHECK (total_amount_paid >= 0),
+    payment_method VARCHAR(50) NOT NULL,
+    payment_reference VARCHAR(100),
+    payment_status VARCHAR(20) NOT NULL DEFAULT 'pending' CHECK (payment_status IN ('pending', 'completed', 'failed', 'refunded')),
+    invoice_number VARCHAR(100),
+    notes TEXT,
+    created_at DATETIME DEFAULT GETDATE(),
+    created_by UNIQUEIDENTIFIER,
+    FOREIGN KEY (created_by) REFERENCES staff(staff_id)
+);
+CREATE INDEX idx_purchase_date ON supplier_paper_purchase (purchase_date);
+CREATE INDEX idx_payment_status ON supplier_paper_purchase (payment_status);
+CREATE INDEX idx_supplier_name ON supplier_paper_purchase (supplier_name);
+GO
+
+CREATE TABLE paper_purchase_item (
+    purchase_item_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    purchase_id UNIQUEIDENTIFIER NOT NULL,
+    page_size_id UNIQUEIDENTIFIER NOT NULL,
+    quantity INT NOT NULL CHECK (quantity > 0),
+    unit_price DECIMAL(10, 4) NOT NULL CHECK (unit_price >= 0),
+    total_price DECIMAL(12, 2) NOT NULL CHECK (total_price >= 0),
+    received_quantity INT NULL,
+    received_date DATE NULL,
+    notes TEXT,
+    FOREIGN KEY (purchase_id) REFERENCES supplier_paper_purchase(purchase_id) ON DELETE CASCADE,
+    FOREIGN KEY (page_size_id) REFERENCES page_size(page_size_id),
+    CHECK (received_quantity IS NULL OR received_quantity >= 0)
+);
+CREATE INDEX idx_purchase_id ON paper_purchase_item (purchase_id);
+CREATE INDEX idx_page_size ON paper_purchase_item (page_size_id);
 GO
 
 -- System Configuration Tables

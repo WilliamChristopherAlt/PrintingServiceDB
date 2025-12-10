@@ -275,6 +275,8 @@ class PrintingServiceDataGenerator:
         self.rooms = []
         self.printers = []
         self.print_jobs = []
+        self.semesters = []
+        self.student_page_allocations = []
         
         # Academic structure data
         self.faculties = []
@@ -291,6 +293,11 @@ class PrintingServiceDataGenerator:
         
         # Discount packs (initialized empty, populated in generate_discount_packs)
         self.discount_packs = []
+        
+        # Fund and supplier purchase data
+        self.fund_sources = []
+        self.supplier_purchases = []
+        self.paper_purchase_items = []
         
         # System state
         self.current_academic_year = spec['current_academic_year']
@@ -319,6 +326,9 @@ class PrintingServiceDataGenerator:
         
         print("Generating discount packages...")
         self.generate_discount_packs()
+        
+        print("Generating fund sources and supplier paper purchases...")
+        self.generate_fund_and_supplier_purchases()
         
         print("Generating printer infrastructure...")
         self.generate_printer_infrastructure()
@@ -1041,34 +1051,110 @@ class PrintingServiceDataGenerator:
         for stmt in bulk_page_sizes.get_statements():
             self.add_sql(stmt)
         
-        # Find A4 page size for default allocation
-        a4_page_size = next(ps for ps in self.page_sizes if ps["size_name"] == "A4")
-        
-        # Generate page allocations
-        bulk_allocations = BulkInsertHelper("page_allocation", [
-            "allocation_id", "semester", "academic_year", "page_type_id", 
-            "default_page_count", "allocation_date", "created_at", "created_by"
+        # Generate semester records (Fall, Spring, Summer for each academic year)
+        bulk_semesters = BulkInsertHelper("semester", [
+            "semester_id", "academic_year_id", "term_name", "start_date", "end_date", "created_at"
         ])
         
-        semesters = self.spec['semester_names']
+        term_order = [
+            ("fall", 9, 12),   # Sept - Dec of start year
+            ("spring", 1, 5),  # Jan - May of next year
+            ("summer", 6, 8)   # Jun - Aug of next year
+        ]
+        
+        for ay in self.academic_years:
+            year_name = ay['year_name']
+            # Expect formats like "2023-2024"; fallback to start_date year
+            try:
+                start_year = int(year_name.split('-')[0])
+            except Exception:
+                start_year = datetime.strptime(ay['start_date'], "%Y-%m-%d").year
+            
+            for term_name, start_month, end_month in term_order:
+                if term_name == "fall":
+                    term_year_start = start_year
+                    term_year_end = start_year
+                else:
+                    term_year_start = start_year + 1
+                    term_year_end = start_year + 1
+                
+                start_date = datetime(term_year_start, start_month, 1)
+                # End date = last day of end_month
+                if end_month in [1,3,5,7,8,10,12]:
+                    end_day = 31
+                elif end_month == 2:
+                    end_day = 28
+                else:
+                    end_day = 30
+                end_date = datetime(term_year_end, end_month, end_day)
+                
+                semester_id = generate_uuid()
+                self.semesters.append({
+                    "semester_id": semester_id,
+                    "academic_year_id": ay['academic_year_id'],
+                    "term_name": term_name,
+                    "start_date": start_date,
+                    "end_date": end_date
+                })
+                
+                bulk_semesters.add_row([
+                    semester_id,
+                    ay['academic_year_id'],
+                    term_name,
+                    start_date.strftime('%Y-%m-%d'),
+                    end_date.strftime('%Y-%m-%d'),
+                    datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                ])
+        
+        for stmt in bulk_semesters.get_statements():
+            self.add_sql(stmt)
+        
+        # Generate per-student page allocations for current and previous academic year semesters
+        bulk_student_allocations = BulkInsertHelper("student_page_allocation", [
+            "allocation_id", "student_id", "semester_id",
+            "a4_page_count", "allocation_date", "created_at", "created_by"
+        ])
+        
         default_pages = self.spec['default_pages_per_semester']
         current_year = self.current_academic_year
         creator_staff = random.choice(self.staff) if self.staff else None
         
-        # Generate allocations for current year and previous year
-        for year in [current_year - 1, current_year]:
-            for semester in semesters:
+        # Limit to semesters whose academic year starts in current_year or current_year-1
+        target_semesters = []
+        for sem in self.semesters:
+            ay = next((ay for ay in self.academic_years if ay['academic_year_id'] == sem['academic_year_id']), None)
+            if not ay:
+                continue
+            try:
+                ay_start_year = int(ay['year_name'].split('-')[0])
+            except Exception:
+                ay_start_year = datetime.strptime(ay['start_date'], "%Y-%m-%d").year if 'start_date' in ay else current_year
+            if ay_start_year in [current_year - 1, current_year]:
+                target_semesters.append(sem)
+        
+        for student in self.students:
+            for sem in target_semesters:
                 allocation_id = generate_uuid()
-                allocation_date = datetime(year, 1 if semester == "HK1" else (5 if semester == "HK2" else 8), 1)
+                allocation_date = sem['start_date']
                 
-                bulk_allocations.add_row([
-                    allocation_id, semester, year, a4_page_size["page_size_id"],
-                    default_pages, allocation_date.strftime('%Y-%m-%d'),
+                self.student_page_allocations.append({
+                    "allocation_id": allocation_id,
+                    "student_id": student['student_id'],
+                    "semester_id": sem['semester_id'],
+                    "a4_page_count": default_pages
+                })
+                
+                bulk_student_allocations.add_row([
+                    allocation_id,
+                    student['student_id'],
+                    sem['semester_id'],
+                    default_pages,
+                    allocation_date.strftime('%Y-%m-%d'),
                     allocation_date.strftime('%Y-%m-%d %H:%M:%S'),
                     creator_staff['staff_id'] if creator_staff else None
                 ])
         
-        for stmt in bulk_allocations.get_statements():
+        for stmt in bulk_student_allocations.get_statements():
             self.add_sql(stmt)
         
         # Generate student page purchases
@@ -1187,6 +1273,221 @@ class PrintingServiceDataGenerator:
             ])
         
         for stmt in bulk.get_statements():
+            self.add_sql(stmt)
+    
+    def generate_fund_and_supplier_purchases(self):
+        """Generate fund sources and supplier paper purchases."""
+        self.add_sql("\n-- ============================================")
+        self.add_sql("-- FUND SOURCES AND SUPPLIER PAPER PURCHASES DATA")
+        self.add_sql("-- ============================================")
+        
+        # Generate fund sources
+        bulk_funds = BulkInsertHelper("fund_source", [
+            "fund_id", "fund_source_type", "fund_source_name", "amount",
+            "received_date", "description", "created_at", "created_by"
+        ])
+        
+        fund_types = ['school_budget', 'donation', 'revenue', 'other']
+        fund_type_weights = [0.5, 0.2, 0.2, 0.1]  # 50% school budget, 20% donation, 20% revenue, 10% other
+        
+        # Generate 10-20 fund sources
+        num_funds = random.randint(10, 20)
+        creator_staff = random.choice(self.staff) if self.staff else None
+        
+        fund_source_names = {
+            'school_budget': [
+                'Annual Printing Budget 2023',
+                'Annual Printing Budget 2024',
+                'Semester 1 Printing Allocation',
+                'Semester 2 Printing Allocation',
+                'Emergency Printing Fund'
+            ],
+            'donation': [
+                'Alumni Donation 2023',
+                'Corporate Sponsorship - ABC Corp',
+                'Community Donation',
+                'Graduate Association Fund',
+                'Anonymous Donation'
+            ],
+            'revenue': [
+                'Student Purchase Revenue',
+                'Printing Service Revenue Q1',
+                'Printing Service Revenue Q2',
+                'Additional Service Fees'
+            ],
+            'other': [
+                'Miscellaneous Income',
+                'Refund Recovery',
+                'Other Sources'
+            ]
+        }
+        
+        for i in range(num_funds):
+            fund_id = generate_uuid()
+            fund_type = random.choices(fund_types, weights=fund_type_weights, k=1)[0]
+            fund_name = random.choice(fund_source_names.get(fund_type, ['Fund Source']))
+            
+            # Generate realistic amounts based on type
+            if fund_type == 'school_budget':
+                amount = round(random.uniform(50000, 200000), 2)  # $50k - $200k
+            elif fund_type == 'donation':
+                amount = round(random.uniform(5000, 50000), 2)  # $5k - $50k
+            elif fund_type == 'revenue':
+                amount = round(random.uniform(10000, 80000), 2)  # $10k - $80k
+            else:
+                amount = round(random.uniform(1000, 20000), 2)  # $1k - $20k
+            
+            received_date = random_date_in_range(730, 0)  # Last 2 years
+            description = f"Fund received from {fund_type.replace('_', ' ')}"
+            created_at = received_date
+            
+            fund_data = {
+                'fund_id': fund_id,
+                'fund_source_type': fund_type,
+                'fund_source_name': fund_name,
+                'amount': amount,
+                'received_date': received_date
+            }
+            self.fund_sources.append(fund_data)
+            
+            bulk_funds.add_row([
+                fund_id, fund_type, fund_name, amount,
+                received_date.strftime('%Y-%m-%d'), description,
+                created_at.strftime('%Y-%m-%d %H:%M:%S'),
+                creator_staff['staff_id'] if creator_staff else None
+            ])
+        
+        for stmt in bulk_funds.get_statements():
+            self.add_sql(stmt)
+        
+        # Generate supplier paper purchases
+        bulk_purchases = BulkInsertHelper("supplier_paper_purchase", [
+            "purchase_id", "supplier_name", "supplier_contact", "purchase_date",
+            "total_amount_paid", "payment_method", "payment_reference", "payment_status",
+            "invoice_number", "notes", "created_at", "created_by"
+        ])
+        
+        supplier_names = [
+            'Office Supplies Co.',
+            'Paper Distributors Ltd.',
+            'Printing Materials Inc.',
+            'Stationery Solutions',
+            'Campus Supply Chain',
+            'Academic Materials Corp.',
+            'Educational Supplies Co.'
+        ]
+        
+        payment_methods = ['bank_transfer', 'check', 'cash', 'credit_card', 'wire_transfer']
+        payment_statuses = ['completed', 'completed', 'completed', 'pending', 'completed']  # Mostly completed
+        
+        # Generate 15-30 supplier purchases
+        num_purchases = random.randint(15, 30)
+        
+        for i in range(num_purchases):
+            purchase_id = generate_uuid()
+            supplier_name = random.choice(supplier_names)
+            supplier_contact = f"{random.choice(['+84', ''])}{random.randint(900000000, 999999999)}"
+            purchase_date = random_date_in_range(365, 0)  # Last year
+            
+            payment_method = random.choice(payment_methods)
+            payment_reference = f"PAY{random.randint(100000, 999999)}"
+            payment_status = random.choice(payment_statuses)
+            invoice_number = f"INV-{random.randint(2023000, 2024999)}"
+            notes = f"Paper purchase from {supplier_name}"
+            created_at = purchase_date
+            created_by = creator_staff['staff_id'] if creator_staff else None
+            
+            # Estimate total based on typical purchase (will be refined when items are added)
+            # Typical purchase: 1-3 paper sizes, 5k-20k sheets, $0.03-$0.15 per sheet
+            estimated_items = random.randint(1, 3)
+            estimated_sheets = random.randint(5000, 20000)
+            estimated_unit_price = random.uniform(0.03, 0.15)
+            base_total = round(estimated_items * estimated_sheets * estimated_unit_price, 2)
+            
+            purchase_data = {
+                'purchase_id': purchase_id,
+                'supplier_name': supplier_name,
+                'purchase_date': purchase_date,
+                'total_amount_paid': base_total  # Estimated, actual breakdown in items
+            }
+            self.supplier_purchases.append(purchase_data)
+            
+            bulk_purchases.add_row([
+                purchase_id, supplier_name, supplier_contact, purchase_date.strftime('%Y-%m-%d'),
+                base_total, payment_method, payment_reference, payment_status,
+                invoice_number, notes, created_at.strftime('%Y-%m-%d %H:%M:%S'), created_by
+            ])
+        
+        for stmt in bulk_purchases.get_statements():
+            self.add_sql(stmt)
+        
+        # Generate paper purchase items
+        bulk_items = BulkInsertHelper("paper_purchase_item", [
+            "purchase_item_id", "purchase_id", "page_size_id", "quantity",
+            "unit_price", "total_price", "received_quantity", "received_date", "notes"
+        ])
+        
+        # Unit prices per sheet (in USD) - A3 is more expensive, A5 is cheaper
+        base_unit_prices = {
+            'A3': 0.15,   # $0.15 per A3 sheet
+            'A4': 0.05,   # $0.05 per A4 sheet
+            'A5': 0.03    # $0.03 per A5 sheet
+        }
+        
+        # Ensure page_sizes are available
+        if not hasattr(self, 'page_sizes') or not self.page_sizes:
+            raise ValueError("Page sizes not generated yet. Ensure generate_page_allocation_system() runs before generate_fund_and_supplier_purchases().")
+        
+        # For each purchase, add 1-3 different paper sizes
+        for purchase in self.supplier_purchases:
+            num_items = random.randint(1, 3)
+            selected_sizes = random.sample(self.page_sizes, min(num_items, len(self.page_sizes)))
+            
+            for page_size in selected_sizes:
+                item_id = generate_uuid()
+                size_name = page_size['size_name']
+                
+                # Generate quantity based on size (A3: less quantity, A4: medium, A5: more)
+                if size_name == 'A3':
+                    quantity = random.randint(1000, 5000)  # 1k - 5k sheets
+                elif size_name == 'A4':
+                    quantity = random.randint(5000, 20000)  # 5k - 20k sheets
+                else:  # A5
+                    quantity = random.randint(3000, 10000)  # 3k - 10k sheets
+                
+                # Get base unit price and add some variance
+                base_price = base_unit_prices.get(size_name, 0.05)
+                unit_price = round(base_price * random.uniform(0.9, 1.1), 4)  # ±10% variance
+                total_price = round(quantity * unit_price, 2)
+                
+                # Most items are fully received, some partially
+                if random.random() < 0.9:  # 90% fully received
+                    received_quantity = quantity
+                    received_date = purchase['purchase_date'] + timedelta(days=random.randint(1, 14))
+                else:  # 10% partially received or pending
+                    received_quantity = random.randint(int(quantity * 0.5), quantity) if random.random() < 0.5 else None
+                    received_date = purchase['purchase_date'] + timedelta(days=random.randint(1, 30)) if received_quantity else None
+                
+                notes = f"{quantity} sheets of {size_name} paper"
+                
+                item_data = {
+                    'purchase_item_id': item_id,
+                    'purchase_id': purchase['purchase_id'],
+                    'page_size_id': page_size['page_size_id'],
+                    'quantity': quantity,
+                    'unit_price': unit_price,
+                    'total_price': total_price
+                }
+                self.paper_purchase_items.append(item_data)
+                
+                bulk_items.add_row([
+                    item_id, purchase['purchase_id'], page_size['page_size_id'], quantity,
+                    unit_price, total_price,
+                    received_quantity, received_date.strftime('%Y-%m-%d') if received_date else None,
+                    notes
+                ])
+        
+        for stmt in bulk_items.get_statements():
             self.add_sql(stmt)
     
     def generate_system_configuration(self):
@@ -1777,9 +2078,14 @@ def main():
         print(f"Departments generated: {len(generator.departments)}")
         print(f"Majors generated: {len(generator.majors)}")
         print(f"Academic years generated: {len(generator.academic_years)}")
+        print(f"Semesters generated: {len(generator.semesters)}")
         print(f"Classes generated: {len(generator.classes)}")
         print(f"Students generated: {len(generator.students)}")
         print(f"Staff generated: {len(generator.staff)}")
+        print(f"Fund sources generated: {len(generator.fund_sources)}")
+        print(f"Supplier purchases generated: {len(generator.supplier_purchases)}")
+        print(f"Paper purchase items generated: {len(generator.paper_purchase_items)}")
+        print(f"Student page allocations generated: {len(generator.student_page_allocations)}")
         print(f"Printers generated: {len(generator.printers)}")
         print(f"Print jobs generated: {len(generator.print_jobs)}")
         print(f"Output file: {OUTPUT_SQL_FILE}")

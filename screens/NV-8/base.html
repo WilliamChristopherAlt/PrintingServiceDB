@@ -1,0 +1,546 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fund Management - Printing Service</title>
+  <style>
+    :root {
+      --bg: #f7f7fb;
+      --card: #ffffff;
+      --border: #e5e7eb;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --accent: #2563eb;
+      --accent-2: #10b981;
+      --danger: #dc2626;
+      --warn: #f59e0b;
+      --shadow: 0 12px 30px -18px rgba(15, 23, 42, 0.4);
+      font-family: "Inter", system-ui, -apple-system, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      display: grid;
+      grid-template-rows: 72px 1fr;
+      grid-template-columns: 260px 1fr;
+      grid-template-areas:
+        "sidebar header"
+        "sidebar main";
+      min-height: 100vh;
+    }
+    header {
+      grid-area: header;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      z-index: 10;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 18px; }
+    .brand span { color: var(--muted); font-weight: 500; }
+    .actions { display: flex; align-items: center; gap: 12px; }
+    .btn {
+      border: 1px solid var(--border);
+      background: var(--card);
+      padding: 10px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--text);
+      transition: 0.2s ease;
+    }
+    .btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .btn.secondary { background: #eef2ff; color: #1e3a8a; border-color: #c7d2fe; }
+    .btn:hover { box-shadow: 0 6px 18px -12px rgba(37, 99, 235, 0.8); }
+    .icon-btn {
+      width: 40px; height: 40px; display: grid; place-items: center;
+      border-radius: 10px; border: 1px solid var(--border); background: var(--card);
+      cursor: pointer; transition: 0.2s ease;
+    }
+    .icon-btn:hover { border-color: var(--accent); }
+    aside {
+      grid-area: sidebar;
+      background: #0f172a;
+      color: #e2e8f0;
+      display: flex;
+      flex-direction: column;
+      padding: 20px 16px;
+      gap: 16px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+    }
+    nav { display: flex; flex-direction: column; gap: 6px; }
+    .nav-item {
+      padding: 12px 14px; border-radius: 10px; color: inherit; text-decoration: none;
+      display: flex; align-items: center; gap: 10px; transition: 0.2s ease;
+    }
+    .nav-item:hover, .nav-item.active { background: rgba(59, 130, 246, 0.15); color: #fff; }
+    main { grid-area: main; padding: 28px 28px 40px; display: flex; flex-direction: column; gap: 20px; }
+    .page-title { font-size: 28px; font-weight: 700; margin: 0; }
+    .sub { color: var(--muted); margin-top: 6px; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: var(--shadow);
+    }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+    .stat-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+      padding: 20px; box-shadow: var(--shadow); display: flex; align-items: center; gap: 16px;
+    }
+    .stat-icon {
+      width: 56px; height: 56px; border-radius: 12px; display: grid; place-items: center;
+      font-size: 24px; flex-shrink: 0;
+    }
+    .stat-icon.blue { background: rgba(37, 99, 235, 0.1); color: #2563eb; }
+    .stat-icon.green { background: rgba(16, 185, 129, 0.12); color: #059669; }
+    .stat-icon.purple { background: rgba(124, 58, 237, 0.12); color: #7c3aed; }
+    .stat-info { display: flex; flex-direction: column; gap: 6px; }
+    .stat-label { color: var(--muted); font-size: 14px; }
+    .stat-value { font-size: 24px; font-weight: 700; }
+    .filters {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      align-items: end;
+    }
+    label { font-weight: 600; font-size: 14px; color: var(--muted); margin-bottom: 6px; display: block; }
+    input, select {
+      width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px;
+      font-size: 14px; background: #fff;
+    }
+    .table-card { padding: 0; }
+    .table-header {
+      padding: 18px; border-bottom: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
+    }
+    .table-header .title { font-weight: 700; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { text-align: left; padding: 14px 16px; }
+    th {
+      color: var(--muted); font-size: 13px; letter-spacing: 0.3px;
+      border-bottom: 1px solid var(--border); cursor: pointer; user-select: none;
+    }
+    tr:hover td { background: #f9fafb; }
+    td { border-bottom: 1px solid var(--border); font-size: 14px; }
+    .badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 10px; font-weight: 600; font-size: 12px; }
+    .badge.gray { background: #eef2ff; color: #4338ca; }
+    .badge.green { background: #ecfdf3; color: #166534; }
+    .badge.orange { background: #fff7ed; color: #9a3412; }
+    .muted { color: var(--muted); }
+    .actions-col { display: flex; gap: 6px; flex-wrap: wrap; }
+    .pill-btn {
+      border: 1px solid var(--border);
+      background: #fff;
+      padding: 6px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: 0.2s ease;
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+    }
+    .pill-btn svg { width: 16px; height: 16px; }
+    .pill-btn.view { color: #2563eb; border-color: #bfdbfe; }
+    .pill-btn.update { color: #7c3aed; border-color: #ddd6fe; }
+    .pill-btn.delete { color: #dc2626; border-color: #fecaca; }
+    .pill-btn:hover { box-shadow: 0 6px 12px -10px rgba(0,0,0,0.25); }
+    .pagination {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 18px; gap: 12px; flex-wrap: wrap;
+    }
+    .pager { display: flex; align-items: center; gap: 8px; }
+    .pager button, .pager select {
+      padding: 8px 12px; border: 1px solid var(--border); background: #fff; border-radius: 8px; cursor: pointer;
+    }
+    .pager span { white-space: nowrap; }
+    .pager select { min-width: 90px; }
+    .pager button:disabled { opacity: 0.5; cursor: not-allowed; }
+    /* Modal */
+    .modal-backdrop {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+      display: none; align-items: center; justify-content: center; z-index: 20;
+    }
+    .modal {
+      background: #fff; border-radius: 14px; padding: 20px; width: min(720px, 90vw);
+      box-shadow: var(--shadow);
+    }
+    .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .modal-header h3 { margin: 0; }
+    .modal-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+    .kv { display: flex; flex-direction: column; gap: 4px; }
+    .kv .label { color: var(--muted); font-size: 13px; }
+    .kv .value { font-weight: 600; }
+  </style>
+</head>
+<body>
+  <aside>
+    <div class="brand" style="color:#fff;">Smart Print <span>Dashboard</span></div>
+    <nav>
+      <a class="nav-item" href="#">🏠 Dashboard</a>
+      <a class="nav-item" href="#">🖨️ Printers</a>
+      <a class="nav-item" href="#">📄 Jobs</a>
+      <a class="nav-item active" href="#">💰 Fund Management</a>
+      <a class="nav-item" href="#">🧾 Reports</a>
+    </nav>
+    <div class="sidebar-footer">
+      Manage print funds. View, filter, export reports.
+    </div>
+  </aside>
+  <header>
+    <div class="brand">Fund Management <span>Print fund overview</span></div>
+    <div class="actions">
+      <div class="icon-btn">🔔</div>
+      <div class="icon-btn">☰</div>
+    </div>
+  </header>
+  <main>
+    <div>
+      <h1 class="page-title">Fund Management</h1>
+      <div class="sub">View fund sources, track amounts, and export summaries</div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon blue">💰</div>
+        <div class="stat-info">
+          <div class="stat-label">Total funds</div>
+          <div class="stat-value">12,450,000,000 ₫</div>
+          <div class="muted">All fund sources</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon green">📦</div>
+        <div class="stat-info">
+          <div class="stat-label">Fund sources</div>
+          <div class="stat-value">48</div>
+          <div class="muted">school / donation / revenue / other</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon purple">📈</div>
+        <div class="stat-info">
+          <div class="stat-label">Distribution by type</div>
+          <div class="stat-value">50% / 20% / 20% / 10%</div>
+          <div class="muted">school / donation / revenue / other</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="filters">
+        <div>
+          <label>Search</label>
+          <input type="text" placeholder="Search by fund name or description" />
+        </div>
+        <div>
+          <label>Fund type</label>
+          <select>
+            <option>All types</option>
+            <option>School budget</option>
+            <option>Donation</option>
+            <option>Revenue</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div>
+          <label>Date from</label>
+          <input type="date" />
+        </div>
+        <div>
+          <label>Date to</label>
+          <input type="date" />
+        </div>
+        <div style="display:flex; gap:8px;">
+          <button class="btn primary" style="width:100%;">Apply</button>
+          <button class="btn" style="width:100%;">Clear</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card table-card">
+      <div class="table-header">
+        <div class="title">Funds</div>
+        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+          <div class="muted">Showing 10 of 48 entries</div>
+          <button class="btn primary" onclick="openModal('create-modal')">New Fund</button>
+          <button class="btn secondary">Export PDF</button>
+          <button class="btn primary" style="background:#eef2ff; color:#1e3a8a; border-color:#c7d2fe;">Export Excel</button>
+        </div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Fund Name ↕</th>
+            <th>Type ↕</th>
+            <th>Amount ↕</th>
+            <th>Received Date ↕</th>
+            <th>Recorded By</th>
+            <th>Description</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Annual Printing Budget 2024</td>
+            <td><span class="badge gray">School budget</span></td>
+            <td>3,200,000,000 ₫</td>
+            <td>2024-09-01</td>
+            <td>Nguyen Van A</td>
+            <td class="muted">Campus-wide allocation for AY 2024-2025</td>
+            <td>
+              <div class="actions-col">
+                <button class="pill-btn view" onclick="openModal('detail-modal')" aria-label="View fund">
+                  <svg fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 5c-5 0-9.27 3.11-10.5 7 1.23 3.89 5.5 7 10.5 7s9.27-3.11 10.5-7C21.27 8.11 17 5 12 5Zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10Zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z"/>
+                  </svg>
+                </button>
+                <button class="pill-btn update" onclick="openModal('update-modal')" aria-label="Update fund">
+                  <svg fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M4 17.25V20h2.75L17.81 8.94l-2.75-2.75L4 17.25ZM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83Z"/>
+                  </svg>
+                </button>
+                <button class="pill-btn delete" onclick="openModal('delete-modal')" aria-label="Delete fund">
+                  <svg fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M9 3h6a1 1 0 0 1 1 1v1h4v2h-1v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V7H4V5h4V4a1 1 0 0 1 1-1Zm8 4H7v12h10V7Zm-6 2h2v8h-2V9Z"/>
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td>Alumni Donation</td>
+            <td><span class="badge orange">Donation</span></td>
+            <td>850,000,000 ₫</td>
+            <td>2024-06-18</td>
+            <td>Tran Thi B</td>
+            <td class="muted">Support for student printing credits</td>
+            <td>
+              <div class="actions-col">
+                <button class="pill-btn view" onclick="openModal('detail-modal')" aria-label="View fund">
+                  <svg fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 5c-5 0-9.27 3.11-10.5 7 1.23 3.89 5.5 7 10.5 7s9.27-3.11 10.5-7C21.27 8.11 17 5 12 5Zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10Zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z"/>
+                  </svg>
+                </button>
+                <button class="pill-btn update" onclick="openModal('update-modal')" aria-label="Update fund">
+                  <svg fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M4 17.25V20h2.75L17.81 8.94l-2.75-2.75L4 17.25ZM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83Z"/>
+                  </svg>
+                </button>
+                <button class="pill-btn delete" onclick="openModal('delete-modal')" aria-label="Delete fund">
+                  <svg fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M9 3h6a1 1 0 0 1 1 1v1h4v2h-1v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V7H4V5h4V4a1 1 0 0 1 1-1Zm8 4H7v12h10V7Zm-6 2h2v8h-2V9Z"/>
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td>Printing Service Revenue Q2</td>
+            <td><span class="badge green">Revenue</span></td>
+            <td>420,000,000 ₫</td>
+            <td>2024-07-05</td>
+            <td>Le Van C</td>
+            <td class="muted">Accumulated service fees</td>
+            <td>
+              <div class="actions-col">
+                <button class="pill-btn view" onclick="openModal('detail-modal')" aria-label="View fund">
+                  <svg fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 5c-5 0-9.27 3.11-10.5 7 1.23 3.89 5.5 7 10.5 7s9.27-3.11 10.5-7C21.27 8.11 17 5 12 5Zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10Zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z"/>
+                  </svg>
+                </button>
+                <button class="pill-btn update" onclick="openModal('update-modal')" aria-label="Update fund">
+                  <svg fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M4 17.25V20h2.75L17.81 8.94l-2.75-2.75L4 17.25ZM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83Z"/>
+                  </svg>
+                </button>
+                <button class="pill-btn delete" onclick="openModal('delete-modal')" aria-label="Delete fund">
+                  <svg fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M9 3h6a1 1 0 0 1 1 1v1h4v2h-1v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V7H4V5h4V4a1 1 0 0 1 1-1Zm8 4H7v12h10V7Zm-6 2h2v8h-2V9Z"/>
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="pagination">
+        <div class="pager">
+          <button disabled>⏮</button>
+          <button disabled>◀</button>
+          <span class="muted">Page 1 of 5</span>
+          <button>▶</button>
+          <button>⏭</button>
+        </div>
+        <div class="pager">
+          <span class="muted">Rows per page</span>
+          <select>
+            <option>10</option>
+            <option>25</option>
+            <option>50</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Detail Modal -->
+  <div class="modal-backdrop" id="detail-modal" onclick="closeModal('detail-modal')">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Fund Details</h3>
+        <button class="icon-btn" onclick="closeModal('detail-modal')">✕</button>
+      </div>
+      <div class="modal-grid">
+        <div class="kv">
+          <span class="label">Fund Name</span>
+          <span class="value">Annual Printing Budget 2024</span>
+        </div>
+        <div class="kv">
+          <span class="label">Type</span>
+          <span class="value">School budget</span>
+        </div>
+        <div class="kv">
+          <span class="label">Amount</span>
+          <span class="value">3,200,000,000 ₫</span>
+        </div>
+        <div class="kv">
+          <span class="label">Received Date</span>
+          <span class="value">2024-09-01</span>
+        </div>
+        <div class="kv">
+          <span class="label">Created By</span>
+          <span class="value">Nguyen Van A</span>
+        </div>
+        <div class="kv">
+          <span class="label">Description</span>
+          <span class="value">Campus-wide allocation for AY 2024-2025</span>
+        </div>
+      </div>
+      <div style="margin-top:16px; display:flex; justify-content:flex-end; gap:10px;">
+        <button class="btn" onclick="closeModal('detail-modal')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create Modal -->
+  <div class="modal-backdrop" id="create-modal" onclick="closeModal('create-modal')">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3>New Fund</h3>
+        <button class="icon-btn" onclick="closeModal('create-modal')">✕</button>
+      </div>
+      <div class="modal-grid">
+        <div class="kv">
+          <span class="label">Fund Name</span>
+          <input type="text" placeholder="Enter fund name" />
+        </div>
+        <div class="kv">
+          <span class="label">Type</span>
+          <select>
+            <option>School budget</option>
+            <option>Donation</option>
+            <option>Revenue</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="kv">
+          <span class="label">Amount</span>
+          <input type="number" placeholder="Amount" />
+        </div>
+        <div class="kv">
+          <span class="label">Received Date</span>
+          <input type="date" />
+        </div>
+        <div class="kv" style="grid-column: 1 / -1;">
+          <span class="label">Description</span>
+          <textarea rows="3" style="width:100%; padding:10px; border:1px solid var(--border); border-radius:10px;" placeholder="Description"></textarea>
+        </div>
+      </div>
+      <div style="margin-top:16px; display:flex; justify-content:flex-end; gap:10px;">
+        <button class="btn" onclick="closeModal('create-modal')">Cancel</button>
+        <button class="btn primary" onclick="closeModal('create-modal')">Create</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Update Modal -->
+  <div class="modal-backdrop" id="update-modal" onclick="closeModal('update-modal')">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Update Fund</h3>
+        <button class="icon-btn" onclick="closeModal('update-modal')">✕</button>
+      </div>
+      <div class="modal-grid">
+        <div class="kv">
+          <span class="label">Fund Name</span>
+          <input type="text" value="Annual Printing Budget 2024" />
+        </div>
+        <div class="kv">
+          <span class="label">Type</span>
+          <select>
+            <option selected>School budget</option>
+            <option>Donation</option>
+            <option>Revenue</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="kv">
+          <span class="label">Amount</span>
+          <input type="number" value="3200000000" />
+        </div>
+        <div class="kv">
+          <span class="label">Received Date</span>
+          <input type="date" value="2024-09-01" />
+        </div>
+        <div class="kv" style="grid-column: 1 / -1;">
+          <span class="label">Description</span>
+          <textarea rows="3" style="width:100%; padding:10px; border:1px solid var(--border); border-radius:10px;">Campus-wide allocation for AY 2024-2025</textarea>
+        </div>
+      </div>
+      <div style="margin-top:16px; display:flex; justify-content:flex-end; gap:10px;">
+        <button class="btn" onclick="closeModal('update-modal')">Cancel</button>
+        <button class="btn primary" onclick="closeModal('update-modal')">Update</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Modal -->
+  <div class="modal-backdrop" id="delete-modal" onclick="closeModal('delete-modal')">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Delete Fund</h3>
+        <button class="icon-btn" onclick="closeModal('delete-modal')">✕</button>
+      </div>
+      <p style="color:var(--text); margin: 0 0 12px 0;">Delete fund "Annual Printing Budget 2024"?</p>
+      <p class="muted" style="margin:0 0 16px 0;">This action cannot be undone.</p>
+      <div style="display:flex; justify-content:flex-end; gap:10px;">
+        <button class="btn" onclick="closeModal('delete-modal')">Cancel</button>
+        <button class="btn" style="background:#fee2e2; border-color:#fecaca; color:#b91c1c;" onclick="closeModal('delete-modal')">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function openModal(id) {
+      const el = document.getElementById(id);
+      if (el) el.style.display = 'flex';
+    }
+    function closeModal(id) {
+      const el = document.getElementById(id);
+      if (el) el.style.display = 'none';
+    }
+  </script>
+</body>
+</html>
+
