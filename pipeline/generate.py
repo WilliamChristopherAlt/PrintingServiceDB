@@ -366,7 +366,7 @@ class PrintingServiceDataGenerator:
         
         # Test account password hashes
         student_test_password_hash = generate_password_hash("SmartPrint@123")
-        staff_test_password_hash = generate_password_hash("SmartPrint@123!")
+        staff_test_password_hash = generate_password_hash("SmartPrint@123")
         
         bulk = BulkInsertHelper("user", [
             "user_id", "email", "full_name", "password_hash",
@@ -417,7 +417,7 @@ class PrintingServiceDataGenerator:
                 'student', test_phone, test_created_at.strftime('%Y-%m-%d %H:%M:%S'), 1
             ])
         
-        # Test staff account (password SmartPrint@123!)
+        # Test staff account (password SmartPrint@123)
         test_staff_id = generate_uuid()
         test_staff_email = "staff.test@edu.vn"
         if test_staff_email not in used_emails:
@@ -823,7 +823,8 @@ class PrintingServiceDataGenerator:
         # Generate models
         bulk_models = BulkInsertHelper("printer_model", [
             "model_id", "brand_id", "model_name", "description", "max_paper_size_id",
-            "supports_color", "supports_duplex", "pages_per_second", "created_at"
+            "supports_color", "supports_duplex", "pages_per_second", "image_2d_url",
+            "image_3d_url", "created_at"
         ])
         
         for brand in self.brands:
@@ -849,6 +850,10 @@ class PrintingServiceDataGenerator:
                     else:
                         pages_per_second = round(random.uniform(0.5, 2.0), 2)  # 0.5-2.0 pps for B&W
                 
+                # Generate image URLs - use from config if available, otherwise NULL
+                image_2d_url = model_config.get('image_2d_url', None)
+                image_3d_url = model_config.get('image_3d_url', None)
+                
                 model_data = {
                     'model_id': model_id,
                     'brand_id': brand['brand_id'],
@@ -856,7 +861,9 @@ class PrintingServiceDataGenerator:
                     'max_paper_size_id': max_paper_size_id,
                     'supports_color': model_config['supports_color'],
                     'supports_duplex': model_config['supports_duplex'],
-                    'pages_per_second': pages_per_second
+                    'pages_per_second': pages_per_second,
+                    'image_2d_url': image_2d_url,
+                    'image_3d_url': image_3d_url
                 }
                 
                 self.models.append(model_data)
@@ -865,6 +872,7 @@ class PrintingServiceDataGenerator:
                     model_id, brand['brand_id'], model_config['name'], description,
                     max_paper_size_id, model_config['supports_color'],
                     model_config['supports_duplex'], pages_per_second,
+                    image_2d_url, image_3d_url,
                     created_at.strftime('%Y-%m-%d %H:%M:%S')
                 ])
         

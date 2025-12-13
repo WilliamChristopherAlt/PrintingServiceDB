@@ -22,6 +22,7 @@ CREATE TABLE [user] (
     phone_number VARCHAR(15),
     created_at DATETIME DEFAULT GETDATE(),
     updated_at DATETIME DEFAULT GETDATE(),
+    last_login_at DATETIME,
     is_active BIT DEFAULT 1
 );
 CREATE INDEX idx_user_type ON [user] (user_type);
@@ -193,6 +194,8 @@ CREATE TABLE printer_model (
     supports_color BIT DEFAULT 0,
     supports_duplex BIT DEFAULT 0,
     pages_per_second FLOAT,
+    image_2d_url VARCHAR(255) NULL,
+    image_3d_url VARCHAR(255) NULL,
     created_at DATETIME DEFAULT GETDATE(),
     FOREIGN KEY (brand_id) REFERENCES brand(brand_id),
     FOREIGN KEY (max_paper_size_id) REFERENCES page_size(page_size_id),
@@ -471,6 +474,22 @@ CREATE INDEX idx_printer_log_user ON printer_log(user_id);
 CREATE INDEX idx_printer_log_resolved ON printer_log(is_resolved);
 CREATE INDEX idx_printer_log_type_severity ON printer_log(log_type, severity);
 CREATE INDEX idx_printer_log_printer_date ON printer_log(printer_id, created_at);
+GO
+
+-- Printer Activity Log Table (for tracking printer CRUD operations)
+-- ============================================
+CREATE TABLE printer_activity_log (
+    log_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    printer_id UNIQUEIDENTIFIER NOT NULL,
+    action_type VARCHAR(20) NOT NULL CHECK (action_type IN ('added', 'enabled', 'disabled', 'updated', 'removed')),
+    performed_by UNIQUEIDENTIFIER NULL,
+    action_detail TEXT NULL,
+    action_timestamp DATETIME DEFAULT GETDATE(),
+    FOREIGN KEY (printer_id) REFERENCES printer_physical(printer_id) ON DELETE CASCADE,
+    FOREIGN KEY (performed_by) REFERENCES staff(staff_id)
+);
+CREATE INDEX idx_printer_log ON printer_activity_log (printer_id);
+CREATE INDEX idx_action_timestamp ON printer_activity_log (action_timestamp);
 GO
 
 CREATE TABLE system_audit_log (
