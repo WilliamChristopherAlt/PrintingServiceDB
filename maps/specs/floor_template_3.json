@@ -1,0 +1,248 @@
+{
+  "grid_size": 100,
+  "grid_cols": 24,
+  "grid_rows": 16,
+  "rooms": [
+    {
+      "id": "entrance-hall",
+      "grid_x": 0,
+      "grid_y": 0,
+      "grid_w": 2,
+      "grid_h": 16,
+      "label": "Entrance Hall",
+      "type": "corridor"
+    },
+    {
+      "id": "R301",
+      "grid_x": 2,
+      "grid_y": 0,
+      "grid_w": 5,
+      "grid_h": 4,
+      "label": "Lab 301",
+      "type": "lab"
+    },
+    {
+      "id": "R302",
+      "grid_x": 7,
+      "grid_y": 0,
+      "grid_w": 5,
+      "grid_h": 4,
+      "label": "Lecture Hall 302",
+      "type": "classroom"
+    },
+    {
+      "id": "R303",
+      "grid_x": 12,
+      "grid_y": 0,
+      "grid_w": 4,
+      "grid_h": 4,
+      "label": "Library Wing A",
+      "type": "library"
+    },
+    {
+      "id": "corridor-wc-access-3",
+      "grid_x": 16,
+      "grid_y": 0,
+      "grid_w": 1,
+      "grid_h": 4,
+      "label": "",
+      "type": "corridor"
+    },
+    {
+      "id": "restroom-m",
+      "grid_x": 17,
+      "grid_y": 0,
+      "grid_w": 2,
+      "grid_h": 2,
+      "label": "Men's",
+      "type": "restroom"
+    },
+    {
+      "id": "restroom-w",
+      "grid_x": 17,
+      "grid_y": 2,
+      "grid_w": 2,
+      "grid_h": 2,
+      "label": "Women's",
+      "type": "restroom"
+    },
+    {
+      "id": "stairs-1",
+      "grid_x": 19,
+      "grid_y": 0,
+      "grid_w": 2,
+      "grid_h": 2,
+      "label": "Stairs",
+      "type": "stairs"
+    },
+    {
+      "id": "lift-1",
+      "grid_x": 19,
+      "grid_y": 2,
+      "grid_w": 2,
+      "grid_h": 2,
+      "label": "LIFT",
+      "type": "elevator"
+    },
+    {
+      "id": "storage-1",
+      "grid_x": 21,
+      "grid_y": 0,
+      "grid_w": 3,
+      "grid_h": 4,
+      "label": "Storage",
+      "type": "storage"
+    },
+    {
+      "id": "corridor-main",
+      "grid_x": 2,
+      "grid_y": 4,
+      "grid_w": 22,
+      "grid_h": 2,
+      "label": "Main Corridor",
+      "type": "corridor"
+    },
+    {
+      "id": "corridor-wc-connect-3",
+      "grid_x": 16,
+      "grid_y": 4,
+      "grid_w": 1,
+      "grid_h": 1,
+      "label": "",
+      "type": "corridor"
+    },
+    {
+      "id": "corridor-right-1",
+      "grid_x": 21,
+      "grid_y": 4,
+      "grid_w": 3,
+      "grid_h": 12,
+      "label": "Hallway",
+      "type": "corridor"
+    },
+    {
+      "id": "R304",
+      "grid_x": 2,
+      "grid_y": 6,
+      "grid_w": 6,
+      "grid_h": 5,
+      "label": "Computer Lab 304",
+      "type": "lab"
+    },
+    {
+      "id": "R305",
+      "grid_x": 8,
+      "grid_y": 6,
+      "grid_w": 5,
+      "grid_h": 5,
+      "label": "Office 305",
+      "type": "office"
+    },
+    {
+      "id": "R306",
+      "grid_x": 13,
+      "grid_y": 6,
+      "grid_w": 5,
+      "grid_h": 5,
+      "label": "Study Room 306",
+      "type": "classroom"
+    },
+    {
+      "id": "lounge-1",
+      "grid_x": 18,
+      "grid_y": 6,
+      "grid_w": 3,
+      "grid_h": 5,
+      "label": "Student Lounge",
+      "type": "lounge"
+    },
+    {
+      "id": "corridor-2",
+      "grid_x": 2,
+      "grid_y": 11,
+      "grid_w": 19,
+      "grid_h": 2,
+      "label": "Corridor",
+      "type": "corridor"
+    },
+    {
+      "id": "R307",
+      "grid_x": 2,
+      "grid_y": 13,
+      "grid_w": 7,
+      "grid_h": 3,
+      "label": "Lecture Hall 307",
+      "type": "classroom"
+    },
+    {
+      "id": "R308",
+      "grid_x": 9,
+      "grid_y": 13,
+      "grid_w": 7,
+      "grid_h": 3,
+      "label": "Library Wing B",
+      "type": "library"
+    },
+    {
+      "id": "R309",
+      "grid_x": 16,
+      "grid_y": 13,
+      "grid_w": 5,
+      "grid_h": 3,
+      "label": "Lab 309",
+      "type": "lab"
+    }
+  ],
+  "doors": [
+    {"grid_x": 2, "grid_y": 4, "orientation": "horizontal"},
+    {"grid_x": 7, "grid_y": 4, "orientation": "horizontal"},
+    {"grid_x": 12, "grid_y": 4, "orientation": "horizontal"},
+    {"grid_x": 2, "grid_y": 11, "orientation": "horizontal"},
+    {"grid_x": 9, "grid_y": 11, "orientation": "horizontal"},
+    {"grid_x": 16, "grid_y": 11, "orientation": "horizontal"}
+  ],
+  "printers": [
+    {
+      "id": "printer-1",
+      "room": "R301",
+      "grid_rx": 0.15,
+      "grid_ry": 0.2,
+      "label": "P1"
+    },
+    {
+      "id": "printer-2",
+      "room": "R302",
+      "grid_rx": 0.85,
+      "grid_ry": 0.3,
+      "label": "P2"
+    },
+    {
+      "id": "printer-3",
+      "room": "R303",
+      "grid_rx": 0.2,
+      "grid_ry": 0.7,
+      "label": "P3"
+    },
+    {
+      "id": "printer-4",
+      "room": "R306",
+      "grid_rx": 0.8,
+      "grid_ry": 0.25,
+      "label": "P4"
+    },
+    {
+      "id": "printer-5",
+      "room": "R307",
+      "grid_rx": 0.15,
+      "grid_ry": 0.7,
+      "label": "P5"
+    },
+    {
+      "id": "printer-6",
+      "room": "R309",
+      "grid_rx": 0.85,
+      "grid_ry": 0.25,
+      "label": "P6"
+    }
+  ]
+}

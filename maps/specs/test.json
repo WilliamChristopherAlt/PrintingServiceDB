@@ -1,355 +1,195 @@
 {
+  "grid_size": 100,
+  "grid_cols": 24,
+  "grid_rows": 14,
   "width": 2400,
   "height": 1400,
   "rooms": [
     {
       "id": "entrance-hall",
-      "x": 100,
-      "y": 550,
-      "w": 300,
-      "h": 300,
+      "grid_x": 0,
+      "grid_y": 0,
+      "grid_w": 2,
+      "grid_h": 14,
       "label": "Entrance Hall",
       "type": "corridor"
     },
     {
       "id": "R101",
-      "x": 450,
-      "y": 100,
-      "w": 380,
-      "h": 320,
+      "grid_x": 2,
+      "grid_y": 0,
+      "grid_w": 5,
+      "grid_h": 4,
       "label": "Computer Lab 101",
       "type": "lab"
     },
     {
       "id": "R102",
-      "x": 880,
-      "y": 100,
-      "w": 380,
-      "h": 320,
+      "grid_x": 7,
+      "grid_y": 0,
+      "grid_w": 5,
+      "grid_h": 4,
       "label": "Lecture Hall 102",
       "type": "classroom"
     },
     {
       "id": "R103",
-      "x": 1310,
-      "y": 100,
-      "w": 350,
-      "h": 320,
+      "grid_x": 12,
+      "grid_y": 0,
+      "grid_w": 5,
+      "grid_h": 4,
       "label": "Faculty Office",
       "type": "office"
     },
     {
-      "id": "corridor-main",
-      "x": 450,
-      "y": 450,
-      "w": 1210,
-      "h": 180,
-      "label": "Main Corridor",
-      "type": "corridor"
-    },
-    {
-      "id": "R201",
-      "x": 450,
-      "y": 680,
-      "w": 380,
-      "h": 320,
-      "label": "Library",
-      "type": "library"
-    },
-    {
-      "id": "R202",
-      "x": 880,
-      "y": 680,
-      "w": 350,
-      "h": 320,
-      "label": "Study Room",
-      "type": "classroom"
-    },
-    {
-      "id": "R203",
-      "x": 1280,
-      "y": 680,
-      "w": 380,
-      "h": 320,
-      "label": "Meeting Room",
-      "type": "office"
-    },
-    {
       "id": "restroom-m",
-      "x": 1710,
-      "y": 100,
-      "w": 180,
-      "h": 140,
+      "grid_x": 17,
+      "grid_y": 0,
+      "grid_w": 2,
+      "grid_h": 2,
       "label": "Men's",
       "type": "restroom"
     },
     {
       "id": "restroom-w",
-      "x": 1710,
-      "y": 270,
-      "w": 180,
-      "h": 140,
+      "grid_x": 17,
+      "grid_y": 2,
+      "grid_w": 2,
+      "grid_h": 2,
       "label": "Women's",
       "type": "restroom"
     },
     {
-      "id": "storage",
-      "x": 1940,
-      "y": 100,
-      "w": 140,
-      "h": 310,
+      "id": "storage-top",
+      "grid_x": 19,
+      "grid_y": 0,
+      "grid_w": 2,
+      "grid_h": 4,
       "label": "Storage",
+      "type": "storage"
+    },
+    {
+      "id": "fill-top-right",
+      "grid_x": 21,
+      "grid_y": 0,
+      "grid_w": 3,
+      "grid_h": 4,
+      "label": "",
+      "type": "storage"
+    },
+    {
+      "id": "corridor-main",
+      "grid_x": 2,
+      "grid_y": 4,
+      "grid_w": 22,
+      "grid_h": 2,
+      "label": "Main Corridor",
+      "type": "corridor"
+    },
+    {
+      "id": "R201",
+      "grid_x": 2,
+      "grid_y": 6,
+      "grid_w": 5,
+      "grid_h": 8,
+      "label": "Library",
+      "type": "library"
+    },
+    {
+      "id": "R202",
+      "grid_x": 7,
+      "grid_y": 6,
+      "grid_w": 5,
+      "grid_h": 8,
+      "label": "Study Room",
+      "type": "classroom"
+    },
+    {
+      "id": "R203",
+      "grid_x": 12,
+      "grid_y": 6,
+      "grid_w": 5,
+      "grid_h": 8,
+      "label": "Meeting Room",
       "type": "office"
     },
     {
       "id": "lounge",
-      "x": 1710,
-      "y": 680,
-      "w": 370,
-      "h": 320,
+      "grid_x": 17,
+      "grid_y": 6,
+      "grid_w": 4,
+      "grid_h": 8,
       "label": "Student Lounge",
-      "type": "corridor"
+      "type": "lounge"
+    },
+    {
+      "id": "stairs-right",
+      "grid_x": 21,
+      "grid_y": 4,
+      "grid_w": 3,
+      "grid_h": 2,
+      "label": "Stairs",
+      "type": "stairs"
+    },
+    {
+      "id": "lift-right",
+      "grid_x": 21,
+      "grid_y": 6,
+      "grid_w": 3,
+      "grid_h": 2,
+      "label": "LIFT",
+      "type": "elevator"
+    },
+    {
+      "id": "balcony",
+      "grid_x": 21,
+      "grid_y": 8,
+      "grid_w": 3,
+      "grid_h": 6,
+      "label": "Balcony",
+      "type": "lounge"
     }
   ],
-  "doors": [
-    {
-      "x": 400,
-      "y": 700,
-      "orientation": "vertical"
-    },
-    {
-      "x": 620,
-      "y": 450,
-      "orientation": "horizontal"
-    },
-    {
-      "x": 1050,
-      "y": 450,
-      "orientation": "horizontal"
-    },
-    {
-      "x": 1470,
-      "y": 450,
-      "orientation": "horizontal"
-    },
-    {
-      "x": 620,
-      "y": 630,
-      "orientation": "horizontal"
-    },
-    {
-      "x": 1050,
-      "y": 630,
-      "orientation": "horizontal"
-    },
-    {
-      "x": 1470,
-      "y": 630,
-      "orientation": "horizontal"
-    },
-    {
-      "x": 1660,
-      "y": 540,
-      "orientation": "vertical"
-    },
-    {
-      "x": 1800,
-      "y": 450,
-      "orientation": "horizontal"
-    },
-    {
-      "x": 1800,
-      "y": 630,
-      "orientation": "horizontal"
-    },
-    {
-      "x": 1710,
-      "y": 170,
-      "orientation": "vertical"
-    },
-    {
-      "x": 1710,
-      "y": 340,
-      "orientation": "vertical"
-    }
-  ],
-  "windows": [
-    {
-      "x": 640,
-      "y": 100,
-      "orientation": "horizontal"
-    },
-    {
-      "x": 760,
-      "y": 100,
-      "orientation": "horizontal"
-    },
-    {
-      "x": 1070,
-      "y": 100,
-      "orientation": "horizontal"
-    },
-    {
-      "x": 1190,
-      "y": 100,
-      "orientation": "horizontal"
-    },
-    {
-      "x": 1490,
-      "y": 100,
-      "orientation": "horizontal"
-    },
-    {
-      "x": 640,
-      "y": 1000,
-      "orientation": "horizontal"
-    },
-    {
-      "x": 760,
-      "y": 1000,
-      "orientation": "horizontal"
-    },
-    {
-      "x": 1015,
-      "y": 1000,
-      "orientation": "horizontal"
-    },
-    {
-      "x": 1470,
-      "y": 1000,
-      "orientation": "horizontal"
-    },
-    {
-      "x": 1590,
-      "y": 1000,
-      "orientation": "horizontal"
-    },
-    {
-      "x": 100,
-      "y": 630,
-      "orientation": "vertical"
-    },
-    {
-      "x": 100,
-      "y": 760,
-      "orientation": "vertical"
-    },
-    {
-      "x": 2080,
-      "y": 200,
-      "orientation": "vertical"
-    },
-    {
-      "x": 2080,
-      "y": 300,
-      "orientation": "vertical"
-    }
-  ],
-  "stairs": [
-    {
-      "x": 100,
-      "y": 100,
-      "direction": "horizontal",
-      "label": "Stairs"
-    },
-    {
-      "x": 1940,
-      "y": 460,
-      "direction": "horizontal",
-      "label": "Stairs"
-    }
-  ],
-  "elevators": [
-    {
-      "x": 230,
-      "y": 100
-    },
-    {
-      "x": 1940,
-      "y": 880
-    }
-  ],
-  "plants": [
-    {
-      "x": 500,
-      "y": 500
-    },
-    {
-      "x": 650,
-      "y": 580
-    },
-    {
-      "x": 920,
-      "y": 500
-    },
-    {
-      "x": 1100,
-      "y": 580
-    },
-    {
-      "x": 1350,
-      "y": 500
-    },
-    {
-      "x": 1580,
-      "y": 580
-    },
-    {
-      "x": 180,
-      "y": 630
-    },
-    {
-      "x": 320,
-      "y": 750
-    },
-    {
-      "x": 1750,
-      "y": 760
-    },
-    {
-      "x": 1950,
-      "y": 850
-    }
-  ],
+  "doors": [],
   "entrance": {
-    "x": 250,
-    "y": 700,
+    "grid_x": 1,
+    "grid_y": 7,
     "label": "Main Entrance"
   },
   "printers": [
     {
       "id": "P1",
       "room": "R101",
-      "rx": 0.75,
-      "ry": 0.7,
+      "grid_rx": 0.8,
+      "grid_ry": 0.65,
       "label": "Printer P1"
     },
     {
       "id": "P2",
       "room": "R102",
-      "rx": 0.25,
-      "ry": 0.65,
+      "grid_rx": 0.5,
+      "grid_ry": 0.65,
       "label": "Printer P2"
     },
     {
       "id": "P3",
       "room": "R201",
-      "rx": 0.65,
-      "ry": 0.75,
+      "grid_rx": 0.25,
+      "grid_ry": 0.75,
       "label": "Printer P3"
     },
     {
       "id": "P4",
       "room": "R203",
-      "rx": 0.3,
-      "ry": 0.5,
+      "grid_rx": 0.5,
+      "grid_ry": 0.7,
       "label": "Printer P4"
     },
     {
       "id": "P5",
-      "room": "lounge", 
-      "rx": 0.5,
-      "ry": 0.4,
+      "room": "lounge",
+      "grid_rx": 0.55,
+      "grid_ry": 0.6,
       "label": "Printer P5"
     }
   ]

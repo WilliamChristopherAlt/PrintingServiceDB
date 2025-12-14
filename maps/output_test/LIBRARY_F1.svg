@@ -1,0 +1,366 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" 
+     viewBox="0 0 2400 2000" 
+     width="2400" 
+     height="2000"
+     style="display:block; max-width:100%; height:auto;">
+  <defs>
+    <style>
+      text { 
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+    </style>
+  </defs>
+  
+  <!-- Background -->
+  <rect x="0" y="0" width="2400" height="2000" fill="#f5f5f5"/>
+  
+  <!-- Rooms -->
+  <rect x="0" y="0" width="300" height="1600" 
+              fill="#E0E0E0" stroke="none"/>
+<g><text x="150.0" y="797.5" 
+                      font-family="Roboto,Segoe UI,Arial,sans-serif" 
+                      font-size="40" font-weight="600"
+                      fill="#1a1a1a" text-anchor="middle" dominant-baseline="middle">
+                  Entrance
+                </text><text x="150.0" y="842.5" 
+                      font-family="Roboto,Segoe UI,Arial,sans-serif" 
+                      font-size="40" font-weight="600"
+                      fill="#1a1a1a" text-anchor="middle" dominant-baseline="middle">
+                  Hall
+                </text></g>
+<rect x="300" y="0" width="600" height="500" 
+              fill="#FF9800" stroke="none"/>
+<text x="600.0" y="250.0" 
+                  font-family="Roboto,Segoe UI,Arial,sans-serif" 
+                  font-size="40" font-weight="600"
+                  fill="white" text-anchor="middle" dominant-baseline="middle">
+              Computer Lab
+            </text>
+<rect x="900" y="0" width="600" height="500" 
+              fill="#2196F3" stroke="none"/>
+<text x="1200.0" y="250.0" 
+                  font-family="Roboto,Segoe UI,Arial,sans-serif" 
+                  font-size="40" font-weight="600"
+                  fill="white" text-anchor="middle" dominant-baseline="middle">
+              Auditorium
+            </text>
+<rect x="1500" y="0" width="300" height="500" 
+              fill="#9C27B0" stroke="none"/>
+<text x="1650.0" y="250.0" 
+                  font-family="Roboto,Segoe UI,Arial,sans-serif" 
+                  font-size="40" font-weight="600"
+                  fill="white" text-anchor="middle" dominant-baseline="middle">
+              Study Area
+            </text>
+<rect x="1800" y="0" width="100" height="500" 
+                  fill="#E0E0E0" stroke="none"/>
+<rect x="1900" y="0" width="200" height="300" 
+              fill="#4CAF50" stroke="none"/>
+<text x="2000.0" y="150.0" 
+                  font-family="Roboto,Segoe UI,Arial,sans-serif" 
+                  font-size="40" font-weight="600"
+                  fill="white" text-anchor="middle" dominant-baseline="middle">
+              Men's
+            </text>
+<rect x="1900" y="300" width="200" height="200" 
+              fill="#4CAF50" stroke="none"/>
+<text x="2000.0" y="400.0" 
+                  font-family="Roboto,Segoe UI,Arial,sans-serif" 
+                  font-size="38" font-weight="600"
+                  fill="white" text-anchor="middle" dominant-baseline="middle">
+              Women's
+            </text>
+<rect x="2100" y="0" width="300" height="300" 
+              fill="#9E9E9E" stroke="none"/>
+<text x="2250.0" y="150.0" 
+                  font-family="Roboto,Segoe UI,Arial,sans-serif" 
+                  font-size="40" font-weight="600"
+                  fill="white" text-anchor="middle" dominant-baseline="middle">
+              Stairs
+            </text>
+<rect x="2100" y="300" width="300" height="300" 
+              fill="#607D8B" stroke="none"/>
+<text x="2250.0" y="450.0" 
+                  font-family="Roboto,Segoe UI,Arial,sans-serif" 
+                  font-size="40" font-weight="600"
+                  fill="white" text-anchor="middle" dominant-baseline="middle">
+              LIFT
+            </text>
+<rect x="2100" y="600" width="300" height="1000" 
+              fill="#E0E0E0" stroke="none"/>
+<text x="2250.0" y="1100.0" 
+                  font-family="Roboto,Segoe UI,Arial,sans-serif" 
+                  font-size="40" font-weight="600"
+                  fill="#1a1a1a" text-anchor="middle" dominant-baseline="middle">
+              Hallway
+            </text>
+<rect x="300" y="500" width="1800" height="200" 
+              fill="#E0E0E0" stroke="none"/>
+<text x="1200.0" y="600.0" 
+                  font-family="Roboto,Segoe UI,Arial,sans-serif" 
+                  font-size="40" font-weight="600"
+                  fill="#1a1a1a" text-anchor="middle" dominant-baseline="middle">
+              Main Corridor
+            </text>
+<rect x="1800" y="500" width="100" height="100" 
+                  fill="#E0E0E0" stroke="none"/>
+<rect x="300" y="700" width="500" height="400" 
+              fill="#F44336" stroke="none"/>
+<text x="550.0" y="900.0" 
+                  font-family="Roboto,Segoe UI,Arial,sans-serif" 
+                  font-size="40" font-weight="600"
+                  fill="white" text-anchor="middle" dominant-baseline="middle">
+              Staff Office
+            </text>
+<rect x="800" y="700" width="500" height="400" 
+              fill="#2196F3" stroke="none"/>
+<text x="1050.0" y="900.0" 
+                  font-family="Roboto,Segoe UI,Arial,sans-serif" 
+                  font-size="40" font-weight="600"
+                  fill="white" text-anchor="middle" dominant-baseline="middle">
+              Classroom
+            </text>
+<rect x="1300" y="700" width="500" height="400" 
+              fill="#FF9800" stroke="none"/>
+<text x="1550.0" y="900.0" 
+                  font-family="Roboto,Segoe UI,Arial,sans-serif" 
+                  font-size="40" font-weight="600"
+                  fill="white" text-anchor="middle" dominant-baseline="middle">
+              Software Lab
+            </text>
+<rect x="1800" y="700" width="300" height="400" 
+              fill="#757575" stroke="none"/>
+<text x="1950.0" y="900.0" 
+                  font-family="Roboto,Segoe UI,Arial,sans-serif" 
+                  font-size="39" font-weight="600"
+                  fill="white" text-anchor="middle" dominant-baseline="middle">
+              Supply Room
+            </text>
+<rect x="300" y="1100" width="1800" height="200" 
+              fill="#E0E0E0" stroke="none"/>
+<text x="1200.0" y="1200.0" 
+                  font-family="Roboto,Segoe UI,Arial,sans-serif" 
+                  font-size="40" font-weight="600"
+                  fill="#1a1a1a" text-anchor="middle" dominant-baseline="middle">
+              Corridor
+            </text>
+<rect x="300" y="1300" width="600" height="300" 
+              fill="#2196F3" stroke="none"/>
+<text x="600.0" y="1450.0" 
+                  font-family="Roboto,Segoe UI,Arial,sans-serif" 
+                  font-size="40" font-weight="600"
+                  fill="white" text-anchor="middle" dominant-baseline="middle">
+              Hall
+            </text>
+<rect x="900" y="1300" width="600" height="300" 
+              fill="#00BCD4" stroke="none"/>
+<text x="1200.0" y="1450.0" 
+                  font-family="Roboto,Segoe UI,Arial,sans-serif" 
+                  font-size="40" font-weight="600"
+                  fill="#1a1a1a" text-anchor="middle" dominant-baseline="middle">
+              Common Area
+            </text>
+<rect x="1500" y="1300" width="600" height="300" 
+              fill="#9C27B0" stroke="none"/>
+<text x="1800.0" y="1450.0" 
+                  font-family="Roboto,Segoe UI,Arial,sans-serif" 
+                  font-size="40" font-weight="600"
+                  fill="white" text-anchor="middle" dominant-baseline="middle">
+              Study Area
+            </text>
+  
+  <!-- Printers -->
+  
+    <!-- Printer printer-1 -->
+    <rect x="365.0" y="100.0" width="50" height="50" 
+          fill="#2C3E50" stroke="#FFF" stroke-width="3" rx="5"/>
+    <rect x="370.0" y="95.0" width="40" height="8" 
+          fill="#7F8C8D" rx="2"/>
+    <rect x="375.0" y="115.0" width="30" height="18" 
+          fill="white" rx="2"/>
+    <line x1="380.0" y1="120.0" x2="400.0" y2="120.0" 
+          stroke="#2C3E50" stroke-width="2"/>
+    <line x1="380.0" y1="127.0" x2="400.0" y2="127.0" 
+          stroke="#2C3E50" stroke-width="2"/>
+    <text x="390.0" y="170.0" 
+          font-family="Roboto,Segoe UI,Arial,sans-serif" 
+          font-size="24" font-weight="700"
+          fill="#1a1a1a" text-anchor="middle">
+      P1
+    </text>
+
+    <!-- Printer printer-2 -->
+    <rect x="1385.0" y="125.0" width="50" height="50" 
+          fill="#2C3E50" stroke="#FFF" stroke-width="3" rx="5"/>
+    <rect x="1390.0" y="120.0" width="40" height="8" 
+          fill="#7F8C8D" rx="2"/>
+    <rect x="1395.0" y="140.0" width="30" height="18" 
+          fill="white" rx="2"/>
+    <line x1="1400.0" y1="145.0" x2="1420.0" y2="145.0" 
+          stroke="#2C3E50" stroke-width="2"/>
+    <line x1="1400.0" y1="152.0" x2="1420.0" y2="152.0" 
+          stroke="#2C3E50" stroke-width="2"/>
+    <text x="1410.0" y="195.0" 
+          font-family="Roboto,Segoe UI,Arial,sans-serif" 
+          font-size="24" font-weight="700"
+          fill="#1a1a1a" text-anchor="middle">
+      P2
+    </text>
+
+    <!-- Printer printer-3 -->
+    <rect x="1535.0" y="325.0" width="50" height="50" 
+          fill="#2C3E50" stroke="#FFF" stroke-width="3" rx="5"/>
+    <rect x="1540.0" y="320.0" width="40" height="8" 
+          fill="#7F8C8D" rx="2"/>
+    <rect x="1545.0" y="340.0" width="30" height="18" 
+          fill="white" rx="2"/>
+    <line x1="1550.0" y1="345.0" x2="1570.0" y2="345.0" 
+          stroke="#2C3E50" stroke-width="2"/>
+    <line x1="1550.0" y1="352.0" x2="1570.0" y2="352.0" 
+          stroke="#2C3E50" stroke-width="2"/>
+    <text x="1560.0" y="395.0" 
+          font-family="Roboto,Segoe UI,Arial,sans-serif" 
+          font-size="24" font-weight="700"
+          fill="#1a1a1a" text-anchor="middle">
+      P3
+    </text>
+
+    <!-- Printer printer-4 -->
+    <rect x="1675.0" y="775.0" width="50" height="50" 
+          fill="#2C3E50" stroke="#FFF" stroke-width="3" rx="5"/>
+    <rect x="1680.0" y="770.0" width="40" height="8" 
+          fill="#7F8C8D" rx="2"/>
+    <rect x="1685.0" y="790.0" width="30" height="18" 
+          fill="white" rx="2"/>
+    <line x1="1690.0" y1="795.0" x2="1710.0" y2="795.0" 
+          stroke="#2C3E50" stroke-width="2"/>
+    <line x1="1690.0" y1="802.0" x2="1710.0" y2="802.0" 
+          stroke="#2C3E50" stroke-width="2"/>
+    <text x="1700.0" y="845.0" 
+          font-family="Roboto,Segoe UI,Arial,sans-serif" 
+          font-size="24" font-weight="700"
+          fill="#1a1a1a" text-anchor="middle">
+      P4
+    </text>
+
+    <!-- Printer printer-5 -->
+    <rect x="1565.0" y="1485.0" width="50" height="50" 
+          fill="#2C3E50" stroke="#FFF" stroke-width="3" rx="5"/>
+    <rect x="1570.0" y="1480.0" width="40" height="8" 
+          fill="#7F8C8D" rx="2"/>
+    <rect x="1575.0" y="1500.0" width="30" height="18" 
+          fill="white" rx="2"/>
+    <line x1="1580.0" y1="1505.0" x2="1600.0" y2="1505.0" 
+          stroke="#2C3E50" stroke-width="2"/>
+    <line x1="1580.0" y1="1512.0" x2="1600.0" y2="1512.0" 
+          stroke="#2C3E50" stroke-width="2"/>
+    <text x="1590.0" y="1555.0" 
+          font-family="Roboto,Segoe UI,Arial,sans-serif" 
+          font-size="24" font-weight="700"
+          fill="#1a1a1a" text-anchor="middle">
+      P5
+    </text>
+  
+  <!-- Building outline -->
+  <rect x="0" y="0" width="2400" height="1600" fill="none" stroke="#222" stroke-width="8"/>
+  
+  <!-- Title and Legend -->
+  <text x="1200.0" y="1650" 
+              font-family="Roboto,Segoe UI,Arial,sans-serif" 
+              font-size="48" font-weight="700"
+              fill="#1a1a1a" text-anchor="middle" dominant-baseline="middle">
+          Library &amp; Research Center - 1st Floor
+        </text>
+<rect x="290.0" y="1715.0" 
+              width="50" height="50" 
+              fill="#FF9800" stroke="#333" stroke-width="3"/>
+<text x="360.0" y="1740" 
+              font-family="Roboto,Segoe UI,Arial,sans-serif" 
+              font-size="40" font-weight="700"
+              fill="#1a1a1a" text-anchor="start" dominant-baseline="middle">
+          Computer Lab
+        </text>
+<rect x="1090.0" y="1715.0" 
+              width="50" height="50" 
+              fill="#2196F3" stroke="#333" stroke-width="3"/>
+<text x="1160.0" y="1740" 
+              font-family="Roboto,Segoe UI,Arial,sans-serif" 
+              font-size="40" font-weight="700"
+              fill="#1a1a1a" text-anchor="start" dominant-baseline="middle">
+          Lecture Hall
+        </text>
+<rect x="1890.0" y="1715.0" 
+              width="50" height="50" 
+              fill="#F44336" stroke="#333" stroke-width="3"/>
+<text x="1960.0" y="1740" 
+              font-family="Roboto,Segoe UI,Arial,sans-serif" 
+              font-size="40" font-weight="700"
+              fill="#1a1a1a" text-anchor="start" dominant-baseline="middle">
+          Faculty Office
+        </text>
+<rect x="290.0" y="1780.0" 
+              width="50" height="50" 
+              fill="#9C27B0" stroke="#333" stroke-width="3"/>
+<text x="360.0" y="1805" 
+              font-family="Roboto,Segoe UI,Arial,sans-serif" 
+              font-size="40" font-weight="700"
+              fill="#1a1a1a" text-anchor="start" dominant-baseline="middle">
+          Library
+        </text>
+<rect x="1090.0" y="1780.0" 
+              width="50" height="50" 
+              fill="#00BCD4" stroke="#333" stroke-width="3"/>
+<text x="1160.0" y="1805" 
+              font-family="Roboto,Segoe UI,Arial,sans-serif" 
+              font-size="40" font-weight="700"
+              fill="#1a1a1a" text-anchor="start" dominant-baseline="middle">
+          Lounge
+        </text>
+<rect x="1890.0" y="1780.0" 
+              width="50" height="50" 
+              fill="#4CAF50" stroke="#333" stroke-width="3"/>
+<text x="1960.0" y="1805" 
+              font-family="Roboto,Segoe UI,Arial,sans-serif" 
+              font-size="40" font-weight="700"
+              fill="#1a1a1a" text-anchor="start" dominant-baseline="middle">
+          Restroom
+        </text>
+<rect x="290.0" y="1845.0" 
+              width="50" height="50" 
+              fill="#9E9E9E" stroke="#333" stroke-width="3"/>
+<text x="360.0" y="1870" 
+              font-family="Roboto,Segoe UI,Arial,sans-serif" 
+              font-size="40" font-weight="700"
+              fill="#1a1a1a" text-anchor="start" dominant-baseline="middle">
+          Stairs
+        </text>
+<rect x="1090.0" y="1845.0" 
+              width="50" height="50" 
+              fill="#607D8B" stroke="#333" stroke-width="3"/>
+<text x="1160.0" y="1870" 
+              font-family="Roboto,Segoe UI,Arial,sans-serif" 
+              font-size="40" font-weight="700"
+              fill="#1a1a1a" text-anchor="start" dominant-baseline="middle">
+          Elevator
+        </text>
+<rect x="1890.0" y="1845.0" 
+              width="50" height="50" 
+              fill="#757575" stroke="#333" stroke-width="3"/>
+<text x="1960.0" y="1870" 
+              font-family="Roboto,Segoe UI,Arial,sans-serif" 
+              font-size="40" font-weight="700"
+              fill="#1a1a1a" text-anchor="start" dominant-baseline="middle">
+          Storage
+        </text>
+<rect x="290.0" y="1910.0" 
+              width="50" height="50" 
+              fill="#E0E0E0" stroke="#333" stroke-width="3"/>
+<text x="360.0" y="1935" 
+              font-family="Roboto,Segoe UI,Arial,sans-serif" 
+              font-size="40" font-weight="700"
+              fill="#1a1a1a" text-anchor="start" dominant-baseline="middle">
+          Corridor
+        </text>
+</svg>

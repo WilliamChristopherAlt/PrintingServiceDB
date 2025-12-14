@@ -11,6 +11,7 @@ import bcrypt
 import uuid
 import yaml
 import os
+import json
 from datetime import datetime, timedelta
 from pathlib import Path
 from collections import defaultdict
@@ -21,8 +22,14 @@ from collections import defaultdict
 import os
 script_dir = os.path.dirname(os.path.abspath(__file__))
 SPEC_FILE_PATH = os.path.join(script_dir, "specs.yaml")
-MEDIA_FOLDER = os.path.join(script_dir, "..", "medias")
+MEDIA_FOLDER = os.path.join(script_dir, "..", "medias", "docs")
+PROFILE_PICS_FOLDER = os.path.join(script_dir, "..", "medias", "profile_pics")
 OUTPUT_SQL_FILE = os.path.join(script_dir, "..", "sql", "insert.sql")
+
+# Supabase storage configuration
+SUPABASE_BASE_URL = "https://ilzhoxyiftrpphhbwliz.supabase.co/storage/v1/object/public"
+SUPABASE_BUCKET_PRINT_JOBS = "print_jobs_files"
+SUPABASE_BUCKET_FLOOR_DIAGRAMS = "floor_diagrams"
 
 delete_path = os.path.join(script_dir, "..", "sql", "delete.sql")
 design_path = os.path.join(script_dir, "..", "sql", "design.sql")
@@ -260,9 +267,10 @@ class BulkInsertHelper:
 # ============================================================================
 
 class PrintingServiceDataGenerator:
-    def __init__(self, spec, media_files):
+    def __init__(self, spec, media_files, profile_pics_files=None):
         self.spec = spec
         self.media_files = media_files
+        self.profile_pics_files = profile_pics_files or []
         self.sql_statements = []
         
         # Data storage for relationships
@@ -272,6 +280,7 @@ class PrintingServiceDataGenerator:
         self.brands = []
         self.models = []
         self.buildings = []
+        self.floors = []
         self.rooms = []
         self.printers = []
         self.print_jobs = []
@@ -290,6 +299,15 @@ class PrintingServiceDataGenerator:
         self.student_by_id = {}
         self.staff_by_id = {}
         self.printer_by_id = {}
+        self.floor_by_id = {}
+        self.room_by_id = {}
+        
+        # Floor templates
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        maps_dir = os.path.join(script_dir, "..", "maps")
+        self.floor_templates_dir = os.path.join(maps_dir, "specs")
+        self.floors_diagrams_dir = os.path.join(maps_dir, "floors_diagrams")
+        self.output_test_dir = os.path.join(maps_dir, "output_test")
         
         # Discount packs (initialized empty, populated in generate_discount_packs)
         self.discount_packs = []
@@ -306,6 +324,36 @@ class PrintingServiceDataGenerator:
     def add_sql(self, statement):
         """Add a SQL statement."""
         self.sql_statements.append(statement)
+    
+    def is_test_student(self, email):
+        """Check if an email belongs to a test student account."""
+        test_student_emails = [
+            "student.test@edu.vn",
+            "phandienmanhthienk16@siu.edu.vn",
+            "leanhtuank16@siu.edu.vn",
+            "nguyenhongbaongock16@siu.edu.vn",
+            "phanthanhthaituank16@siu.edu.vn",
+            "lengocdangkhoak16@siu.edu.vn",
+            "lyhieuvyk17@siu.edu.vn",
+        ]
+        return email in test_student_emails
+    
+    def is_test_staff(self, email):
+        """Check if an email belongs to a test staff account."""
+        return email == "staff.test@edu.vn"
+    
+    def is_test_account(self, email):
+        """Check if an email belongs to any test account."""
+        return self.is_test_student(email) or self.is_test_staff(email)
+    
+    def get_test_student_by_email(self, email):
+        """Get test student data by email."""
+        if not self.is_test_student(email):
+            return None
+        user = next((u for u in self.users if u['email'] == email), None)
+        if not user:
+            return None
+        return next((s for s in self.students if s['user_id'] == user['user_id']), None)
     
     def generate_all_data(self):
         """Generate all database entries."""
@@ -331,6 +379,7 @@ class PrintingServiceDataGenerator:
         self.generate_fund_and_supplier_purchases()
         
         print("Generating printer infrastructure...")
+        print("  (This may take a moment for floor diagram generation...)")
         self.generate_printer_infrastructure()
         
         print("Generating system configuration...")
@@ -370,10 +419,28 @@ class PrintingServiceDataGenerator:
         
         bulk = BulkInsertHelper("user", [
             "user_id", "email", "full_name", "password_hash",
-            "user_type", "phone_number", "created_at", "is_active"
+            "user_type", "phone_number", "date_of_birth", "gender",
+            "citizen_id", "address", "profile_picture", "email_verified",
+            "email_verification_code", "account_status", "created_at",
+            "updated_at", "last_login_at", "is_active"
         ])
         
         phone_prefixes = self.spec['phone_prefixes']
+        
+        # Helper function to get random profile picture
+        def get_profile_picture():
+            if self.profile_pics_files:
+                return random.choice(self.profile_pics_files)
+            return None
+        
+        # Helper function to generate date of birth (18-25 years old for students, 25-60 for staff)
+        def generate_date_of_birth(user_type):
+            if user_type == 'student':
+                age_years = random.randint(18, 25)
+            else:
+                age_years = random.randint(25, 60)
+            birth_date = datetime.now() - timedelta(days=age_years * 365 + random.randint(0, 365))
+            return birth_date.date()
         
         # Add test accounts first
         def name_from_email(email):
@@ -399,6 +466,13 @@ class PrintingServiceDataGenerator:
             test_phone = generate_phone_number(phone_prefixes)
             test_created_at = random_date_in_range(365, 30)
             test_full_name = name_from_email(test_email)
+            test_date_of_birth = generate_date_of_birth('student')
+            test_gender = random.choice(['male', 'female'])
+            test_citizen_id = f"{random.randint(100000000, 999999999)}"
+            test_address = f"{random.randint(1, 999)} {random.choice(['Street', 'Avenue', 'Road'])}"
+            test_profile_picture = get_profile_picture()
+            test_email_verified = 1
+            test_account_status = 'active'
             
             test_data = {
                 'user_id': test_id,
@@ -414,7 +488,10 @@ class PrintingServiceDataGenerator:
             
             bulk.add_row([
                 test_id, test_email, test_full_name, student_test_password_hash,
-                'student', test_phone, test_created_at.strftime('%Y-%m-%d %H:%M:%S'), 1
+                'student', test_phone, test_date_of_birth, test_gender,
+                test_citizen_id, test_address, test_profile_picture, test_email_verified,
+                None, test_account_status, test_created_at.strftime('%Y-%m-%d %H:%M:%S'),
+                None, None, 1
             ])
         
         # Test staff account (password SmartPrint@123)
@@ -424,6 +501,13 @@ class PrintingServiceDataGenerator:
             used_emails.add(test_staff_email)
         test_staff_phone = generate_phone_number(phone_prefixes)
         test_staff_created_at = random_date_in_range(365, 30)
+        test_staff_date_of_birth = generate_date_of_birth('staff')
+        test_staff_gender = random.choice(['male', 'female'])
+        test_staff_citizen_id = f"{random.randint(100000000, 999999999)}"
+        test_staff_address = f"{random.randint(1, 999)} {random.choice(['Street', 'Avenue', 'Road'])}"
+        test_staff_profile_picture = get_profile_picture()
+        test_staff_email_verified = 1
+        test_staff_account_status = 'active'
         
         test_staff_data = {
             'user_id': test_staff_id,
@@ -439,7 +523,10 @@ class PrintingServiceDataGenerator:
         
         bulk.add_row([
             test_staff_id, test_staff_email, 'Test Staff', staff_test_password_hash,
-            'staff', test_staff_phone, test_staff_created_at.strftime('%Y-%m-%d %H:%M:%S'), 1
+            'staff', test_staff_phone, test_staff_date_of_birth, test_staff_gender,
+            test_staff_citizen_id, test_staff_address, test_staff_profile_picture, test_staff_email_verified,
+            None, test_staff_account_status, test_staff_created_at.strftime('%Y-%m-%d %H:%M:%S'),
+            None, None, 1
         ])
         
         # Generate regular users
@@ -468,6 +555,14 @@ class PrintingServiceDataGenerator:
             phone = generate_phone_number(phone_prefixes)
             created_at = random_date_in_range(730, 30)  # 2 years to 1 month ago
             is_active = 1  # All users are active now
+            date_of_birth = generate_date_of_birth(user_type)
+            gender = random.choice(['male', 'female'])
+            citizen_id = f"{random.randint(100000000, 999999999)}"
+            address = f"{random.randint(1, 999)} {random.choice(['Street', 'Avenue', 'Road'])}"
+            profile_picture = get_profile_picture()
+            email_verified = random.choice([0, 1])  # Some verified, some not
+            email_verification_code = None if email_verified else f"VERIFY_{random.randint(100000, 999999)}"
+            account_status = 'active'  # All active for now
             
             user_data = {
                 'user_id': user_id,
@@ -484,7 +579,10 @@ class PrintingServiceDataGenerator:
             
             bulk.add_row([
                 user_id, email, full_name, shared_password_hash,
-                user_type, phone, created_at.strftime('%Y-%m-%d %H:%M:%S'), is_active
+                user_type, phone, date_of_birth, gender,
+                citizen_id, address, profile_picture, email_verified,
+                email_verification_code, account_status, created_at.strftime('%Y-%m-%d %H:%M:%S'),
+                None, None, is_active
             ])
         
         for stmt in bulk.get_statements():
@@ -666,21 +764,11 @@ class PrintingServiceDataGenerator:
         
         bulk = BulkInsertHelper("student", [
             "student_id", "user_id", "student_code", "class_id", 
-            "enrollment_date", "status"
+            "enrollment_date", "graduation_date", "status"
         ])
         
         student_users = [user for user in self.users if user['user_type'] == 'student' and user['is_active']]
         students_per_class = self.spec['students_per_class']
-        
-        student_index = 0
-        
-        # Find a suitable class for assignment (current/recent academic year)
-        suitable_classes = [
-            class_info for class_info in self.classes
-            if any(ay['academic_year_id'] == class_info['academic_year_id'] and 
-                  ay['year_name'] in ['2023-2024', '2024-2025'] 
-                  for ay in self.academic_years)
-        ]
         
         # Map specific test student emails to fixed student codes
         test_student_codes = {
@@ -692,6 +780,21 @@ class PrintingServiceDataGenerator:
             'lengocdangkhoak16@siu.edu.vn': 'TEST006',
             'lyhieuvyk17@siu.edu.vn': 'TEST007',
         }
+        
+        # Prioritize test students: move them to the front of the list
+        test_student_users = [u for u in student_users if u['email'] in test_student_codes]
+        regular_student_users = [u for u in student_users if u['email'] not in test_student_codes]
+        student_users = test_student_users + regular_student_users
+        
+        student_index = 0
+        
+        # Find a suitable class for assignment (current/recent academic year)
+        suitable_classes = [
+            class_info for class_info in self.classes
+            if any(ay['academic_year_id'] == class_info['academic_year_id'] and 
+                  ay['year_name'] in ['2023-2024', '2024-2025'] 
+                  for ay in self.academic_years)
+        ]
         
         # Distribute students across classes
         for class_info in suitable_classes:
@@ -719,6 +822,9 @@ class PrintingServiceDataGenerator:
                 
                 # Enrollment date based on class year level
                 enrollment_date = random_date_in_range(365 * class_info['year_level'], 365 * (class_info['year_level'] - 1))
+                graduation_date = None  # Most students haven't graduated yet
+                if random.random() < 0.05:  # 5% chance of being graduated
+                    graduation_date = random_date_in_range(365, 1)
                 
                 student_data = {
                     'student_id': student_id,
@@ -734,7 +840,8 @@ class PrintingServiceDataGenerator:
                 
                 bulk.add_row([
                     student_id, user['user_id'], student_code, class_info['class_id'],
-                    enrollment_date.strftime('%Y-%m-%d'), 'active'
+                    enrollment_date.strftime('%Y-%m-%d'), graduation_date.strftime('%Y-%m-%d') if graduation_date else None,
+                    'active'
                 ])
                 
                 student_index += 1
@@ -786,10 +893,27 @@ class PrintingServiceDataGenerator:
             self.add_sql(stmt)
     
     def generate_printer_infrastructure(self):
-        """Generate printer brands, models, and physical printers."""
+        """Generate printer brands, models, buildings, floors, rooms, and physical printers."""
         self.add_sql("\n-- ============================================")
         self.add_sql("-- PRINTER INFRASTRUCTURE DATA")
         self.add_sql("-- ============================================")
+        
+        # Import floor generator
+        try:
+            import sys
+            script_dir = os.path.dirname(os.path.abspath(__file__))
+            maps_dir = os.path.join(script_dir, "..", "maps")
+            maps_dir_abs = os.path.abspath(maps_dir)
+            if maps_dir_abs not in sys.path:
+                sys.path.insert(0, maps_dir_abs)
+            from floor_generator import generate_floor_diagram, get_room_grid_coordinate, grid_to_image_coordinate
+        except ImportError as e:
+            print(f"Warning: Could not import floor_generator: {e}")
+            import traceback
+            traceback.print_exc()
+            generate_floor_diagram = None
+            get_room_grid_coordinate = None
+            grid_to_image_coordinate = None
         
         # Generate brands
         bulk_brands = BulkInsertHelper("brand", [
@@ -879,96 +1003,333 @@ class PrintingServiceDataGenerator:
         for stmt in bulk_models.get_statements():
             self.add_sql(stmt)
         
-        # Generate physical printers
-        bulk_printers = BulkInsertHelper("printer_physical", [
-            "printer_id", "model_id", "room_id", "serial_number", "is_enabled",
-            "status", "printing_status", "installed_date", "last_maintenance_date",
-            "created_at", "created_by"
-        ])
-        
-        # First generate buildings
+        # Generate buildings (3 buildings)
         bulk_buildings = BulkInsertHelper("building", [
             "building_id", "building_code", "address", "campus_name", "created_at"
         ])
         
-        campuses = self.spec['campuses']
+        # Create 3 buildings
+        building_names = ["Main Academic Building", "Science & Technology Building", "Library & Research Center"]
+        campus_name = "Main Campus"  # Default campus
         
-        for campus in campuses:
-            for building_name in campus['buildings']:
-                building_id = generate_uuid()
-                building_code = building_name[:10].upper().replace(' ', '')
-                address = f"{building_name}, {campus['name']} Campus"
-                
-                building_data = {
-                    'building_id': building_id,
-                    'building_code': building_code,
-                    'building_name': building_name,
-                    'campus_name': campus['name'],
-                    'address': address
-                }
-                
-                self.buildings.append(building_data)
-                
-                created_at = random_date_in_range(3650, 365)
-                bulk_buildings.add_row([
-                    building_id,
-                    sql_escape(building_code),
-                    sql_escape(address),
-                    sql_escape(campus['name']),
-                    created_at.strftime('%Y-%m-%d %H:%M:%S')
-                ])
+        for building_name in building_names:
+            building_id = generate_uuid()
+            building_code = building_name[:10].upper().replace(' ', '').replace('&', '')
+            address = f"{building_name}, {campus_name}"
+            
+            building_data = {
+                'building_id': building_id,
+                'building_code': building_code,
+                'building_name': building_name,
+                'campus_name': campus_name,
+                'address': address
+            }
+            
+            self.buildings.append(building_data)
+            
+            created_at = random_date_in_range(3650, 365)
+            bulk_buildings.add_row([
+                building_id,
+                sql_escape(building_code),
+                sql_escape(address),
+                sql_escape(campus_name),
+                created_at.strftime('%Y-%m-%d %H:%M:%S')
+            ])
         
         for stmt in bulk_buildings.get_statements():
             self.add_sql(stmt)
         
-        # Generate rooms
-        bulk_rooms = BulkInsertHelper("room", [
-            "room_id", "building_id", "room_code", "room_type", "created_at"
+        # Generate floors (5 floors per building)
+        bulk_floors = BulkInsertHelper("floor", [
+            "floor_id", "building_id", "floor_number", "file_url", "created_at"
         ])
         
-        room_types = ['Classroom', 'Lab', 'Office', 'Library', 'Study Hall', 'Conference Room']
-        printers_range = self.spec['printers_per_building']
+        # Load floor templates
+        template_files = [
+            "floor_template_1.json",
+            "floor_template_2.json",
+            "floor_template_3.json",
+            "floor_template_4.json",
+            "floor_template_5.json"
+        ]
         
+        print(f"  Generating {len(self.buildings)} buildings with 5 floors each...")
+        floor_count = 0
+        total_floors = len(self.buildings) * 5
+        
+        # Create floor data structures first
         for building in self.buildings:
-            num_rooms = random.randint(printers_range['min'], printers_range['max'])
+            for floor_num in range(1, 6):  # 5 floors (1-5)
+                floor_count += 1
+                floor_id = generate_uuid()
+                
+                # Select template (cycle through templates)
+                template_idx = (floor_num - 1) % len(template_files)
+                template_file = template_files[template_idx]
+                template_path = os.path.join(self.floor_templates_dir, template_file)
+                
+                floor_data = {
+                    'floor_id': floor_id,
+                    'building_id': building['building_id'],
+                    'building_code': building['building_code'],
+                    'floor_number': floor_num,
+                    'template_path': template_path,
+                    'file_url': None,
+                    'grid_to_pixel_scale': None
+                }
+                
+                self.floors.append(floor_data)
+                self.floor_by_id[floor_id] = floor_data
+        
+        # Generate rooms from floor templates
+        print(f"  Generating rooms from {len(self.floors)} floors...")
+        bulk_rooms = BulkInsertHelper("room", [
+            "room_id", "floor_id", "room_code", "room_name", "room_type", "created_at"
+        ])
+        
+        # Room type mapping from template to database
+        room_type_mapping = {
+            'lab': 'Lab',
+            'classroom': 'Lecture Hall',
+            'library': 'Library',
+            'office': 'Office',
+            'lounge': 'Lounge',
+            'storage': 'Storage',
+            'corridor': 'Corridor',
+            'restroom': 'Restroom',
+            'stairs': 'Stairs',
+            'elevator': 'Elevator'
+        }
+        
+        # Room name templates based on type (NO NUMBERS OR CODES)
+        room_name_templates = {
+            'Lab': ['Computer Lab', 'IT Lab', 'Programming Lab', 'Software Lab', 'Hardware Lab'],
+            'Lecture Hall': ['Lecture Hall', 'Classroom', 'Hall', 'Auditorium'],
+            'Library': ['Library', 'Reading Room', 'Study Area', 'Reference Section'],
+            'Office': ['Office', 'Faculty Office', 'Staff Office', 'Administrative Office'],
+            'Lounge': ['Student Lounge', 'Common Area', 'Recreation Room', 'Break Room'],
+            'Storage': ['Storage Room', 'Supply Room', 'Equipment Storage'],
+            'Restroom': ["Women's", "Men's"],
+            'Stairs': ['Stairwell', 'Stairs'],
+            'Elevator': ['Elevator']
+        }
+        
+        # Printer-allowed room types
+        printer_room_types = {'lab', 'classroom', 'library'}
+        
+        room_count = 0
+        for floor in self.floors:
+            # Load template
+            try:
+                with open(floor['template_path'], 'r', encoding='utf-8') as f:
+                    template = json.load(f)
+            except Exception as e:
+                print(f"Warning: Could not load template {floor['template_path']}: {e}")
+                continue
             
-            for room_num in range(1, num_rooms + 1):
+            rooms_spec = template.get('rooms', [])
+            room_counter = 1
+            
+            # Build room mapping for diagram generation (template room ID -> database room_code)
+            room_mapping = {}
+            
+            # Track restrooms to ensure exactly one Men's and one Women's per floor
+            restroom_mens_assigned = False
+            restroom_womens_assigned = False
+            
+            for room_spec in rooms_spec:
+                # Skip corridors, stairs, elevators, and unlabeled rooms
+                if not room_spec.get('label') or room_spec.get('type') in ['corridor', 'stairs', 'elevator']:
+                    continue
+                
                 room_id = generate_uuid()
-                room_code = f"{room_num:03d}"
-                room_type = random.choice(room_types)
+                room_code = f"{floor['floor_number']}{room_counter:02d}"
+                template_type = room_spec.get('type', 'office')
+                room_type = room_type_mapping.get(template_type, 'Office')
+                template_room_id = room_spec.get('id', '').lower()
+                original_label = room_spec.get('label', '')
+                
+                # Generate room name based on type (NO NUMBERS OR CODES)
+                room_name = None
+                if room_type == 'Restroom':
+                    # For restrooms, assign based on template ID or label - ensure exactly one of each
+                    if 'restroom-m' in template_room_id or original_label == "Men's":
+                        if restroom_mens_assigned:
+                            # Skip duplicate men's restroom
+                            continue
+                        room_name = "Men's"
+                        restroom_mens_assigned = True
+                    elif 'restroom-w' in template_room_id or original_label == "Women's":
+                        if restroom_womens_assigned:
+                            # Skip duplicate women's restroom
+                            continue
+                        room_name = "Women's"
+                        restroom_womens_assigned = True
+                    else:
+                        # Fallback: assign based on what's needed
+                        if not restroom_mens_assigned:
+                            room_name = "Men's"
+                            restroom_mens_assigned = True
+                        elif not restroom_womens_assigned:
+                            room_name = "Women's"
+                            restroom_womens_assigned = True
+                        else:
+                            # Both already assigned, skip this restroom
+                            continue
+                elif room_type in room_name_templates:
+                    templates = room_name_templates[room_type]
+                    room_name = random.choice(templates)
+                else:
+                    # Fallback: use room type only (no number)
+                    room_name = room_type
+                
+                # Map template room ID and label to database room_name for diagram labels
+                # IMPORTANT: Only use room_name (no codes or numbers) for diagrams
+                template_room_id = room_spec.get('id', '')
+                original_label = room_spec.get('label', '')
+                
+                # Always map by ID if available (diagrams will show room_name only)
+                if template_room_id:
+                    room_mapping[template_room_id] = room_name
+                
+                # Always map by original label (we know it exists because we skip rooms without labels)
+                if original_label:
+                    room_mapping[original_label] = room_name
+                
+                # DO NOT map by room_code - diagrams should only show names, not codes
                 
                 room_data = {
                     'room_id': room_id,
-                    'building_id': building['building_id'],
-                    'building_code': building['building_code'],
-                    'campus_name': building['campus_name'],
+                    'floor_id': floor['floor_id'],
                     'room_code': room_code,
-                    'room_type': room_type
+                    'room_name': room_name,
+                    'room_type': room_type,
+                    'template_type': template_type,
+                    'room_spec': room_spec,
+                    'allows_printer': template_type in printer_room_types,
+                    'template_room_id': template_room_id
                 }
                 
                 self.rooms.append(room_data)
+                self.room_by_id[room_id] = room_data
                 
                 created_at = random_date_in_range(2190, 180)
                 bulk_rooms.add_row([
                     room_id,
-                    building['building_id'],
+                    floor['floor_id'],
                     sql_escape(room_code),
+                    sql_escape(room_name),
                     sql_escape(room_type),
                     created_at.strftime('%Y-%m-%d %H:%M:%S')
                 ])
+                
+                room_counter += 1
+            
+            # Generate floor diagram with room mappings (after rooms are created)
+            # Skip PNG generation for speed - only generate SVG (much faster)
+            if generate_floor_diagram:
+                # Debug: print room mapping for troubleshooting
+                if room_mapping:
+                    print(f"    Room mapping for {floor['building_code']} F{floor['floor_number']}: {len(room_mapping)} rooms")
+                try:
+                    # Generate SVG only (fast) - PNG will be generated in batch afterward
+                    diagram_filename, grid_to_pixel_scale = generate_floor_diagram(
+                        floor['template_path'],
+                        self.floors_diagrams_dir,
+                        floor['building_code'],
+                        floor['floor_number'],
+                        room_mapping if room_mapping else {},
+                        generate_png=False,  # Skip PNG during pipeline for speed
+                        include_printers=False  # NO printers in floors_diagrams
+                    )
+                    # Generate full Supabase URL for floor diagram
+                    if diagram_filename:
+                        floor['file_url'] = f"{SUPABASE_BASE_URL}/{SUPABASE_BUCKET_FLOOR_DIAGRAMS}/{diagram_filename}"
+                    else:
+                        floor['file_url'] = None
+                    floor['grid_to_pixel_scale'] = grid_to_pixel_scale
+                    
+                    # Also generate SVG WITH printers for output_test folder
+                    try:
+                        generate_floor_diagram(
+                            floor['template_path'],
+                            self.output_test_dir,
+                            floor['building_code'],
+                            floor['floor_number'],
+                            room_mapping if room_mapping else {},
+                            generate_png=False,  # Skip PNG during pipeline for speed
+                            include_printers=True  # WITH printers in output_test
+                        )
+                    except Exception as e:
+                        print(f"    Warning: Could not generate test diagram with printers for {floor['building_code']} F{floor['floor_number']}: {e}")
+                    
+                    if (room_count + 1) % 5 == 0 or (room_count + 1) == len(self.floors):
+                        print(f"    Generated {room_count + 1}/{len(self.floors)} floor diagrams...")
+                except Exception as e:
+                    print(f"    Warning: Could not generate floor diagram for {floor['building_code']} F{floor['floor_number']}: {e}")
+            
+            room_count += 1
         
+        # IMPORTANT: Insert floors BEFORE rooms (rooms have FK to floors)
+        # Now generate floor SQL with diagram filenames (after diagrams are generated)
+        print(f"  Generating floor SQL with diagram filenames...")
+        for floor in self.floors:
+            created_at = random_date_in_range(2190, 180)
+            bulk_floors.add_row([
+                floor['floor_id'],
+                floor['building_id'],
+                floor['floor_number'],
+                sql_escape(floor['file_url']) if floor.get('file_url') else None,
+                created_at.strftime('%Y-%m-%d %H:%M:%S')
+            ])
+        
+        # Insert floors FIRST (before rooms)
+        for stmt in bulk_floors.get_statements():
+            self.add_sql(stmt)
+        
+        # Insert rooms AFTER floors (rooms reference floors via FK)
         for stmt in bulk_rooms.get_statements():
             self.add_sql(stmt)
+        
+        # Generate physical printers from specs (only in lab, lecture hall, library, office)
+        bulk_printers = BulkInsertHelper("printer_physical", [
+            "printer_id", "model_id", "room_id", "serial_number", "printer_pixel_coordinate",
+            "is_enabled", "status", "printing_status", "installed_date", "last_maintenance_date",
+            "created_at", "created_by"
+        ])
         
         # Get a random staff member as creator
         creator_staff = random.choice(self.staff) if self.staff else None
         
-        # Generate printers for rooms (about 70% of rooms have printers)
-        status_options = ['idle', 'idle', 'idle', 'idle', 'idle', 'printing', 'maintained', 'unplugged']  # Weighted: mostly idle
+        # Map room template IDs to database room IDs for printer assignment
+        room_template_to_db = {}  # Maps template room ID -> database room data
+        for room in self.rooms:
+            template_id = room.get('template_room_id', '').lower()
+            if template_id:
+                room_template_to_db[template_id] = room
+        
+        status_options = ['idle', 'idle', 'idle', 'idle', 'idle', 'printing', 'maintained', 'unplugged']
         printing_status_options = ['printing', 'paper_jam', 'low_toner', 'out_of_paper', 'network_error', 'error']
         
-        for room in self.rooms:
-            if random.random() < 0.7:  # 70% chance of having a printer
+        # Generate printers from specs for each floor
+        for floor in self.floors:
+            # Load template to get printers
+            try:
+                with open(floor['template_path'], 'r', encoding='utf-8') as f:
+                    template = json.load(f)
+            except Exception as e:
+                continue
+            
+            printers_spec = template.get('printers', [])
+            
+            for printer_spec in printers_spec:
+                # Find the room by template ID
+                room_template_id = printer_spec.get('room', '').lower()
+                room = room_template_to_db.get(room_template_id)
+                
+                if not room:
+                    continue  # Room not found, skip this printer
+                
                 printer_id = generate_uuid()
                 model = random.choice(self.models)
                 
@@ -978,16 +1339,33 @@ class PrintingServiceDataGenerator:
                 created_at = installed_date
                 is_enabled = random.choice([True, True, True, False])  # 75% enabled
                 
+                # Get printer grid coordinates from spec
+                pixel_coordinate = None
+                if get_room_grid_coordinate and grid_to_image_coordinate and room.get('room_spec'):
+                    grid_rx = printer_spec.get('grid_rx', 0.15)  # Default near left wall
+                    grid_ry = printer_spec.get('grid_ry', 0.2)   # Default near top wall
+                    grid_x, grid_y = get_room_grid_coordinate(room['room_spec'], grid_rx, grid_ry)
+                    
+                    # Get floor to get grid_to_pixel_scale
+                    floor_obj = self.floor_by_id.get(room['floor_id'])
+                    if floor_obj and floor_obj.get('grid_to_pixel_scale'):
+                        pixel_x, pixel_y = grid_to_image_coordinate(grid_x, grid_y, floor_obj['grid_to_pixel_scale'])
+                        # Store as JSON: {"grid": [x, y], "pixel": [x, y]}
+                        import json as json_module
+                        pixel_coordinate = json_module.dumps({
+                            "grid": [round(grid_x, 2), round(grid_y, 2)],
+                            "pixel": [pixel_x, pixel_y]
+                        })
+                
                 # Generate status
                 if not is_enabled:
                     status = random.choice(['unplugged', 'maintained'])
                 else:
                     status = random.choice(status_options)
                 
-                # Generate printing_status (only set when status is 'printing', otherwise NULL)
+                # Generate printing_status
                 printing_status = None
                 if status == 'printing':
-                    # 85% chance of normal printing, 15% chance of error
                     if random.random() < 0.85:
                         printing_status = 'printing'
                     else:
@@ -997,21 +1375,20 @@ class PrintingServiceDataGenerator:
                     'printer_id': printer_id,
                     'model_id': model['model_id'],
                     'room_id': room['room_id'],
-                    'campus_name': room['campus_name'],
-                    'building_code': room['building_code'],
-                    'room_code': room['room_code'],
-                    'room_type': room['room_type'],
+                    'pixel_coordinate': pixel_coordinate,
                     'is_enabled': is_enabled,
                     'status': status,
-                    'printing_status': printing_status
+                    'printing_status': printing_status,
+                    'printer_spec': printer_spec  # Store spec for diagram generation
                 }
                 
                 self.printers.append(printer_data)
                 self.printer_by_id[printer_id] = printer_data
                 
                 bulk_printers.add_row([
-                    printer_id, model['model_id'], room['room_id'], serial_number, is_enabled,
-                    status, printing_status,
+                    printer_id, model['model_id'], room['room_id'], serial_number,
+                    sql_escape(pixel_coordinate) if pixel_coordinate else None,
+                    is_enabled, status, printing_status,
                     installed_date.strftime('%Y-%m-%d'),
                     last_maintenance.strftime('%Y-%m-%d'),
                     created_at.strftime('%Y-%m-%d %H:%M:%S'),
@@ -1181,10 +1558,32 @@ class PrintingServiceDataGenerator:
         # Price multipliers for different page sizes
         price_multipliers = {"A3": 2.0, "A4": 1.0, "A5": 0.5}
         
+        # Identify test students to ensure they get guaranteed purchases
+        test_student_emails = [
+            "student.test@edu.vn",
+            "phandienmanhthienk16@siu.edu.vn",
+            "leanhtuank16@siu.edu.vn",
+            "nguyenhongbaongock16@siu.edu.vn",
+            "phanthanhthaituank16@siu.edu.vn",
+            "lengocdangkhoak16@siu.edu.vn",
+            "lyhieuvyk17@siu.edu.vn",
+        ]
+        test_student_ids = set()
+        for email in test_student_emails:
+            user = next((u for u in self.users if u['email'] == email), None)
+            if user:
+                student = next((s for s in self.students if s['user_id'] == user['user_id']), None)
+                if student:
+                    test_student_ids.add(student['student_id'])
+        
         for student in self.students:
-            if random.random() < purchase_rate:
-                # Generate 1-3 transactions per student
-                num_transactions = random.randint(1, 3)
+            # Guarantee purchases for test accounts (2-4 transactions)
+            is_test_account = student['student_id'] in test_student_ids
+            should_generate = True if is_test_account else (random.random() < purchase_rate)
+            
+            if should_generate:
+                # Test accounts get 2-4 transactions, regular students get 1-3
+                num_transactions = random.randint(2, 4) if is_test_account else random.randint(1, 3)
                 
                 for _ in range(num_transactions):
                     purchase_id = generate_uuid()
@@ -1596,7 +1995,7 @@ class PrintingServiceDataGenerator:
         use_real_files = len(self.media_files) > 0
         
         bulk_jobs = BulkInsertHelper("print_job", [
-            "job_id", "student_id", "printer_id", "file_name", "file_type",
+            "job_id", "student_id", "printer_id", "file_url", "file_type",
             "file_size_kb", "paper_size_id", "page_orientation", "print_side",
             "color_mode", "number_of_copy", "print_status", "start_time",
             "end_time", "created_at"
@@ -1608,8 +2007,32 @@ class PrintingServiceDataGenerator:
         
         job_id_counter = 1
         
+        # Identify test students to ensure they get guaranteed print jobs
+        test_student_emails = [
+            "student.test@edu.vn",
+            "phandienmanhthienk16@siu.edu.vn",
+            "leanhtuank16@siu.edu.vn",
+            "nguyenhongbaongock16@siu.edu.vn",
+            "phanthanhthaituank16@siu.edu.vn",
+            "lengocdangkhoak16@siu.edu.vn",
+            "lyhieuvyk17@siu.edu.vn",
+        ]
+        test_student_ids = set()
+        for email in test_student_emails:
+            user = next((u for u in self.users if u['email'] == email), None)
+            if user:
+                student = next((s for s in self.students if s['user_id'] == user['user_id']), None)
+                if student:
+                    test_student_ids.add(student['student_id'])
+        
         for student in self.students:
-            num_jobs = max(0, int(random.gauss(avg_jobs, variance)))
+            # Guarantee minimum print jobs for test accounts (at least 10-20 jobs)
+            is_test_account = student['student_id'] in test_student_ids
+            if is_test_account:
+                # Test accounts get 15-25 print jobs to ensure rich history
+                num_jobs = random.randint(15, 25)
+            else:
+                num_jobs = max(0, int(random.gauss(avg_jobs, variance)))
             
             for _ in range(num_jobs):
                 job_id = generate_uuid()
@@ -1617,38 +2040,46 @@ class PrintingServiceDataGenerator:
                 # Select printer
                 printer = random.choice(enabled_printers)
                 
-                # Generate file details
-                file_ext = weighted_choice(file_type_dist)
+                # Generate file details - ALWAYS use real files from medias folder
+                file_name = None
+                file_url = None
+                file_size_kb = None
+                file_ext = None
                 
-                # Use actual media files or generate realistic names
-                if use_real_files and random.random() < 0.3:  # 30% chance to use real file
-                    # Filter media files by extension
-                    matching_files = [f for f in self.media_files if f.lower().endswith(f'.{file_ext}')]
-                    if matching_files:
-                        file_name = random.choice(matching_files)
-                        # Try to get actual file size if possible
-                        try:
-                            media_path = os.path.join(MEDIA_FOLDER, file_name)
-                            if os.path.exists(media_path):
-                                file_size_kb = os.path.getsize(media_path) // 1024
-                                file_size_kb = max(1, file_size_kb)  # At least 1KB
-                            else:
-                                file_size_kb = random.randint(100, 10240)
-                        except:
+                if use_real_files and self.media_files:
+                    # ALWAYS pick a random real file from medias folder
+                    file_name = random.choice(self.media_files)
+                    # Generate full Supabase URL for print job file
+                    file_url = f"{SUPABASE_BASE_URL}/{SUPABASE_BUCKET_PRINT_JOBS}/{file_name}"
+                    # Extract extension from real file
+                    file_ext = os.path.splitext(file_name)[1].lstrip('.').lower()
+                    if not file_ext:
+                        file_ext = weighted_choice(file_type_dist)
+                    
+                    # Get actual file size from real file
+                    try:
+                        media_path = os.path.join(MEDIA_FOLDER, file_name)
+                        if os.path.exists(media_path):
+                            file_size_kb = os.path.getsize(media_path) // 1024
+                            file_size_kb = max(1, file_size_kb)  # At least 1KB
+                        else:
                             file_size_kb = random.randint(100, 10240)
-                    else:
-                        file_name = generate_document_name(doc_templates, courses, f".{file_ext}")
+                    except:
                         file_size_kb = random.randint(100, 10240)
                 else:
+                    # Only fallback to generated names if no media files available
+                    file_ext = weighted_choice(file_type_dist)
                     file_name = generate_document_name(doc_templates, courses, f".{file_ext}")
+                    # Generate full Supabase URL for print job file
+                    file_url = f"{SUPABASE_BASE_URL}/{SUPABASE_BUCKET_PRINT_JOBS}/{file_name}"
                     # Realistic file sizes by type
                     if file_ext == 'pdf':
                         file_size_kb = random.randint(500, 5000)  # 500KB to 5MB
-                    elif file_ext in ['jpg', 'png']:
+                    elif file_ext in ['jpg', 'png', 'webp']:
                         file_size_kb = random.randint(200, 2000)  # 200KB to 2MB
                     elif file_ext == 'docx':
                         file_size_kb = random.randint(100, 1000)  # 100KB to 1MB
-                    elif file_ext == 'xlsx':
+                    elif file_ext in ['xlsx', 'xls']:
                         file_size_kb = random.randint(50, 500)   # 50KB to 500KB
                     elif file_ext == 'pptx':
                         file_size_kb = random.randint(1000, 10000)  # 1MB to 10MB
@@ -1714,7 +2145,7 @@ class PrintingServiceDataGenerator:
                 
                 bulk_jobs.add_row([
                     job_id, student['student_id'], printer['printer_id'],
-                    file_name, file_ext, file_size_kb, paper_size_id,
+                    file_url, file_ext, file_size_kb, paper_size_id,
                     orientation, print_side, color_mode, num_copies,
                     status,
                     start_time.strftime('%Y-%m-%d %H:%M:%S') if start_time else None,
@@ -1753,14 +2184,17 @@ class PrintingServiceDataGenerator:
             # Each printer has 5-15 logs
             num_logs = random.randint(5, 15)
             
-            # Look up room and building information
+            # Look up room, floor, and building information
             room = next((r for r in self.rooms if r['room_id'] == printer['room_id']), None)
+            floor = None
             building = None
             if room:
-                building = next((b for b in self.buildings if b['building_id'] == room['building_id']), None)
+                floor = next((f for f in self.floors if f['floor_id'] == room['floor_id']), None)
+                if floor:
+                    building = next((b for b in self.buildings if b['building_id'] == floor['building_id']), None)
             
-            building_name = building['building_name'] if building else printer.get('building_code', 'Unknown Building')
-            room_code = printer.get('room_code', 'Unknown Room')
+            building_name = building['building_name'] if building else 'Unknown Building'
+            room_code = room['room_code'] if room else 'Unknown Room'
             
             # Get print jobs for this printer
             printer_jobs = [job for job in self.print_jobs if job.get('printer_id') == printer['printer_id']]
@@ -1988,13 +2422,18 @@ def main():
     media_files = get_media_files(MEDIA_FOLDER)
     print(f"  Media files found: {len(media_files)}")
     
+    # Load profile picture files
+    print(f"\nScanning profile pictures folder: {PROFILE_PICS_FOLDER}")
+    profile_pics_files = get_media_files(PROFILE_PICS_FOLDER)
+    print(f"  Profile picture files found: {len(profile_pics_files)}")
+    
     # Generate data
     print("\n" + "=" * 70)
     print("GENERATING DATA (BULK INSERTS)")
     print("=" * 70)
     print()
     
-    generator = PrintingServiceDataGenerator(spec, media_files)
+    generator = PrintingServiceDataGenerator(spec, media_files, profile_pics_files)
     
     try:
         sql_content = generator.generate_all_data()
@@ -2099,6 +2538,29 @@ def main():
         print(f"Output file: {OUTPUT_SQL_FILE}")
         print()
         print("Ready to import into database!")
+        print()
+        print("Generating PNG files in batch (faster)...")
+        # Generate PNGs in batch using optimized converter
+        try:
+            import sys
+            script_dir = os.path.dirname(os.path.abspath(__file__))
+            maps_dir = os.path.join(script_dir, "..", "maps")
+            maps_dir_abs = os.path.abspath(maps_dir)
+            if maps_dir_abs not in sys.path:
+                sys.path.insert(0, maps_dir_abs)
+            from convert_svgs_to_png import convert_all_svgs_fast
+            
+            # Convert both directories
+            floors_diagrams_dir = os.path.join(maps_dir, "floors_diagrams")
+            output_test_dir = os.path.join(maps_dir, "output_test")
+            
+            for dir_path in [floors_diagrams_dir, output_test_dir]:
+                if os.path.exists(dir_path):
+                    convert_all_svgs_fast(dir_path)
+            print("PNG generation complete!")
+        except Exception as e:
+            print(f"Warning: Could not generate PNGs in batch: {e}")
+            print("  You can run: cd maps && python convert_svgs_to_png.py")
         
     except Exception as e:
         print(f"Error during data generation: {e}")

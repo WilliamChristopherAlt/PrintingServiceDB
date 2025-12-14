@@ -1,351 +1,254 @@
 <?xml version="1.0" encoding="utf-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2400 1400" 
-     width="1200" height="700" preserveAspectRatio="xMidYMid meet">
+<svg xmlns="http://www.w3.org/2000/svg" 
+     viewBox="0 0 2400 1800" 
+     width="2400" 
+     height="1800"
+     style="display:block; max-width:100%; height:auto;">
   <defs>
     <style>
       text { 
-        pointer-events: none;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
       }
-      .room:hover rect { opacity: 0.9; }
     </style>
   </defs>
   
-  <g class="room" data-room="entrance-hall">
-      <rect x="100" y="550" width="300" height="300" 
-            fill="#ECF0F1" stroke="none"/>
-      <text x="250.0" y="700.0" 
-            font-family="Helvetica,Arial,sans-serif" font-size="16" font-weight="500"
-            fill="#333" text-anchor="middle" dominant-baseline="middle"
-            transform="">
-        Entrance Hall
-      </text>
-    </g>
-<g class="room" data-room="R101">
-      <rect x="450" y="100" width="380" height="320" 
-            fill="#FFB84D" stroke="none"/>
-      <text x="640.0" y="260.0" 
-            font-family="Helvetica,Arial,sans-serif" font-size="16" font-weight="500"
-            fill="#333" text-anchor="middle" dominant-baseline="middle"
-            transform="">
-        Computer Lab 101
-      </text>
-    </g>
-<g class="room" data-room="R102">
-      <rect x="880" y="100" width="380" height="320" 
-            fill="#4A90E2" stroke="none"/>
-      <text x="1070.0" y="260.0" 
-            font-family="Helvetica,Arial,sans-serif" font-size="16" font-weight="500"
-            fill="#333" text-anchor="middle" dominant-baseline="middle"
-            transform="">
-        Lecture Hall 102
-      </text>
-    </g>
-<g class="room" data-room="R103">
-      <rect x="1310" y="100" width="350" height="320" 
-            fill="#E74C3C" stroke="none"/>
-      <text x="1485.0" y="260.0" 
-            font-family="Helvetica,Arial,sans-serif" font-size="16" font-weight="500"
-            fill="#333" text-anchor="middle" dominant-baseline="middle"
-            transform="">
-        Faculty Office
-      </text>
-    </g>
-<g class="room" data-room="corridor-main">
-      <rect x="450" y="450" width="1210" height="180" 
-            fill="#ECF0F1" stroke="none"/>
-      <text x="1055.0" y="540.0" 
-            font-family="Helvetica,Arial,sans-serif" font-size="16" font-weight="500"
-            fill="#333" text-anchor="middle" dominant-baseline="middle"
-            transform="">
-        Main Corridor
-      </text>
-    </g>
-<g class="room" data-room="R201">
-      <rect x="450" y="680" width="380" height="320" 
-            fill="#9B59B6" stroke="none"/>
-      <text x="640.0" y="840.0" 
-            font-family="Helvetica,Arial,sans-serif" font-size="16" font-weight="500"
-            fill="#333" text-anchor="middle" dominant-baseline="middle"
-            transform="">
-        Library
-      </text>
-    </g>
-<g class="room" data-room="R202">
-      <rect x="880" y="680" width="350" height="320" 
-            fill="#4A90E2" stroke="none"/>
-      <text x="1055.0" y="840.0" 
-            font-family="Helvetica,Arial,sans-serif" font-size="16" font-weight="500"
-            fill="#333" text-anchor="middle" dominant-baseline="middle"
-            transform="">
-        Study Room
-      </text>
-    </g>
-<g class="room" data-room="R203">
-      <rect x="1280" y="680" width="380" height="320" 
-            fill="#E74C3C" stroke="none"/>
-      <text x="1470.0" y="840.0" 
-            font-family="Helvetica,Arial,sans-serif" font-size="16" font-weight="500"
-            fill="#333" text-anchor="middle" dominant-baseline="middle"
-            transform="">
-        Meeting Room
-      </text>
-    </g>
-<g class="room" data-room="restroom-m">
-      <rect x="1710" y="100" width="180" height="140" 
-            fill="#2ECC71" stroke="none"/>
-      <text x="1800.0" y="170.0" 
-            font-family="Helvetica,Arial,sans-serif" font-size="16" font-weight="500"
-            fill="#333" text-anchor="middle" dominant-baseline="middle"
-            transform="">
-        Men's
-      </text>
-    </g>
-<g class="room" data-room="restroom-w">
-      <rect x="1710" y="270" width="180" height="140" 
-            fill="#2ECC71" stroke="none"/>
-      <text x="1800.0" y="340.0" 
-            font-family="Helvetica,Arial,sans-serif" font-size="16" font-weight="500"
-            fill="#333" text-anchor="middle" dominant-baseline="middle"
-            transform="">
-        Women's
-      </text>
-    </g>
-<g class="room" data-room="storage">
-      <rect x="1940" y="100" width="140" height="310" 
-            fill="#E74C3C" stroke="none"/>
-      <text x="2010.0" y="255.0" 
-            font-family="Helvetica,Arial,sans-serif" font-size="16" font-weight="500"
-            fill="#333" text-anchor="middle" dominant-baseline="middle"
-            transform="rotate(-90 2010.0 255.0)">
-        Storage
-      </text>
-    </g>
-<g class="room" data-room="lounge">
-      <rect x="1710" y="680" width="370" height="320" 
-            fill="#ECF0F1" stroke="none"/>
-      <text x="1895.0" y="840.0" 
-            font-family="Helvetica,Arial,sans-serif" font-size="16" font-weight="500"
-            fill="#333" text-anchor="middle" dominant-baseline="middle"
-            transform="">
-        Student Lounge
-      </text>
-    </g>
-  <line x1="100" y1="550" x2="400" y2="550" 
-              stroke="#999" stroke-width="1.5" opacity="0.3"/>
-<line x1="400" y1="550" x2="400" y2="850" 
-              stroke="#999" stroke-width="1.5" opacity="0.3"/>
-<line x1="450" y1="100" x2="830" y2="100" 
-              stroke="#999" stroke-width="1.5" opacity="0.3"/>
-<line x1="830" y1="100" x2="830" y2="420" 
-              stroke="#999" stroke-width="1.5" opacity="0.3"/>
-<line x1="880" y1="100" x2="1260" y2="100" 
-              stroke="#999" stroke-width="1.5" opacity="0.3"/>
-<line x1="1260" y1="100" x2="1260" y2="420" 
-              stroke="#999" stroke-width="1.5" opacity="0.3"/>
-<line x1="1310" y1="100" x2="1660" y2="100" 
-              stroke="#999" stroke-width="1.5" opacity="0.3"/>
-<line x1="1660" y1="100" x2="1660" y2="420" 
-              stroke="#999" stroke-width="1.5" opacity="0.3"/>
-<line x1="450" y1="450" x2="1660" y2="450" 
-              stroke="#999" stroke-width="1.5" opacity="0.3"/>
-<line x1="1660" y1="450" x2="1660" y2="630" 
-              stroke="#999" stroke-width="1.5" opacity="0.3"/>
-<line x1="450" y1="680" x2="830" y2="680" 
-              stroke="#999" stroke-width="1.5" opacity="0.3"/>
-<line x1="830" y1="680" x2="830" y2="1000" 
-              stroke="#999" stroke-width="1.5" opacity="0.3"/>
-<line x1="880" y1="680" x2="1230" y2="680" 
-              stroke="#999" stroke-width="1.5" opacity="0.3"/>
-<line x1="1230" y1="680" x2="1230" y2="1000" 
-              stroke="#999" stroke-width="1.5" opacity="0.3"/>
-<line x1="1280" y1="680" x2="1660" y2="680" 
-              stroke="#999" stroke-width="1.5" opacity="0.3"/>
-<line x1="1660" y1="680" x2="1660" y2="1000" 
-              stroke="#999" stroke-width="1.5" opacity="0.3"/>
-<line x1="1710" y1="100" x2="1890" y2="100" 
-              stroke="#999" stroke-width="1.5" opacity="0.3"/>
-<line x1="1890" y1="100" x2="1890" y2="240" 
-              stroke="#999" stroke-width="1.5" opacity="0.3"/>
-<line x1="1710" y1="270" x2="1890" y2="270" 
-              stroke="#999" stroke-width="1.5" opacity="0.3"/>
-<line x1="1890" y1="270" x2="1890" y2="410" 
-              stroke="#999" stroke-width="1.5" opacity="0.3"/>
-<line x1="1940" y1="100" x2="2080" y2="100" 
-              stroke="#999" stroke-width="1.5" opacity="0.3"/>
-<line x1="2080" y1="100" x2="2080" y2="410" 
-              stroke="#999" stroke-width="1.5" opacity="0.3"/>
-<line x1="1710" y1="680" x2="2080" y2="680" 
-              stroke="#999" stroke-width="1.5" opacity="0.3"/>
-<line x1="2080" y1="680" x2="2080" y2="1000" 
-              stroke="#999" stroke-width="1.5" opacity="0.3"/>
-  <rect x="398" y="685" width="4" height="30" 
-              fill="white" stroke="#666" stroke-width="1.5"/>
-<rect x="605" y="448" width="30" height="4" 
-              fill="white" stroke="#666" stroke-width="1.5"/>
-<rect x="1035" y="448" width="30" height="4" 
-              fill="white" stroke="#666" stroke-width="1.5"/>
-<rect x="1455" y="448" width="30" height="4" 
-              fill="white" stroke="#666" stroke-width="1.5"/>
-<rect x="605" y="628" width="30" height="4" 
-              fill="white" stroke="#666" stroke-width="1.5"/>
-<rect x="1035" y="628" width="30" height="4" 
-              fill="white" stroke="#666" stroke-width="1.5"/>
-<rect x="1455" y="628" width="30" height="4" 
-              fill="white" stroke="#666" stroke-width="1.5"/>
-<rect x="1658" y="525" width="4" height="30" 
-              fill="white" stroke="#666" stroke-width="1.5"/>
-<rect x="1785" y="448" width="30" height="4" 
-              fill="white" stroke="#666" stroke-width="1.5"/>
-<rect x="1785" y="628" width="30" height="4" 
-              fill="white" stroke="#666" stroke-width="1.5"/>
-<rect x="1708" y="155" width="4" height="30" 
-              fill="white" stroke="#666" stroke-width="1.5"/>
-<rect x="1708" y="325" width="4" height="30" 
-              fill="white" stroke="#666" stroke-width="1.5"/>
-  <rect x="620" y="98" width="40" height="4" 
-              fill="#87CEEB" stroke="#4682B4" stroke-width="1"/>
-<rect x="740" y="98" width="40" height="4" 
-              fill="#87CEEB" stroke="#4682B4" stroke-width="1"/>
-<rect x="1050" y="98" width="40" height="4" 
-              fill="#87CEEB" stroke="#4682B4" stroke-width="1"/>
-<rect x="1170" y="98" width="40" height="4" 
-              fill="#87CEEB" stroke="#4682B4" stroke-width="1"/>
-<rect x="1470" y="98" width="40" height="4" 
-              fill="#87CEEB" stroke="#4682B4" stroke-width="1"/>
-<rect x="620" y="998" width="40" height="4" 
-              fill="#87CEEB" stroke="#4682B4" stroke-width="1"/>
-<rect x="740" y="998" width="40" height="4" 
-              fill="#87CEEB" stroke="#4682B4" stroke-width="1"/>
-<rect x="995" y="998" width="40" height="4" 
-              fill="#87CEEB" stroke="#4682B4" stroke-width="1"/>
-<rect x="1450" y="998" width="40" height="4" 
-              fill="#87CEEB" stroke="#4682B4" stroke-width="1"/>
-<rect x="1570" y="998" width="40" height="4" 
-              fill="#87CEEB" stroke="#4682B4" stroke-width="1"/>
-<rect x="98" y="610" width="4" height="40" 
-              fill="#87CEEB" stroke="#4682B4" stroke-width="1"/>
-<rect x="98" y="740" width="4" height="40" 
-              fill="#87CEEB" stroke="#4682B4" stroke-width="1"/>
-<rect x="2078" y="180" width="4" height="40" 
-              fill="#87CEEB" stroke="#4682B4" stroke-width="1"/>
-<rect x="2078" y="280" width="4" height="40" 
-              fill="#87CEEB" stroke="#4682B4" stroke-width="1"/>
-  <g class="stairs">
-          <rect x="100" y="100" width="80" height="50" fill="#95A5A6" stroke="none"/>
-          <text x="140" y="130" font-family="Helvetica,Arial,sans-serif" 
-                font-size="12" fill="white" text-anchor="middle">
-            Stairs
-          </text>
-        </g>
-<g class="stairs">
-          <rect x="1940" y="460" width="80" height="50" fill="#95A5A6" stroke="none"/>
-          <text x="1980" y="490" font-family="Helvetica,Arial,sans-serif" 
-                font-size="12" fill="white" text-anchor="middle">
-            Stairs
-          </text>
-        </g>
-  <g class="elevator">
-      <rect x="230" y="100" width="60" height="60" fill="#34495E" 
-            stroke="none" rx="2"/>
-      <text x="260" y="135" font-family="Helvetica,Arial,sans-serif" 
-            font-size="12" fill="white" text-anchor="middle" font-weight="bold">
-        LIFT
-      </text>
-    </g>
-<g class="elevator">
-      <rect x="1940" y="880" width="60" height="60" fill="#34495E" 
-            stroke="none" rx="2"/>
-      <text x="1970" y="915" font-family="Helvetica,Arial,sans-serif" 
-            font-size="12" fill="white" text-anchor="middle" font-weight="bold">
-        LIFT
-      </text>
-    </g>
-  <g class="entrance">
-      <circle cx="250" cy="700" r="12" 
-              fill="#E74C3C" stroke="white" stroke-width="2"/>
-      <text x="250" y="682" 
-            font-family="Helvetica,Arial,sans-serif" font-size="12" font-weight="bold"
-            fill="#E74C3C" text-anchor="middle">
-        Main Entrance
-      </text>
-    </g>
-  <g class="printer" data-id="P1">
-      <!-- Printer icon -->
-      <rect x="797" y="316.0" width="16" height="16" 
-            fill="#2C3E50" stroke="none" rx="2"/>
-      <rect x="799" y="314.0" width="12" height="3" 
-            fill="#95A5A6" stroke="none"/>
-      <rect x="801" y="321.0" width="8" height="5" 
-            fill="white" stroke="none"/>
-      <!-- Label -->
-      <text x="805" y="342.0" 
-            font-family="Helvetica,Arial,sans-serif" font-size="11" font-weight="500"
-            fill="#2C3E50" text-anchor="middle">
-        Printer P1
-      </text>
-    </g>
-<g class="printer" data-id="P2">
-      <!-- Printer icon -->
-      <rect x="897" y="300.0" width="16" height="16" 
-            fill="#2C3E50" stroke="none" rx="2"/>
-      <rect x="899" y="298.0" width="12" height="3" 
-            fill="#95A5A6" stroke="none"/>
-      <rect x="901" y="305.0" width="8" height="5" 
-            fill="white" stroke="none"/>
-      <!-- Label -->
-      <text x="905" y="326.0" 
-            font-family="Helvetica,Arial,sans-serif" font-size="11" font-weight="500"
-            fill="#2C3E50" text-anchor="middle">
-        Printer P2
-      </text>
-    </g>
-<g class="printer" data-id="P3">
-      <!-- Printer icon -->
-      <rect x="689.0" y="967" width="16" height="16" 
-            fill="#2C3E50" stroke="none" rx="2"/>
-      <rect x="691.0" y="965" width="12" height="3" 
-            fill="#95A5A6" stroke="none"/>
-      <rect x="693.0" y="972" width="8" height="5" 
-            fill="white" stroke="none"/>
-      <!-- Label -->
-      <text x="697.0" y="993" 
-            font-family="Helvetica,Arial,sans-serif" font-size="11" font-weight="500"
-            fill="#2C3E50" text-anchor="middle">
-        Printer P3
-      </text>
-    </g>
-<g class="printer" data-id="P4">
-      <!-- Printer icon -->
-      <rect x="1386.0" y="832.0" width="16" height="16" 
-            fill="#2C3E50" stroke="none" rx="2"/>
-      <rect x="1388.0" y="830.0" width="12" height="3" 
-            fill="#95A5A6" stroke="none"/>
-      <rect x="1390.0" y="837.0" width="8" height="5" 
-            fill="white" stroke="none"/>
-      <!-- Label -->
-      <text x="1394.0" y="858.0" 
-            font-family="Helvetica,Arial,sans-serif" font-size="11" font-weight="500"
-            fill="#2C3E50" text-anchor="middle">
-        Printer P4
-      </text>
-    </g>
-<g class="printer" data-id="P5">
-      <!-- Printer icon -->
-      <rect x="1887.0" y="800.0" width="16" height="16" 
-            fill="#2C3E50" stroke="none" rx="2"/>
-      <rect x="1889.0" y="798.0" width="12" height="3" 
-            fill="#95A5A6" stroke="none"/>
-      <rect x="1891.0" y="805.0" width="8" height="5" 
-            fill="white" stroke="none"/>
-      <!-- Label -->
-      <text x="1895.0" y="826.0" 
-            font-family="Helvetica,Arial,sans-serif" font-size="11" font-weight="500"
-            fill="#2C3E50" text-anchor="middle">
-        Printer P5
-      </text>
-    </g>
-  <rect x="0" y="0" width="2400" height="1400" 
-          fill="none" stroke="#333" stroke-width="4"/>
+  <!-- Background -->
+  <rect x="0" y="0" width="2400" height="1800" fill="#f5f5f5"/>
+  
+  <!-- Rooms -->
+  <rect x="0" y="0" width="300" height="1600" 
+              fill="#E0E0E0" stroke="none"/>
+<g><text x="150.0" y="797.5" 
+                      font-family="Roboto,Segoe UI,Arial,sans-serif" 
+                      font-size="40" font-weight="600"
+                      fill="#1a1a1a" text-anchor="middle" dominant-baseline="middle">
+                  Entrance
+                </text><text x="150.0" y="842.5" 
+                      font-family="Roboto,Segoe UI,Arial,sans-serif" 
+                      font-size="40" font-weight="600"
+                      fill="#1a1a1a" text-anchor="middle" dominant-baseline="middle">
+                  Hall
+                </text></g>
+<rect x="300" y="0" width="200" height="300" 
+              fill="#9E9E9E" stroke="none"/>
+<text x="400.0" y="150.0" 
+                  font-family="Roboto,Segoe UI,Arial,sans-serif" 
+                  font-size="40" font-weight="600"
+                  fill="white" text-anchor="middle" dominant-baseline="middle">
+              Stairs
+            </text>
+<rect x="300" y="300" width="200" height="300" 
+              fill="#607D8B" stroke="none"/>
+<text x="400.0" y="450.0" 
+                  font-family="Roboto,Segoe UI,Arial,sans-serif" 
+                  font-size="40" font-weight="600"
+                  fill="white" text-anchor="middle" dominant-baseline="middle">
+              LIFT
+            </text>
+<rect x="300" y="600" width="200" height="1000" 
+              fill="#E0E0E0" stroke="none"/>
+<text x="400.0" y="1100.0" 
+                  font-family="Roboto,Segoe UI,Arial,sans-serif" 
+                  font-size="38" font-weight="600"
+                  fill="#1a1a1a" text-anchor="middle" dominant-baseline="middle">
+              Hallway
+            </text>
+<rect x="500" y="0" width="600" height="600" 
+              fill="#9C27B0" stroke="none"/>
+<text x="800.0" y="300.0" 
+                  font-family="Roboto,Segoe UI,Arial,sans-serif" 
+                  font-size="40" font-weight="600"
+                  fill="white" text-anchor="middle" dominant-baseline="middle">
+              Library Main
+            </text>
+<rect x="1100" y="0" width="500" height="600" 
+              fill="#2196F3" stroke="none"/>
+<text x="1350.0" y="300.0" 
+                  font-family="Roboto,Segoe UI,Arial,sans-serif" 
+                  font-size="40" font-weight="600"
+                  fill="white" text-anchor="middle" dominant-baseline="middle">
+              Lecture Hall 502
+            </text>
+<rect x="1600" y="0" width="400" height="600" 
+              fill="#FF9800" stroke="none"/>
+<text x="1800.0" y="300.0" 
+                  font-family="Roboto,Segoe UI,Arial,sans-serif" 
+                  font-size="40" font-weight="600"
+                  fill="white" text-anchor="middle" dominant-baseline="middle">
+              Lab 503
+            </text>
+<rect x="500" y="600" width="1500" height="200" 
+              fill="#E0E0E0" stroke="none"/>
+<text x="1250.0" y="700.0" 
+                  font-family="Roboto,Segoe UI,Arial,sans-serif" 
+                  font-size="40" font-weight="600"
+                  fill="#1a1a1a" text-anchor="middle" dominant-baseline="middle">
+              Main Corridor
+            </text>
+<rect x="2000" y="0" width="200" height="300" 
+              fill="#4CAF50" stroke="none"/>
+<text x="2100.0" y="150.0" 
+                  font-family="Roboto,Segoe UI,Arial,sans-serif" 
+                  font-size="40" font-weight="600"
+                  fill="white" text-anchor="middle" dominant-baseline="middle">
+              Men's
+            </text>
+<rect x="2000" y="300" width="200" height="300" 
+              fill="#4CAF50" stroke="none"/>
+<text x="2100.0" y="450.0" 
+                  font-family="Roboto,Segoe UI,Arial,sans-serif" 
+                  font-size="38" font-weight="600"
+                  fill="white" text-anchor="middle" dominant-baseline="middle">
+              Women's
+            </text>
+<rect x="2000" y="600" width="400" height="1000" 
+              fill="#E0E0E0" stroke="none"/>
+<text x="2200.0" y="1100.0" 
+                  font-family="Roboto,Segoe UI,Arial,sans-serif" 
+                  font-size="40" font-weight="600"
+                  fill="#1a1a1a" text-anchor="middle" dominant-baseline="middle">
+              Hallway
+            </text>
+<rect x="500" y="800" width="400" height="400" 
+              fill="#F44336" stroke="none"/>
+<text x="700.0" y="1000.0" 
+                  font-family="Roboto,Segoe UI,Arial,sans-serif" 
+                  font-size="40" font-weight="600"
+                  fill="white" text-anchor="middle" dominant-baseline="middle">
+              Office 504
+            </text>
+<rect x="900" y="800" width="400" height="400" 
+              fill="#2196F3" stroke="none"/>
+<text x="1100.0" y="1000.0" 
+                  font-family="Roboto,Segoe UI,Arial,sans-serif" 
+                  font-size="40" font-weight="600"
+                  fill="white" text-anchor="middle" dominant-baseline="middle">
+              Study Room 505
+            </text>
+<rect x="1300" y="800" width="400" height="400" 
+              fill="#FF9800" stroke="none"/>
+<text x="1500.0" y="1000.0" 
+                  font-family="Roboto,Segoe UI,Arial,sans-serif" 
+                  font-size="37" font-weight="600"
+                  fill="white" text-anchor="middle" dominant-baseline="middle">
+              Computer Lab 506
+            </text>
+<rect x="1700" y="800" width="300" height="400" 
+              fill="#00BCD4" stroke="none"/>
+<text x="1850.0" y="1000.0" 
+                  font-family="Roboto,Segoe UI,Arial,sans-serif" 
+                  font-size="40" font-weight="600"
+                  fill="#1a1a1a" text-anchor="middle" dominant-baseline="middle">
+              Lounge
+            </text>
+<rect x="500" y="1200" width="1500" height="300" 
+              fill="#E0E0E0" stroke="none"/>
+<text x="1250.0" y="1350.0" 
+                  font-family="Roboto,Segoe UI,Arial,sans-serif" 
+                  font-size="40" font-weight="600"
+                  fill="#1a1a1a" text-anchor="middle" dominant-baseline="middle">
+              Corridor
+            </text>
+<rect x="500" y="1500" width="500" height="300" 
+              fill="#2196F3" stroke="none"/>
+<text x="750.0" y="1650.0" 
+                  font-family="Roboto,Segoe UI,Arial,sans-serif" 
+                  font-size="40" font-weight="600"
+                  fill="white" text-anchor="middle" dominant-baseline="middle">
+              Lecture Hall 507
+            </text>
+<rect x="1000" y="1500" width="500" height="300" 
+              fill="#9C27B0" stroke="none"/>
+<text x="1250.0" y="1650.0" 
+                  font-family="Roboto,Segoe UI,Arial,sans-serif" 
+                  font-size="40" font-weight="600"
+                  fill="white" text-anchor="middle" dominant-baseline="middle">
+              Library Section B
+            </text>
+<rect x="1500" y="1500" width="500" height="300" 
+              fill="#757575" stroke="none"/>
+<text x="1750.0" y="1650.0" 
+                  font-family="Roboto,Segoe UI,Arial,sans-serif" 
+                  font-size="40" font-weight="600"
+                  fill="white" text-anchor="middle" dominant-baseline="middle">
+              Storage
+            </text>
+  
+  <!-- Printers -->
+  
+    <!-- Printer printer-1 -->
+    <rect x="565.0" y="95.0" width="50" height="50" 
+          fill="#2C3E50" stroke="#FFF" stroke-width="3" rx="5"/>
+    <rect x="570.0" y="90.0" width="40" height="8" 
+          fill="#7F8C8D" rx="2"/>
+    <rect x="575.0" y="110.0" width="30" height="18" 
+          fill="white" rx="2"/>
+    <line x1="580.0" y1="115.0" x2="600.0" y2="115.0" 
+          stroke="#2C3E50" stroke-width="2"/>
+    <line x1="580.0" y1="122.0" x2="600.0" y2="122.0" 
+          stroke="#2C3E50" stroke-width="2"/>
+    <text x="590.0" y="165.0" 
+          font-family="Roboto,Segoe UI,Arial,sans-serif" 
+          font-size="24" font-weight="700"
+          fill="#1a1a1a" text-anchor="middle">
+      P1
+    </text>
+
+    <!-- Printer printer-2 -->
+    <rect x="1915.0" y="155.0" width="50" height="50" 
+          fill="#2C3E50" stroke="#FFF" stroke-width="3" rx="5"/>
+    <rect x="1920.0" y="150.0" width="40" height="8" 
+          fill="#7F8C8D" rx="2"/>
+    <rect x="1925.0" y="170.0" width="30" height="18" 
+          fill="white" rx="2"/>
+    <line x1="1930.0" y1="175.0" x2="1950.0" y2="175.0" 
+          stroke="#2C3E50" stroke-width="2"/>
+    <line x1="1930.0" y1="182.0" x2="1950.0" y2="182.0" 
+          stroke="#2C3E50" stroke-width="2"/>
+    <text x="1940.0" y="225.0" 
+          font-family="Roboto,Segoe UI,Arial,sans-serif" 
+          font-size="24" font-weight="700"
+          fill="#1a1a1a" text-anchor="middle">
+      P2
+    </text>
+
+    <!-- Printer printer-3 -->
+    <rect x="1355.0" y="1055.0" width="50" height="50" 
+          fill="#2C3E50" stroke="#FFF" stroke-width="3" rx="5"/>
+    <rect x="1360.0" y="1050.0" width="40" height="8" 
+          fill="#7F8C8D" rx="2"/>
+    <rect x="1365.0" y="1070.0" width="30" height="18" 
+          fill="white" rx="2"/>
+    <line x1="1370.0" y1="1075.0" x2="1390.0" y2="1075.0" 
+          stroke="#2C3E50" stroke-width="2"/>
+    <line x1="1370.0" y1="1082.0" x2="1390.0" y2="1082.0" 
+          stroke="#2C3E50" stroke-width="2"/>
+    <text x="1380.0" y="1125.0" 
+          font-family="Roboto,Segoe UI,Arial,sans-serif" 
+          font-size="24" font-weight="700"
+          fill="#1a1a1a" text-anchor="middle">
+      P3
+    </text>
+
+    <!-- Printer printer-4 -->
+    <rect x="1375.0" y="1550.0" width="50" height="50" 
+          fill="#2C3E50" stroke="#FFF" stroke-width="3" rx="5"/>
+    <rect x="1380.0" y="1545.0" width="40" height="8" 
+          fill="#7F8C8D" rx="2"/>
+    <rect x="1385.0" y="1565.0" width="30" height="18" 
+          fill="white" rx="2"/>
+    <line x1="1390.0" y1="1570.0" x2="1410.0" y2="1570.0" 
+          stroke="#2C3E50" stroke-width="2"/>
+    <line x1="1390.0" y1="1577.0" x2="1410.0" y2="1577.0" 
+          stroke="#2C3E50" stroke-width="2"/>
+    <text x="1400.0" y="1620.0" 
+          font-family="Roboto,Segoe UI,Arial,sans-serif" 
+          font-size="24" font-weight="700"
+          fill="#1a1a1a" text-anchor="middle">
+      P4
+    </text>
+  
+  <!-- Building outline -->
+  <rect x="0" y="0" width="2400" height="1800" fill="none" stroke="#222" stroke-width="8"/>
 </svg>

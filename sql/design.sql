@@ -20,6 +20,14 @@ CREATE TABLE [user] (
     password_hash VARCHAR(255) NOT NULL,
     user_type VARCHAR(10) NOT NULL CHECK (user_type IN ('student', 'staff')),
     phone_number VARCHAR(15),
+    date_of_birth DATE,
+    gender VARCHAR(10) CHECK (gender IN ('male', 'female')),
+    citizen_id VARCHAR(50),
+    address VARCHAR(500),
+    profile_picture VARCHAR(500),
+    email_verified BIT DEFAULT 0,
+    email_verification_code VARCHAR(255),
+    account_status VARCHAR(20) NOT NULL DEFAULT 'active' CHECK (account_status IN ('active', 'inactive', 'suspended')),
     created_at DATETIME DEFAULT GETDATE(),
     updated_at DATETIME DEFAULT GETDATE(),
     last_login_at DATETIME,
@@ -159,16 +167,30 @@ CREATE INDEX idx_building_code ON building (building_code);
 CREATE INDEX idx_campus_name ON building (campus_name);
 GO
 
-CREATE TABLE room (
-    room_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+CREATE TABLE floor (
+    floor_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     building_id UNIQUEIDENTIFIER NOT NULL,
-    room_code VARCHAR(20) NOT NULL,
-    room_type VARCHAR(50) NOT NULL,
+    floor_number INT NOT NULL,
+    file_url VARCHAR(500) NULL,
     created_at DATETIME DEFAULT GETDATE(),
     FOREIGN KEY (building_id) REFERENCES building(building_id),
-    UNIQUE (building_id, room_code)
+    UNIQUE (building_id, floor_number)
 );
-CREATE INDEX idx_building_room ON room (building_id);
+CREATE INDEX idx_building_floor ON floor (building_id);
+CREATE INDEX idx_floor_number ON floor (floor_number);
+GO
+
+CREATE TABLE room (
+    room_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    floor_id UNIQUEIDENTIFIER NOT NULL,
+    room_code VARCHAR(20) NOT NULL,
+    room_name VARCHAR(100) NOT NULL,
+    room_type VARCHAR(50) NOT NULL,
+    created_at DATETIME DEFAULT GETDATE(),
+    FOREIGN KEY (floor_id) REFERENCES floor(floor_id),
+    UNIQUE (floor_id, room_code)
+);
+CREATE INDEX idx_floor_room ON room (floor_id);
 CREATE INDEX idx_room_code ON room (room_code);
 CREATE INDEX idx_room_type ON room (room_type);
 GO
@@ -210,6 +232,7 @@ CREATE TABLE printer_physical (
     model_id UNIQUEIDENTIFIER NOT NULL,
     room_id UNIQUEIDENTIFIER NOT NULL,
     serial_number VARCHAR(100) UNIQUE,
+    printer_pixel_coordinate VARCHAR(100) NULL, -- JSON: {"grid": [x, y], "pixel": [x, y]}
     is_enabled BIT DEFAULT 1,
     status VARCHAR(20) NOT NULL DEFAULT 'idle' CHECK (status IN ('unplugged', 'idle', 'printing', 'maintained')),
     printing_status VARCHAR(50) NULL CHECK (printing_status IN ('printing', 'paper_jam', 'out_of_paper', 'out_of_toner', 'low_toner', 'door_open', 'paper_tray_empty', 'network_error', 'offline', 'error')),
@@ -393,7 +416,7 @@ CREATE TABLE print_job (
     job_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     student_id UNIQUEIDENTIFIER NOT NULL,
     printer_id UNIQUEIDENTIFIER NOT NULL,
-    file_name VARCHAR(255) NOT NULL,
+    file_url VARCHAR(500) NOT NULL,
     file_type VARCHAR(10) NOT NULL,
     file_size_kb INT,
     paper_size_id UNIQUEIDENTIFIER NOT NULL,
@@ -474,22 +497,6 @@ CREATE INDEX idx_printer_log_user ON printer_log(user_id);
 CREATE INDEX idx_printer_log_resolved ON printer_log(is_resolved);
 CREATE INDEX idx_printer_log_type_severity ON printer_log(log_type, severity);
 CREATE INDEX idx_printer_log_printer_date ON printer_log(printer_id, created_at);
-GO
-
--- Printer Activity Log Table (for tracking printer CRUD operations)
--- ============================================
-CREATE TABLE printer_activity_log (
-    log_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    printer_id UNIQUEIDENTIFIER NOT NULL,
-    action_type VARCHAR(20) NOT NULL CHECK (action_type IN ('added', 'enabled', 'disabled', 'updated', 'removed')),
-    performed_by UNIQUEIDENTIFIER NULL,
-    action_detail TEXT NULL,
-    action_timestamp DATETIME DEFAULT GETDATE(),
-    FOREIGN KEY (printer_id) REFERENCES printer_physical(printer_id) ON DELETE CASCADE,
-    FOREIGN KEY (performed_by) REFERENCES staff(staff_id)
-);
-CREATE INDEX idx_printer_log ON printer_activity_log (printer_id);
-CREATE INDEX idx_action_timestamp ON printer_activity_log (action_timestamp);
 GO
 
 CREATE TABLE system_audit_log (
@@ -628,7 +635,8 @@ FROM printer_physical pp
 JOIN printer_model pm ON pp.model_id = pm.model_id
 JOIN brand b ON pm.brand_id = b.brand_id
 JOIN room r ON pp.room_id = r.room_id
-JOIN building bld ON r.building_id = bld.building_id
+JOIN floor f ON r.floor_id = f.floor_id
+JOIN building bld ON f.building_id = bld.building_id
 LEFT JOIN print_job pj ON pp.printer_id = pj.printer_id AND pj.print_status = 'completed'
 LEFT JOIN page_size ps ON pj.paper_size_id = ps.page_size_id
 LEFT JOIN job_pages jp ON pj.job_id = jp.job_id
@@ -703,7 +711,7 @@ SELECT
     m.major_name,
     d.department_name,
     f.faculty_name,
-    pj.file_name,
+    pj.file_url,
     ps.size_name AS paper_size,
     pj.print_side,
     pj.color_mode,
@@ -735,12 +743,13 @@ JOIN printer_physical pp ON pj.printer_id = pp.printer_id
 JOIN printer_model pm ON pp.model_id = pm.model_id
 JOIN brand b ON pm.brand_id = b.brand_id
 JOIN room r ON pp.room_id = r.room_id
-JOIN building bld ON r.building_id = bld.building_id
+JOIN floor fl ON r.floor_id = fl.floor_id
+JOIN building bld ON fl.building_id = bld.building_id
 JOIN page_size ps ON pj.paper_size_id = ps.page_size_id
 LEFT JOIN print_job_page pjp ON pj.job_id = pjp.job_id
 GROUP BY pj.job_id, s.student_id, s.student_code, u.full_name, 
-         c.class_name, m.major_name, d.department_name, f.faculty_name,
-         pj.file_name, ps.size_name, pj.print_side, pj.color_mode, pj.number_of_copy,
+         c.class_name, m.major_name, d.department_name, f.faculty_name, fl.floor_id,
+         pj.file_url, ps.size_name, pj.print_side, pj.color_mode, pj.number_of_copy,
          b.brand_name, pm.model_name, bld.campus_name, bld.address, 
          r.room_code, r.room_type, pj.print_status, pj.start_time, pj.end_time;
 GO
@@ -769,7 +778,8 @@ FROM printer_physical pp
 JOIN printer_model pm ON pp.model_id = pm.model_id
 JOIN brand b ON pm.brand_id = b.brand_id
 JOIN room r ON pp.room_id = r.room_id
-JOIN building bld ON r.building_id = bld.building_id
+JOIN floor f ON r.floor_id = f.floor_id
+JOIN building bld ON f.building_id = bld.building_id
 JOIN page_size ps ON pm.max_paper_size_id = ps.page_size_id
 WHERE pp.is_enabled = 1;
 GO
@@ -846,7 +856,8 @@ FROM printer_physical pp
 JOIN printer_model pm ON pp.model_id = pm.model_id
 JOIN brand b ON pm.brand_id = b.brand_id
 JOIN room r ON pp.room_id = r.room_id
-JOIN building bld ON r.building_id = bld.building_id
+JOIN floor f ON r.floor_id = f.floor_id
+JOIN building bld ON f.building_id = bld.building_id
 LEFT JOIN print_job pj ON pp.printer_id = pj.printer_id 
     AND pj.end_time > pp.last_maintenance_date
 WHERE pp.is_enabled = 1
@@ -872,14 +883,15 @@ SELECT
     pl.is_resolved,
     u.full_name AS user_name,
     u.user_type,
-    pj.file_name AS related_file,
+    pj.file_url AS related_file,
     pl.details
 FROM printer_log pl
 JOIN printer_physical pp ON pl.printer_id = pp.printer_id
 JOIN printer_model pm ON pp.model_id = pm.model_id
 JOIN brand b ON pm.brand_id = b.brand_id
 JOIN room r ON pp.room_id = r.room_id
-JOIN building bld ON r.building_id = bld.building_id
+JOIN floor f ON r.floor_id = f.floor_id
+JOIN building bld ON f.building_id = bld.building_id
 LEFT JOIN [user] u ON pl.user_id = u.user_id
 LEFT JOIN print_job pj ON pl.job_id = pj.job_id;
 GO
