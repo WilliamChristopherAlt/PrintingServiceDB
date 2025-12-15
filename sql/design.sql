@@ -269,58 +269,135 @@ CREATE INDEX idx_semester_academic_year ON semester (academic_year_id, term_name
 CREATE INDEX idx_semester_dates ON semester (start_date, end_date);
 GO
 
--- Per-student semester allocation of free pages (A4-equivalent)
-CREATE TABLE student_page_allocation (
-    allocation_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    student_id UNIQUEIDENTIFIER NOT NULL,
-    semester_id UNIQUEIDENTIFIER NOT NULL,
-    a4_page_count INT NOT NULL,
-    allocation_date DATE NOT NULL,
-    created_at DATETIME DEFAULT GETDATE(),
-    created_by UNIQUEIDENTIFIER,
-    UNIQUE (student_id, semester_id),
-    FOREIGN KEY (student_id) REFERENCES student(student_id) ON DELETE CASCADE,
-    FOREIGN KEY (semester_id) REFERENCES semester(semester_id),
-    FOREIGN KEY (created_by) REFERENCES staff(staff_id)
-);
-CREATE INDEX idx_student_page_allocation_student ON student_page_allocation (student_id);
-CREATE INDEX idx_student_page_allocation_semester ON student_page_allocation (semester_id);
+
+-- ============================================
+-- User Balance and Money Management Tables
+-- ============================================
+
+-- Note: User balance is calculated dynamically from deposits, semester bonuses, and payments
+-- See view: student_balance_view for computed balance
 GO
 
-CREATE TABLE discount_pack (
-    discount_pack_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    num_pages INT NOT NULL,
-    percent_off DECIMAL(5, 4) NOT NULL CHECK (percent_off >= 0 AND percent_off <= 1),
-    pack_name VARCHAR(100),
+-- Deposit bonus package table - defines bonus tiers for deposits
+CREATE TABLE deposit_bonus_package (
+    package_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    amount_cap DECIMAL(10, 2) NOT NULL CHECK (amount_cap > 0), -- Minimum deposit amount to qualify
+    bonus_percentage DECIMAL(5, 4) NOT NULL CHECK (bonus_percentage >= 0 AND bonus_percentage <= 1), -- Bonus percentage (0-1 range)
+    package_name VARCHAR(100),
     description TEXT,
     is_active BIT DEFAULT 1,
     created_at DATETIME DEFAULT GETDATE(),
     updated_at DATETIME DEFAULT GETDATE()
 );
-CREATE INDEX idx_num_pages ON discount_pack (num_pages);
-CREATE INDEX idx_is_active ON discount_pack (is_active);
+CREATE INDEX idx_deposit_bonus_package_amount ON deposit_bonus_package (amount_cap);
+CREATE INDEX idx_deposit_bonus_package_active ON deposit_bonus_package (is_active);
 GO
 
-CREATE TABLE student_page_purchase (
-    purchase_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+-- Deposit table - tracks each deposit/recharge transaction (real dollars to in-app currency)
+CREATE TABLE deposit (
+    deposit_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     student_id UNIQUEIDENTIFIER NOT NULL,
-    page_size_id UNIQUEIDENTIFIER NOT NULL,
-    quantity INT NOT NULL,
-    amount_paid DECIMAL(10, 2) NOT NULL,
-    discount_pack_id UNIQUEIDENTIFIER NULL, -- Link to discount pack if package was used
+    deposit_amount DECIMAL(10, 2) NOT NULL CHECK (deposit_amount > 0), -- Real dollars deposited
+    bonus_amount DECIMAL(10, 2) NOT NULL DEFAULT 0 CHECK (bonus_amount >= 0), -- Bonus received
+    total_credited DECIMAL(10, 2) NOT NULL CHECK (total_credited > 0), -- deposit_amount + bonus_amount
+    deposit_bonus_package_id UNIQUEIDENTIFIER NULL, -- Link to bonus package if applicable
     payment_method VARCHAR(50) NOT NULL,
     payment_reference VARCHAR(100),
     payment_status VARCHAR(20) NOT NULL DEFAULT 'pending' CHECK (payment_status IN ('pending', 'completed', 'failed', 'refunded')),
     transaction_date DATETIME DEFAULT GETDATE(),
     FOREIGN KEY (student_id) REFERENCES student(student_id) ON DELETE CASCADE,
-    FOREIGN KEY (page_size_id) REFERENCES page_size(page_size_id),
-    FOREIGN KEY (discount_pack_id) REFERENCES discount_pack(discount_pack_id)
+    FOREIGN KEY (deposit_bonus_package_id) REFERENCES deposit_bonus_package(package_id)
 );
-CREATE INDEX idx_student_purchase ON student_page_purchase (student_id);
-CREATE INDEX idx_transaction_date ON student_page_purchase (transaction_date);
-CREATE INDEX idx_payment_status ON student_page_purchase (payment_status);
-CREATE INDEX idx_page_size ON student_page_purchase (page_size_id);
-CREATE INDEX idx_discount_pack ON student_page_purchase (discount_pack_id);
+CREATE INDEX idx_deposit_student ON deposit (student_id);
+CREATE INDEX idx_deposit_transaction_date ON deposit (transaction_date);
+CREATE INDEX idx_deposit_payment_status ON deposit (payment_status);
+CREATE INDEX idx_deposit_bonus_package ON deposit (deposit_bonus_package_id);
+GO
+
+-- Semester bonus table - defines how much money is given per semester
+CREATE TABLE semester_bonus (
+    bonus_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    semester_id UNIQUEIDENTIFIER NOT NULL,
+    bonus_amount DECIMAL(10, 2) NOT NULL CHECK (bonus_amount >= 0), -- Amount of in-app currency given
+    description TEXT,
+    created_at DATETIME DEFAULT GETDATE(),
+    created_by UNIQUEIDENTIFIER,
+    FOREIGN KEY (semester_id) REFERENCES semester(semester_id),
+    FOREIGN KEY (created_by) REFERENCES staff(staff_id),
+    UNIQUE (semester_id)
+);
+CREATE INDEX idx_semester_bonus_semester ON semester_bonus (semester_id);
+GO
+
+-- Student semester bonus table - tracks which students received semester bonuses
+CREATE TABLE student_semester_bonus (
+    student_bonus_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    student_id UNIQUEIDENTIFIER NOT NULL,
+    semester_bonus_id UNIQUEIDENTIFIER NOT NULL,
+    semester_id UNIQUEIDENTIFIER NOT NULL, -- Denormalized for easier querying
+    received BIT NOT NULL DEFAULT 0, -- Whether student has received the bonus
+    received_date DATETIME NULL,
+    created_at DATETIME DEFAULT GETDATE(),
+    FOREIGN KEY (student_id) REFERENCES student(student_id) ON DELETE CASCADE,
+    FOREIGN KEY (semester_bonus_id) REFERENCES semester_bonus(bonus_id),
+    FOREIGN KEY (semester_id) REFERENCES semester(semester_id),
+    UNIQUE (student_id, semester_id)
+);
+CREATE INDEX idx_student_semester_bonus_student ON student_semester_bonus (student_id);
+CREATE INDEX idx_student_semester_bonus_semester ON student_semester_bonus (semester_id);
+CREATE INDEX idx_student_semester_bonus_received ON student_semester_bonus (received);
+GO
+
+-- Constraint: Students cannot receive semester bonus before their enrollment date
+-- This is enforced via a trigger or application logic since CHECK constraints cannot reference other tables
+-- Application should validate: semester.start_date >= student.enrollment_date before inserting
+GO
+
+-- ============================================
+-- Pricing Configuration Tables
+-- ============================================
+
+-- Color mode price - defines price multipliers for color modes
+CREATE TABLE color_mode_price (
+    setting_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    color_mode VARCHAR(20) NOT NULL UNIQUE CHECK (color_mode IN ('color', 'grayscale', 'black-white')),
+    price_multiplier DECIMAL(5, 2) NOT NULL CHECK (price_multiplier >= 0), -- Multiplier (e.g., 0.8 = 80% of base, 1.0 = base, 2.5 = 250% of base)
+    description TEXT,
+    is_active BIT DEFAULT 1,
+    created_at DATETIME DEFAULT GETDATE(),
+    updated_at DATETIME DEFAULT GETDATE()
+);
+CREATE INDEX idx_color_mode_price_color_mode ON color_mode_price (color_mode);
+CREATE INDEX idx_color_mode_price_active ON color_mode_price (is_active);
+GO
+
+-- Page size price table - defines base price per page for each paper size
+CREATE TABLE page_size_price (
+    price_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    page_size_id UNIQUEIDENTIFIER NOT NULL UNIQUE,
+    page_price DECIMAL(10, 4) NOT NULL CHECK (page_price >= 0), -- Price per page in dollars
+    is_active BIT DEFAULT 1,
+    created_at DATETIME DEFAULT GETDATE(),
+    updated_at DATETIME DEFAULT GETDATE(),
+    FOREIGN KEY (page_size_id) REFERENCES page_size(page_size_id)
+);
+CREATE INDEX idx_page_size_price_page_size ON page_size_price (page_size_id);
+CREATE INDEX idx_page_size_price_active ON page_size_price (is_active);
+GO
+
+-- Page discount package - defines volume discounts based on number of pages
+CREATE TABLE page_discount_package (
+    package_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    min_pages INT NOT NULL CHECK (min_pages > 0), -- Minimum pages to qualify
+    discount_percentage DECIMAL(5, 4) NOT NULL CHECK (discount_percentage >= 0 AND discount_percentage <= 1), -- Discount (0-1 range)
+    package_name VARCHAR(100),
+    description TEXT,
+    is_active BIT DEFAULT 1,
+    created_at DATETIME DEFAULT GETDATE(),
+    updated_at DATETIME DEFAULT GETDATE()
+);
+CREATE INDEX idx_page_discount_package_min_pages ON page_discount_package (min_pages);
+CREATE INDEX idx_page_discount_package_active ON page_discount_package (is_active);
 GO
 
 -- Fund and Supplier Paper Purchase Management Tables
@@ -451,6 +528,28 @@ CREATE TABLE print_job_page (
 CREATE INDEX idx_job_id ON print_job_page (job_id);
 GO
 
+-- Payment table - tracks payments for print jobs
+CREATE TABLE payment (
+    payment_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    job_id UNIQUEIDENTIFIER NOT NULL UNIQUE, -- One payment per print job
+    student_id UNIQUEIDENTIFIER NOT NULL,
+    amount_paid_directly DECIMAL(10, 2) NOT NULL DEFAULT 0 CHECK (amount_paid_directly >= 0), -- Paid with real money/card
+    amount_paid_from_balance DECIMAL(10, 2) NOT NULL DEFAULT 0 CHECK (amount_paid_from_balance >= 0), -- Paid from in-app balance
+    total_amount DECIMAL(10, 2) NOT NULL CHECK (total_amount > 0), -- Total payment amount
+    payment_method VARCHAR(50) NOT NULL,
+    payment_reference VARCHAR(100),
+    payment_status VARCHAR(20) NOT NULL DEFAULT 'pending' CHECK (payment_status IN ('pending', 'completed', 'failed', 'refunded')),
+    transaction_date DATETIME DEFAULT GETDATE(),
+    FOREIGN KEY (job_id) REFERENCES print_job(job_id) ON DELETE CASCADE,
+    FOREIGN KEY (student_id) REFERENCES student(student_id) ON DELETE NO ACTION,
+    CHECK (amount_paid_directly + amount_paid_from_balance = total_amount)
+);
+CREATE INDEX idx_payment_job ON payment (job_id);
+CREATE INDEX idx_payment_student ON payment (student_id);
+CREATE INDEX idx_payment_transaction_date ON payment (transaction_date);
+CREATE INDEX idx_payment_status ON payment (payment_status);
+GO
+
 -- Audit and Logging Tables
 -- ============================================
 
@@ -532,7 +631,38 @@ GO
 -- Views for Common Queries and Reports
 -- ============================================
 
--- View: Student print summary with balance
+-- View: Student balance (computed from transactions)
+CREATE VIEW student_balance_view AS
+SELECT 
+    s.student_id,
+    s.student_code,
+    u.full_name,
+    u.email,
+    COALESCE((
+        -- Credits from completed deposits
+        SELECT SUM(d.total_credited)
+        FROM deposit d
+        WHERE d.student_id = s.student_id 
+        AND d.payment_status = 'completed'
+    ), 0) + COALESCE((
+        -- Credits from received semester bonuses
+        SELECT SUM(sb.bonus_amount)
+        FROM student_semester_bonus ssb
+        JOIN semester_bonus sb ON ssb.semester_bonus_id = sb.bonus_id
+        WHERE ssb.student_id = s.student_id 
+        AND ssb.received = 1
+    ), 0) - COALESCE((
+        -- Debits from completed payments using balance
+        SELECT SUM(p.amount_paid_from_balance)
+        FROM payment p
+        WHERE p.student_id = s.student_id 
+        AND p.payment_status = 'completed'
+    ), 0) AS balance_amount
+FROM student s
+JOIN [user] u ON s.user_id = u.user_id;
+GO
+
+-- View: Student print summary
 CREATE VIEW student_print_summary AS
 WITH job_pages AS (
     SELECT job_id, COUNT(*) AS page_count
@@ -550,47 +680,8 @@ SELECT
     f.faculty_name,
     ay.year_name,
     COUNT(DISTINCT pj.job_id) AS total_print_job,
-    COALESCE(SUM(
-        CASE 
-            WHEN ps.size_name = 'A4' THEN jp.page_count
-            WHEN ps.size_name = 'A3' THEN jp.page_count * 2
-            WHEN ps.size_name = 'A5' THEN jp.page_count * 0.5
-            ELSE jp.page_count
-        END * pj.number_of_copy
-    ), 0) AS total_a4_equivalent_printed,
-    COALESCE((
-        SELECT SUM(
-            CASE 
-                WHEN psize.size_name = 'A4' THEN spp.quantity
-                WHEN psize.size_name = 'A3' THEN spp.quantity * 2
-                WHEN psize.size_name = 'A5' THEN spp.quantity * 0.5
-                ELSE spp.quantity
-            END
-        )
-        FROM student_page_purchase spp
-        JOIN page_size psize ON spp.page_size_id = psize.page_size_id
-        WHERE spp.student_id = s.student_id AND spp.payment_status = 'completed'
-    ), 0) AS total_a4_page_balance,
-    COALESCE((
-        SELECT SUM(
-            CASE 
-                WHEN psize.size_name = 'A4' THEN spp.quantity
-                WHEN psize.size_name = 'A3' THEN spp.quantity * 2
-                WHEN psize.size_name = 'A5' THEN spp.quantity * 0.5
-                ELSE spp.quantity
-            END
-        )
-        FROM student_page_purchase spp
-        JOIN page_size psize ON spp.page_size_id = psize.page_size_id
-        WHERE spp.student_id = s.student_id AND spp.payment_status = 'completed'
-    ), 0) - COALESCE(SUM(
-        CASE 
-            WHEN ps.size_name = 'A4' THEN jp.page_count
-            WHEN ps.size_name = 'A3' THEN jp.page_count * 2
-            WHEN ps.size_name = 'A5' THEN jp.page_count * 0.5
-            ELSE jp.page_count
-        END * pj.number_of_copy
-    ), 0) AS remaining_a4_page
+    COALESCE(SUM(jp.page_count * pj.number_of_copy), 0) AS total_pages_printed,
+    COALESCE(SUM(p.total_amount), 0) AS total_amount_spent
 FROM student s
 JOIN [user] u ON s.user_id = u.user_id
 JOIN class c ON s.class_id = c.class_id
@@ -599,8 +690,8 @@ JOIN department d ON m.department_id = d.department_id
 JOIN faculty f ON d.faculty_id = f.faculty_id
 JOIN academic_year ay ON c.academic_year_id = ay.academic_year_id
 LEFT JOIN print_job pj ON s.student_id = pj.student_id AND pj.print_status = 'completed'
-LEFT JOIN page_size ps ON pj.paper_size_id = ps.page_size_id
 LEFT JOIN job_pages jp ON pj.job_id = jp.job_id
+LEFT JOIN payment p ON pj.job_id = p.job_id AND p.payment_status = 'completed'
 GROUP BY s.student_id, s.student_code, u.full_name, u.email, 
          c.class_name, m.major_name, d.department_name, f.faculty_name, ay.year_name;
 GO
@@ -622,14 +713,7 @@ SELECT
     pp.is_enabled,
     COUNT(DISTINCT pj.job_id) AS total_job,
     COUNT(DISTINCT pj.student_id) AS unique_student_count,
-    COALESCE(SUM(
-        CASE 
-            WHEN ps.size_name = 'A4' THEN jp.page_count
-            WHEN ps.size_name = 'A3' THEN jp.page_count
-            WHEN ps.size_name = 'A5' THEN jp.page_count
-            ELSE jp.page_count
-        END * pj.number_of_copy
-    ), 0) AS total_page_printed,
+    COALESCE(SUM(jp.page_count * pj.number_of_copy), 0) AS total_page_printed,
     MAX(pj.end_time) AS last_print_time
 FROM printer_physical pp
 JOIN printer_model pm ON pp.model_id = pm.model_id
@@ -638,7 +722,6 @@ JOIN room r ON pp.room_id = r.room_id
 JOIN floor f ON r.floor_id = f.floor_id
 JOIN building bld ON f.building_id = bld.building_id
 LEFT JOIN print_job pj ON pp.printer_id = pj.printer_id AND pj.print_status = 'completed'
-LEFT JOIN page_size ps ON pj.paper_size_id = ps.page_size_id
 LEFT JOIN job_pages jp ON pj.job_id = jp.job_id
 GROUP BY pp.printer_id, b.brand_name, pm.model_name, bld.campus_name, bld.address, r.room_code, r.room_type, pp.is_enabled;
 GO
@@ -655,17 +738,11 @@ SELECT
     COUNT(DISTINCT pj.job_id) AS total_print_job,
     COUNT(DISTINCT pj.student_id) AS total_student_used,
     COUNT(DISTINCT pj.printer_id) AS total_printer_used,
-    COALESCE(SUM(
-        CASE 
-            WHEN ps.size_name = 'A4' THEN jp.page_count
-            WHEN ps.size_name = 'A3' THEN jp.page_count * 2
-            WHEN ps.size_name = 'A5' THEN jp.page_count * 0.5
-            ELSE jp.page_count
-        END * pj.number_of_copy
-    ), 0) AS total_a4_equivalent_page
+    COALESCE(SUM(jp.page_count * pj.number_of_copy), 0) AS total_pages_printed,
+    COALESCE(SUM(p.total_amount), 0) AS total_revenue
 FROM print_job pj
-LEFT JOIN page_size ps ON pj.paper_size_id = ps.page_size_id
 LEFT JOIN job_pages jp ON pj.job_id = jp.job_id
+LEFT JOIN payment p ON pj.job_id = p.job_id AND p.payment_status = 'completed'
 WHERE pj.print_status = 'completed' AND pj.end_time IS NOT NULL
 GROUP BY YEAR(pj.end_time), MONTH(pj.end_time);
 GO
@@ -681,22 +758,11 @@ SELECT
     COUNT(DISTINCT pj.job_id) AS total_print_job,
     COUNT(DISTINCT pj.student_id) AS total_student_used,
     COUNT(DISTINCT pj.printer_id) AS total_printer_used,
-    COALESCE(SUM(
-        CASE 
-            WHEN ps.size_name = 'A4' THEN jp.page_count
-            WHEN ps.size_name = 'A3' THEN jp.page_count * 2
-            WHEN ps.size_name = 'A5' THEN jp.page_count * 0.5
-            ELSE jp.page_count
-        END * pj.number_of_copy
-    ), 0) AS total_a4_equivalent_page,
-    COALESCE(SUM(spp.amount_paid), 0) AS total_revenue
+    COALESCE(SUM(jp.page_count * pj.number_of_copy), 0) AS total_pages_printed,
+    COALESCE(SUM(p.total_amount), 0) AS total_revenue
 FROM print_job pj
-LEFT JOIN page_size ps ON pj.paper_size_id = ps.page_size_id
 LEFT JOIN job_pages jp ON pj.job_id = jp.job_id
-LEFT JOIN student s ON pj.student_id = s.student_id
-LEFT JOIN student_page_purchase spp ON s.student_id = spp.student_id 
-    AND spp.payment_status = 'completed'
-    AND YEAR(spp.transaction_date) = YEAR(pj.end_time)
+LEFT JOIN payment p ON pj.job_id = p.job_id AND p.payment_status = 'completed'
 WHERE pj.print_status = 'completed' AND pj.end_time IS NOT NULL
 GROUP BY YEAR(pj.end_time);
 GO
@@ -717,12 +783,7 @@ SELECT
     pj.color_mode,
     pj.number_of_copy,
     COUNT(pjp.page_number) AS page_count,
-    CASE 
-        WHEN ps.size_name = 'A4' THEN COUNT(pjp.page_number)
-        WHEN ps.size_name = 'A3' THEN COUNT(pjp.page_number) * 2
-        WHEN ps.size_name = 'A5' THEN COUNT(pjp.page_number) * 0.5
-        ELSE COUNT(pjp.page_number)
-    END * pj.number_of_copy AS a4_equivalent,
+    COUNT(pjp.page_number) * pj.number_of_copy AS total_pages,
     b.brand_name AS printer_brand,
     pm.model_name AS printer_model,
     bld.campus_name,
@@ -784,31 +845,6 @@ JOIN page_size ps ON pm.max_paper_size_id = ps.page_size_id
 WHERE pp.is_enabled = 1;
 GO
 
--- View: Page purchase summary by student
-CREATE VIEW student_page_purchase_summary AS
-SELECT 
-    s.student_id,
-    s.student_code,
-    u.full_name,
-    COUNT(spp.purchase_id) AS total_transaction,
-    SUM(CASE 
-        WHEN spp.payment_status = 'completed' THEN 
-            CASE 
-                WHEN ps.size_name = 'A4' THEN spp.quantity
-                WHEN ps.size_name = 'A3' THEN spp.quantity * 2
-                WHEN ps.size_name = 'A5' THEN spp.quantity * 0.5
-                ELSE spp.quantity
-            END
-        ELSE 0 
-    END) AS total_a4_equivalent_purchased,
-    SUM(CASE WHEN spp.payment_status = 'completed' THEN spp.amount_paid ELSE 0 END) AS total_amount_paid,
-    MAX(spp.transaction_date) AS last_purchase_date
-FROM student s
-JOIN [user] u ON s.user_id = u.user_id
-LEFT JOIN student_page_purchase spp ON s.student_id = spp.student_id
-LEFT JOIN page_size ps ON spp.page_size_id = ps.page_size_id
-GROUP BY s.student_id, s.student_code, u.full_name;
-GO
 
 -- View: Daily printing activity
 CREATE VIEW daily_printing_activity AS
@@ -822,17 +858,11 @@ SELECT
     COUNT(DISTINCT pj.job_id) AS total_job,
     COUNT(DISTINCT pj.student_id) AS unique_student,
     COUNT(DISTINCT pj.printer_id) AS printer_used,
-    COALESCE(SUM(
-        CASE 
-            WHEN ps.size_name = 'A4' THEN jp.page_count
-            WHEN ps.size_name = 'A3' THEN jp.page_count * 2
-            WHEN ps.size_name = 'A5' THEN jp.page_count * 0.5
-            ELSE jp.page_count
-        END * pj.number_of_copy
-    ), 0) AS total_a4_equivalent_page
+    COALESCE(SUM(jp.page_count * pj.number_of_copy), 0) AS total_pages_printed,
+    COALESCE(SUM(p.total_amount), 0) AS total_revenue
 FROM print_job pj
-LEFT JOIN page_size ps ON pj.paper_size_id = ps.page_size_id
 LEFT JOIN job_pages jp ON pj.job_id = jp.job_id
+LEFT JOIN payment p ON pj.job_id = p.job_id AND p.payment_status = 'completed'
 WHERE pj.print_status = 'completed' AND pj.end_time IS NOT NULL
 GROUP BY CAST(pj.end_time AS DATE);
 GO

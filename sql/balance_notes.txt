@@ -1,0 +1,61 @@
+QUẢN LÝ TIỀN TRONG HỆ THỐNG IN ẤN
+====================================
+
+1. NẠP TIỀN VÀO TÀI KHOẢN
+--------------------------
+- User nạp tiền thật (USD) vào tài khoản in-app currency qua bảng `deposit`, deposite coi như cộng vào balance
+- Hệ thống không có bảng balance do balance không phải là dữ liệu bất biến (bị thay đổi cho tiền đã nạp, đã dùngdùng)
+- Có thể nhận bonus từ `deposit_bonus_package` (nếu số tiền nạpnạp đạt mức tối thiểu của gói khuyến mãi)
+- Số tiền được cộng vào balance: deposit_amount + bonus_amount = total_credited
+- Balance được tính động qua view `student_balance_view`:
+  + Tổng deposits (payment_status = 'completed') - tiền nạp vào
+  + Tổng semester_bonus (received = 1) - tiền thưởng học kỳ
+  - Tổng payments.amount_paid_from_balance (payment_status = 'completed') - tiền đã dùng từ balance cho print jobs
+
+2. THANH TOÁN CHO PRINT JOB
+---------------------------
+- Mỗi print job tạo một bản ghi trong bảng `payment` (1-1 với `print_job`)
+- User có thể thanh toán bằng:
+  + `amount_paid_from_balance`: từ balance (tiền đã nạp qua deposit) - làm giảm balance
+  + `amount_paid_directly`: trả trực tiếp (thẻ, tiền mặt, etc.) - không ảnh hưởng balance
+- Tổng: amount_paid_from_balance + amount_paid_directly = total_amount
+- Khi tạo payment với amount_paid_from_balance > 0, balance tự động bị trừ (qua view `student_balance_view`)
+- Print jobs tiêu tiền từ balance (deposit) → balance giảm đi
+
+3. CÔNG THỨC TÍNH GIÁ PRINT JOB
+--------------------------------
+Công thức cuối cùng:
+
+total_amount = (total_pages × base_price_per_page × color_multiplier) × (1 - discount_percentage)
+
+Trong đó:
+- total_pages = số trang file × số bản copy × hệ số duplex (từ `print_job.number_of_copy`, `print_job.print_side`, và `print_job_page`)
+  + Nếu print_side = 'double-sided': total_pages = COUNT(print_job_page) × number_of_copy × 2
+  + Nếu print_side = 'one-sided': total_pages = COUNT(print_job_page) × number_of_copy × 1
+- base_price_per_page = giá cơ bản từ `page_size_price.page_price` (theo `print_job.paper_size_id`)
+- color_multiplier = hệ số từ `color_mode_price.price_multiplier` (theo `print_job.color_mode`)
+  + 'black-white': 0.8 (80% giá cơ bản)
+  + 'grayscale': 1.0 (100% giá cơ bản)
+  + 'color': 2.5 (250% giá cơ bản)
+- discount_percentage = giảm giá từ `page_discount_package.discount_percentage` (nếu tổng số trang in vượt ngưỡng min_pages)
+
+Chi tiết:
+1. Tính số trang file: file_pages = COUNT(print_job_page)
+2. Áp dụng duplex: 
+   - Nếu print_side = 'double-sided': physical_pages = file_pages × 2
+   - Nếu print_side = 'one-sided': physical_pages = file_pages × 1
+3. Tính total_pages = physical_pages × print_job.number_of_copy
+4. Lấy base_price từ `page_size_price` WHERE page_size_id = print_job.paper_size_id
+5. Lấy color_multiplier từ `color_mode_price` WHERE color_mode = print_job.color_mode
+6. Tính base_amount = total_pages × base_price × color_multiplier
+7. Tìm discount package phù hợp từ `page_discount_package` WHERE min_pages <= total_pages (lấy package có min_pages lớn nhất)
+8. Tính final_price = base_amount × (1 - discount_percentage)
+
+Bảng liên quan:
+- `print_job`: thông tin job (paper_size_id, color_mode, number_of_copy)
+- `print_job_page`: số trang của file
+- `page_size_price`: giá cơ bản theo kích thước giấy
+- `color_mode_price`: hệ số nhân theo chế độ màu
+- `page_discount_package`: gói giảm giá theo số trang
+- `payment`: thanh toán (lưu total_amount đã tính)
+

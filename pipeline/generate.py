@@ -12,7 +12,7 @@ import uuid
 import yaml
 import os
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from pathlib import Path
 from collections import defaultdict
 
@@ -244,6 +244,12 @@ class BulkInsertHelper:
                     formatted_values.append(f"'{sql_escape(value)}'")
                 elif isinstance(value, bool):
                     formatted_values.append("1" if value else "0")
+                elif isinstance(value, (date, datetime)):
+                    # Format date/datetime as quoted string
+                    if isinstance(value, datetime):
+                        formatted_values.append(f"'{value.strftime('%Y-%m-%d %H:%M:%S')}'")
+                    else:
+                        formatted_values.append(f"'{value.strftime('%Y-%m-%d')}'")
                 else:
                     formatted_values.append(str(value))
             values_list.append(f"({', '.join(formatted_values)})")
@@ -285,7 +291,17 @@ class PrintingServiceDataGenerator:
         self.printers = []
         self.print_jobs = []
         self.semesters = []
-        self.student_page_allocations = []
+        
+        # Balance and payment system data
+        # Note: user_balance is now computed via view, not stored in table
+        self.deposit_bonus_packages = []
+        self.page_size_prices = []
+        self.color_mode_prices = []
+        self.page_discount_packages = []
+        self.deposits = []
+        self.semester_bonuses = []
+        self.student_semester_bonuses = []
+        self.payments = []
         
         # Academic structure data
         self.faculties = []
@@ -309,8 +325,6 @@ class PrintingServiceDataGenerator:
         self.floors_diagrams_dir = os.path.join(maps_dir, "floors_diagrams")
         self.output_test_dir = os.path.join(maps_dir, "output_test")
         
-        # Discount packs (initialized empty, populated in generate_discount_packs)
-        self.discount_packs = []
         
         # Fund and supplier purchase data
         self.fund_sources = []
@@ -372,8 +386,8 @@ class PrintingServiceDataGenerator:
         print("Generating page allocation system...")
         self.generate_page_allocation_system()
         
-        print("Generating discount packages...")
-        self.generate_discount_packs()
+        print("Generating balance and payment system...")
+        self.generate_balance_and_payment_system()
         
         print("Generating fund sources and supplier paper purchases...")
         self.generate_fund_and_supplier_purchases()
@@ -1399,9 +1413,9 @@ class PrintingServiceDataGenerator:
             self.add_sql(stmt)
     
     def generate_page_allocation_system(self):
-        """Generate page sizes, allocations, and student page purchases."""
+        """Generate page sizes and pricing configuration."""
         self.add_sql("\n-- ============================================")
-        self.add_sql("-- PAGE ALLOCATION AND PURCHASE SYSTEM DATA")
+        self.add_sql("-- PAGE SIZES AND PRICING CONFIGURATION DATA")
         self.add_sql("-- ============================================")
         
         # Generate page sizes
@@ -1494,71 +1508,207 @@ class PrintingServiceDataGenerator:
         for stmt in bulk_semesters.get_statements():
             self.add_sql(stmt)
         
-        # Generate per-student page allocations for current and previous academic year semesters
-        bulk_student_allocations = BulkInsertHelper("student_page_allocation", [
-            "allocation_id", "student_id", "semester_id",
-            "a4_page_count", "allocation_date", "created_at", "created_by"
+        # Generate page size prices
+        self.add_sql("\n-- Page Size Prices")
+        bulk_page_prices = BulkInsertHelper("page_size_price", [
+            "price_id", "page_size_id", "page_price", "is_active", "created_at", "updated_at"
         ])
         
-        default_pages = self.spec['default_pages_per_semester']
-        current_year = self.current_academic_year
-        creator_staff = random.choice(self.staff) if self.staff else None
+        # Base prices: A4 = $0.20, A3 = $0.40 (2x A4), A5 = $0.10 (0.5x A4)
+        # Note: A4=0.5*A3, A3=2*A5 conversion is data only, prices are independent
+        base_price_a4 = 0.20
+        page_prices = {
+            "A4": base_price_a4,
+            "A3": base_price_a4 * 2.0,  # $0.40
+            "A5": base_price_a4 * 0.5   # $0.10
+        }
         
-        # Limit to semesters whose academic year starts in current_year or current_year-1
-        target_semesters = []
-        for sem in self.semesters:
-            ay = next((ay for ay in self.academic_years if ay['academic_year_id'] == sem['academic_year_id']), None)
-            if not ay:
-                continue
-            try:
-                ay_start_year = int(ay['year_name'].split('-')[0])
-            except Exception:
-                ay_start_year = datetime.strptime(ay['start_date'], "%Y-%m-%d").year if 'start_date' in ay else current_year
-            if ay_start_year in [current_year - 1, current_year]:
-                target_semesters.append(sem)
+        created_at = random_date_in_range(365, 30)
+        for page_size in self.page_sizes:
+            price_id = generate_uuid()
+            size_name = page_size["size_name"]
+            page_price = page_prices.get(size_name, base_price_a4)
+            
+            self.page_size_prices.append({
+                'price_id': price_id,
+                'page_size_id': page_size["page_size_id"],
+                'page_price': page_price,
+                'is_active': True
+            })
+            
+            bulk_page_prices.add_row([
+                price_id,
+                page_size["page_size_id"],
+                page_price,
+                1,  # is_active
+                created_at.strftime('%Y-%m-%d %H:%M:%S'),
+                created_at.strftime('%Y-%m-%d %H:%M:%S')
+            ])
         
-        for student in self.students:
-            for sem in target_semesters:
-                allocation_id = generate_uuid()
-                allocation_date = sem['start_date']
-                
-                self.student_page_allocations.append({
-                    "allocation_id": allocation_id,
-                    "student_id": student['student_id'],
-                    "semester_id": sem['semester_id'],
-                    "a4_page_count": default_pages
-                })
-                
-                bulk_student_allocations.add_row([
-                    allocation_id,
-                    student['student_id'],
-                    sem['semester_id'],
-                    default_pages,
-                    allocation_date.strftime('%Y-%m-%d'),
-                    allocation_date.strftime('%Y-%m-%d %H:%M:%S'),
-                    creator_staff['staff_id'] if creator_staff else None
-                ])
-        
-        for stmt in bulk_student_allocations.get_statements():
+        for stmt in bulk_page_prices.get_statements():
             self.add_sql(stmt)
         
-        # Generate student page purchases
-        bulk_purchases = BulkInsertHelper("student_page_purchase", [
-            "purchase_id", "student_id", "page_size_id", "quantity", "amount_paid",
-            "discount_pack_id", "payment_method", "payment_reference", "payment_status", "transaction_date"
+        # Generate color mode prices (color mode multipliers)
+        self.add_sql("\n-- Color Mode Prices")
+        bulk_print_prices = BulkInsertHelper("color_mode_price", [
+            "setting_id", "color_mode", "price_multiplier", "description", "is_active", "created_at", "updated_at"
         ])
         
-        payment_methods = self.spec['payment_methods']
-        page_price = self.spec['page_price_per_a4']
-        purchase_rate = self.spec['page_purchase_rate']
-        avg_additional = self.spec['avg_additional_pages']
-        variance = self.spec['additional_pages_variance']
-        success_rate = self.spec['payment_success_rate']
+        # Color mode multipliers: black-white = 0.8, grayscale = 1.0 (base), color = 2.5
+        color_settings = [
+            {"mode": "black-white", "multiplier": 0.8, "desc": "Black and white printing (80% of base price)"},
+            {"mode": "grayscale", "multiplier": 1.0, "desc": "Grayscale printing (base price)"},
+            {"mode": "color", "multiplier": 2.5, "desc": "Color printing (2.5x base price)"}
+        ]
         
-        # Price multipliers for different page sizes
-        price_multipliers = {"A3": 2.0, "A4": 1.0, "A5": 0.5}
+        for setting in color_settings:
+            setting_id = generate_uuid()
+            
+            self.color_mode_prices.append({
+                'setting_id': setting_id,
+                'color_mode': setting["mode"],
+                'price_multiplier': setting["multiplier"],
+                'is_active': True
+            })
+            
+            bulk_print_prices.add_row([
+                setting_id,
+                setting["mode"],
+                setting["multiplier"],
+                setting["desc"],
+                1,  # is_active
+                created_at.strftime('%Y-%m-%d %H:%M:%S'),
+                created_at.strftime('%Y-%m-%d %H:%M:%S')
+            ])
         
-        # Identify test students to ensure they get guaranteed purchases
+        for stmt in bulk_print_prices.get_statements():
+            self.add_sql(stmt)
+        
+        # Generate page discount packages
+        self.add_sql("\n-- Page Discount Packages")
+        bulk_page_discounts = BulkInsertHelper("page_discount_package", [
+            "package_id", "min_pages", "discount_percentage", "package_name", "description", "is_active", "created_at", "updated_at"
+        ])
+        
+        # Discount packages: 50 pages = 0%, 100 pages = 10% off, 200 pages = 12.5% off, 500 pages = 20% off
+        discount_packages = [
+            {"min_pages": 50, "discount": 0.0, "name": "50 pages", "desc": "50 pages: no discount"},
+            {"min_pages": 100, "discount": 0.10, "name": "100 pages", "desc": "100 pages: 10% discount"},
+            {"min_pages": 200, "discount": 0.125, "name": "200 pages", "desc": "200 pages: 12.5% discount"},
+            {"min_pages": 500, "discount": 0.20, "name": "500 pages", "desc": "500 pages: 20% discount"}
+        ]
+        
+        for pkg in discount_packages:
+            package_id = generate_uuid()
+            
+            self.page_discount_packages.append({
+                'package_id': package_id,
+                'min_pages': pkg["min_pages"],
+                'discount_percentage': pkg["discount"],
+                'is_active': True
+            })
+            
+            bulk_page_discounts.add_row([
+                package_id,
+                pkg["min_pages"],
+                pkg["discount"],  # Already 0-1 range
+                pkg["name"],
+                pkg["desc"],
+                1,  # is_active
+                created_at.strftime('%Y-%m-%d %H:%M:%S'),
+                created_at.strftime('%Y-%m-%d %H:%M:%S')
+            ])
+        
+        for stmt in bulk_page_discounts.get_statements():
+            self.add_sql(stmt)
+    
+    def generate_balance_and_payment_system(self):
+        """Generate balance and payment system data including deposits, bonuses, and payments."""
+        self.add_sql("\n-- ============================================")
+        self.add_sql("-- BALANCE AND PAYMENT SYSTEM DATA")
+        self.add_sql("-- ============================================")
+        
+        # 1. Generate deposit bonus packages
+        self.add_sql("\n-- Deposit Bonus Packages")
+        bulk_bonus_packages = BulkInsertHelper("deposit_bonus_package", [
+            "package_id", "amount_cap", "bonus_percentage", "package_name", "description", "is_active", "created_at", "updated_at"
+        ])
+        
+        # Realistic bonus packages: 10% bonus if $10+, 20% bonus if $15+, 25% bonus if $25+, 30% bonus if $50+
+        # Stored as 0-1 range: 0.10 = 10%, 0.20 = 20%, etc.
+        bonus_packages = [
+            {"amount_cap": 10.00, "bonus_percentage": 0.10, "name": "Starter Bonus", "desc": "10% bonus for deposits of $10 or more"},
+            {"amount_cap": 15.00, "bonus_percentage": 0.20, "name": "Premium Bonus", "desc": "20% bonus for deposits of $15 or more"},
+            {"amount_cap": 25.00, "bonus_percentage": 0.25, "name": "Super Bonus", "desc": "25% bonus for deposits of $25 or more"},
+            {"amount_cap": 50.00, "bonus_percentage": 0.30, "name": "Mega Bonus", "desc": "30% bonus for deposits of $50 or more"},
+        ]
+        
+        for pkg in bonus_packages:
+            package_id = generate_uuid()
+            created_at = random_date_in_range(365, 30)
+            
+            self.deposit_bonus_packages.append({
+                'package_id': package_id,
+                'amount_cap': pkg['amount_cap'],
+                'bonus_percentage': pkg['bonus_percentage']
+            })
+            
+            bulk_bonus_packages.add_row([
+                package_id,
+                pkg['amount_cap'],
+                pkg['bonus_percentage'],
+                pkg['name'],
+                pkg['desc'],
+                1,  # is_active
+                created_at.strftime('%Y-%m-%d %H:%M:%S'),
+                created_at.strftime('%Y-%m-%d %H:%M:%S')
+            ])
+        
+        for stmt in bulk_bonus_packages.get_statements():
+            self.add_sql(stmt)
+        
+        # 2. Generate semester bonuses
+        # Note: User balances are computed dynamically via student_balance_view, no table needed
+        self.add_sql("\n-- Semester Bonuses")
+        bulk_semester_bonuses = BulkInsertHelper("semester_bonus", [
+            "bonus_id", "semester_id", "bonus_amount", "description", "created_at", "created_by"
+        ])
+        
+        creator_staff = random.choice(self.staff) if self.staff else None
+        default_semester_bonus = 5.00  # $5 per semester
+        
+        for semester in self.semesters:
+            bonus_id = generate_uuid()
+            bonus_amount = default_semester_bonus
+            created_at = semester['start_date']
+            if isinstance(created_at, str):
+                created_at = datetime.strptime(created_at, '%Y-%m-%d')
+            
+            self.semester_bonuses.append({
+                'bonus_id': bonus_id,
+                'semester_id': semester['semester_id'],
+                'bonus_amount': bonus_amount
+            })
+            
+            bulk_semester_bonuses.add_row([
+                bonus_id,
+                semester['semester_id'],
+                bonus_amount,
+                f"Semester bonus for {semester['term_name']} semester",
+                created_at.strftime('%Y-%m-%d %H:%M:%S'),
+                creator_staff['staff_id'] if creator_staff else None
+            ])
+        
+        for stmt in bulk_semester_bonuses.get_statements():
+            self.add_sql(stmt)
+        
+        # 4. Generate student semester bonuses (only for students enrolled before semester start)
+        self.add_sql("\n-- Student Semester Bonuses")
+        bulk_student_semester_bonuses = BulkInsertHelper("student_semester_bonus", [
+            "student_bonus_id", "student_id", "semester_bonus_id", "semester_id", "received", "received_date", "created_at"
+        ])
+        
+        # Identify test students for guaranteed semester bonuses
         test_student_emails = [
             "student.test@edu.vn",
             "phandienmanhthienk16@siu.edu.vn",
@@ -1577,110 +1727,179 @@ class PrintingServiceDataGenerator:
                     test_student_ids.add(student['student_id'])
         
         for student in self.students:
-            # Guarantee purchases for test accounts (2-4 transactions)
-            is_test_account = student['student_id'] in test_student_ids
-            should_generate = True if is_test_account else (random.random() < purchase_rate)
+            enrollment_date = student.get('enrollment_date')
+            if not enrollment_date:
+                continue
+            if isinstance(enrollment_date, str):
+                enrollment_date = datetime.strptime(enrollment_date, '%Y-%m-%d').date()
+            elif isinstance(enrollment_date, datetime):
+                enrollment_date = enrollment_date.date()
             
-            if should_generate:
-                # Test accounts get 2-4 transactions, regular students get 1-3
-                num_transactions = random.randint(2, 4) if is_test_account else random.randint(1, 3)
+            is_test_account = student['student_id'] in test_student_ids
+            
+            for semester_bonus in self.semester_bonuses:
+                semester = next((s for s in self.semesters if s['semester_id'] == semester_bonus['semester_id']), None)
+                if not semester:
+                    continue
                 
-                for _ in range(num_transactions):
-                    purchase_id = generate_uuid()
+                semester_start = semester['start_date']
+                if isinstance(semester_start, str):
+                    semester_start = datetime.strptime(semester_start, '%Y-%m-%d').date()
+                elif isinstance(semester_start, datetime):
+                    semester_start = semester_start.date()
+                
+                # Only give bonus if student was enrolled before semester start
+                if enrollment_date <= semester_start:
+                    student_bonus_id = generate_uuid()
+                    # Test accounts always receive bonus, regular students 80% chance
+                    received = True if is_test_account else (random.random() < 0.8)
+                    received_date = semester_start + timedelta(days=random.randint(0, 30)) if received else None
                     
-                    # Choose page size (80% A4, 15% A3, 5% A5)
-                    page_choice = random.choices(
-                        self.page_sizes,
-                        weights=[0.15, 0.80, 0.05],  # A3, A4, A5
+                    self.student_semester_bonuses.append({
+                        'student_bonus_id': student_bonus_id,
+                        'student_id': student['student_id'],
+                        'semester_bonus_id': semester_bonus['bonus_id'],
+                        'semester_id': semester['semester_id'],
+                        'received': received
+                    })
+                    
+                    bulk_student_semester_bonuses.add_row([
+                        student_bonus_id,
+                    student['student_id'],
+                        semester_bonus['bonus_id'],
+                        semester['semester_id'],
+                        1 if received else 0,
+                        received_date.strftime('%Y-%m-%d') if received_date else None,
+                        semester_start.strftime('%Y-%m-%d %H:%M:%S')
+                    ])
+        
+        for stmt in bulk_student_semester_bonuses.get_statements():
+            self.add_sql(stmt)
+        
+        # 5. Generate deposits (students depositing money)
+        self.add_sql("\n-- Deposits")
+        bulk_deposits = BulkInsertHelper("deposit", [
+            "deposit_id", "student_id", "deposit_amount", "bonus_amount", "total_credited",
+            "deposit_bonus_package_id", "payment_method", "payment_reference", "payment_status", "transaction_date"
+        ])
+        
+        # Get payment methods - ensure it's a list
+        payment_methods_raw = self.spec.get('payment_methods', ['credit_card', 'debit_card', 'bank_transfer', 'e_wallet'])
+        if isinstance(payment_methods_raw, dict):
+            payment_methods = list(payment_methods_raw.keys())
+        elif isinstance(payment_methods_raw, list):
+            payment_methods = payment_methods_raw
+        else:
+            payment_methods = ['credit_card', 'debit_card', 'bank_transfer', 'e_wallet']
+        deposit_rate = 0.3  # 30% of students make deposits
+        
+        # Track balances for payment logic (will be computed after deposits are generated)
+        # Note: This is only for payment generation logic, actual balance is computed via view
+        student_balance_map = {}
+        
+        # Identify test students to ensure they get guaranteed deposits
+        test_student_emails = [
+            "student.test@edu.vn",
+            "phandienmanhthienk16@siu.edu.vn",
+            "leanhtuank16@siu.edu.vn",
+            "nguyenhongbaongock16@siu.edu.vn",
+            "phanthanhthaituank16@siu.edu.vn",
+            "lengocdangkhoak16@siu.edu.vn",
+            "lyhieuvyk17@siu.edu.vn",
+        ]
+        test_student_ids = set()
+        for email in test_student_emails:
+            user = next((u for u in self.users if u['email'] == email), None)
+            if user:
+                student = next((s for s in self.students if s['user_id'] == user['user_id']), None)
+                if student:
+                    test_student_ids.add(student['student_id'])
+        
+        for student in self.students:
+            is_test_account = student['student_id'] in test_student_ids
+            # Test accounts always get deposits, regular students have 30% chance
+            should_generate_deposit = True if is_test_account else (random.random() < deposit_rate)
+            
+            if should_generate_deposit:
+                # Test accounts get 2-4 deposits, regular students get 1-3
+                num_deposits = random.randint(2, 4) if is_test_account else random.randint(1, 3)
+                
+                for _ in range(num_deposits):
+                    deposit_id = generate_uuid()
+                    # Deposit amounts: $5-$100, weighted towards lower amounts
+                    deposit_amount = round(random.choices(
+                        [5, 10, 15, 20, 25, 30, 50, 75, 100],
+                        weights=[30, 25, 15, 10, 8, 5, 4, 2, 1],
                         k=1
-                    )[0]
+                    )[0] + random.uniform(0, 0.99), 2)
                     
-                    # Generate quantity based on page size
-                    if page_choice["size_name"] == "A4":
-                        quantity = max(20, int(random.gauss(avg_additional, variance)))
-                    elif page_choice["size_name"] == "A3":
-                        quantity = max(10, int(random.gauss(avg_additional/2, variance/2)))
-                    else:  # A5
-                        quantity = max(40, int(random.gauss(avg_additional*2, variance)))
+                    # Find applicable bonus package
+                    applicable_package = None
+                    bonus_amount = 0.00
+                    for pkg in sorted(self.deposit_bonus_packages, key=lambda x: x['amount_cap'], reverse=True):
+                        if deposit_amount >= pkg['amount_cap']:
+                            applicable_package = pkg
+                            bonus_amount = round(deposit_amount * pkg['bonus_percentage'], 2)
+                            break
                     
-                    multiplier = price_multipliers[page_choice["size_name"]]
-                    amount = quantity * page_price * multiplier
-                    method = weighted_choice(payment_methods)
-                    reference = f"TXN{random.randint(100000, 999999)}"
-                    status = 'completed' if random.random() < success_rate else random.choice(['failed', 'pending', 'refunded'])
-                    transaction_date = random_date_in_range(365, 0)
+                    total_credited = deposit_amount + bonus_amount
+                    method = random.choice(payment_methods)
+                    reference = f"DEP-{random.randint(100000, 999999)}"
+                    # Test accounts always have completed deposits, regular students 95% completed
+                    status = 'completed' if is_test_account else ('completed' if random.random() < 0.95 else 'pending')
                     
-                    # Optionally link to a discount pack if quantity matches a pack
-                    discount_pack_id = None
-                    if hasattr(self, 'discount_packs') and self.discount_packs:
-                        matching_pack = next(
-                            (dp for dp in self.discount_packs if dp['num_pages'] == quantity),
-                            None
-                        )
-                        if matching_pack:
-                            discount_pack_id = matching_pack['discount_pack_id']
+                    # Transaction date: within last 6 months
+                    transaction_date = random_date_in_range(180, 0)
                     
-                    bulk_purchases.add_row([
-                        purchase_id, student['student_id'], page_choice["page_size_id"], 
-                        quantity, amount, discount_pack_id, method, reference, status, 
+                    # Store deposit data
+                    deposit_data = {
+                        'deposit_id': deposit_id,
+                        'student_id': student['student_id'],
+                        'deposit_amount': deposit_amount,
+                        'bonus_amount': bonus_amount,
+                        'total_credited': total_credited,
+                        'payment_status': status
+                    }
+                    self.deposits.append(deposit_data)
+                    
+                    # Update balance tracking for payment generation (only completed deposits)
+                    if status == 'completed':
+                        student_id = student['student_id']
+                        if student_id not in student_balance_map:
+                            student_balance_map[student_id] = 0.0
+                        student_balance_map[student_id] += total_credited
+                    
+                    bulk_deposits.add_row([
+                        deposit_id,
+                        student['student_id'],
+                        deposit_amount,
+                        bonus_amount,
+                        total_credited,
+                        applicable_package['package_id'] if applicable_package else None,
+                        method,
+                        reference,
+                        status,
                         transaction_date.strftime('%Y-%m-%d %H:%M:%S')
                     ])
         
-        for stmt in bulk_purchases.get_statements():
+        for stmt in bulk_deposits.get_statements():
             self.add_sql(stmt)
+        
+        # Add semester bonuses to balance map for payment generation logic
+        for ssb in self.student_semester_bonuses:
+            if ssb.get('received'):
+                semester_bonus = next((sb for sb in self.semester_bonuses if sb['bonus_id'] == ssb['semester_bonus_id']), None)
+                if semester_bonus:
+                    student_id = ssb['student_id']
+                    if student_id not in student_balance_map:
+                        student_balance_map[student_id] = 0.0
+                    student_balance_map[student_id] += semester_bonus['bonus_amount']
+        
+        # Store balance map for use in payment generation
+        self.student_balance_map = student_balance_map
+        
+        # Note: Balances are computed dynamically via student_balance_view, no UPDATE statements needed
     
-    def generate_discount_packs(self):
-        """Generate discount packages for page purchases."""
-        self.add_sql("\n-- ============================================")
-        self.add_sql("-- DISCOUNT PACKAGES DATA")
-        self.add_sql("-- ============================================")
-        
-        bulk = BulkInsertHelper("discount_pack", [
-            "discount_pack_id", "num_pages", "percent_off", "pack_name",
-            "description", "is_active", "created_at", "updated_at"
-        ])
-        
-        # Default discount packages matching the spec requirements
-        # Spec: 50 pages: $10.00, 100 pages: $18.00 (10% off), 200 pages: $35.00 (12.5% off), 500 pages: $80.00 (20% off)
-        default_packs = [
-            {"num_pages": 50, "percent_off": 0.0, "name": "50 pages", "desc": "50 pages: $10.00 ($0.200/page)"},
-            {"num_pages": 100, "percent_off": 0.10, "name": "100 pages", "desc": "100 pages: $18.00 ($0.180/page) - 10% off"},
-            {"num_pages": 200, "percent_off": 0.125, "name": "200 pages", "desc": "200 pages: $35.00 ($0.175/page) - 12.5% off"},
-            {"num_pages": 500, "percent_off": 0.20, "name": "500 pages", "desc": "500 pages: $80.00 ($0.160/page) - 20% off"},
-        ]
-        
-        # Use discount packs from spec if available, otherwise use defaults
-        discount_packs = self.spec.get('discount_packs', default_packs)
-        
-        # Store discount packs for use in purchase generation
-        self.discount_packs = []
-        
-        for pack_config in discount_packs:
-            discount_pack_id = generate_uuid()
-            num_pages = pack_config.get('num_pages', pack_config.get('pages', 100))
-            percent_off = pack_config.get('percent_off', pack_config.get('discount', 0.05))
-            
-            pack_name = pack_config.get('name', pack_config.get('pack_name', f"{num_pages} Page Pack"))
-            description = pack_config.get('description', pack_config.get('desc', f"Discount package: {percent_off*100:.0f}% off for {num_pages} pages"))
-            is_active = pack_config.get('is_active', True)
-            created_at = random_date_in_range(365, 30)
-            updated_at = created_at
-            
-            pack_data = {
-                'discount_pack_id': discount_pack_id,
-                'num_pages': num_pages,
-                'percent_off': percent_off
-            }
-            self.discount_packs.append(pack_data)
-            
-            bulk.add_row([
-                discount_pack_id, num_pages, percent_off, pack_name,
-                description, is_active, created_at.strftime('%Y-%m-%d %H:%M:%S'),
-                updated_at.strftime('%Y-%m-%d %H:%M:%S')
-            ])
-        
-        for stmt in bulk.get_statements():
-            self.add_sql(stmt)
     
     def generate_fund_and_supplier_purchases(self):
         """Generate fund sources and supplier paper purchases."""
@@ -2138,7 +2357,12 @@ class PrintingServiceDataGenerator:
                     'job_id': job_id,
                     'student_id': student['student_id'],
                     'printer_id': printer['printer_id'],
-                    'num_pages': num_pages
+                    'num_pages': num_pages,
+                    'paper_size_id': paper_size_id,
+                    'paper_size_name': matching_page_size['size_name'],
+                    'num_copies': num_copies,
+                    'status': status,
+                    'created_at': created_at
                 }
                 
                 self.print_jobs.append(job_data)
@@ -2163,6 +2387,171 @@ class PrintingServiceDataGenerator:
         
         for stmt in bulk_pages.get_statements():
             self.add_sql(stmt)
+        
+        # Generate payments for completed print jobs
+        self.generate_payments()
+    
+    def generate_payments(self):
+        """Generate payment records for print jobs."""
+        self.add_sql("\n-- ============================================")
+        self.add_sql("-- PAYMENT DATA (for Print Jobs)")
+        self.add_sql("-- ============================================")
+        
+        bulk_payments = BulkInsertHelper("payment", [
+            "payment_id", "job_id", "student_id", "amount_paid_directly", "amount_paid_from_balance",
+            "total_amount", "payment_method", "payment_reference", "payment_status", "transaction_date"
+        ])
+        
+        # Get payment methods - ensure it's a list
+        payment_methods_raw = self.spec.get('payment_methods', ['credit_card', 'debit_card', 'bank_transfer', 'e_wallet'])
+        if isinstance(payment_methods_raw, dict):
+            payment_methods = list(payment_methods_raw.keys())
+        elif isinstance(payment_methods_raw, list):
+            payment_methods = payment_methods_raw
+        else:
+            payment_methods = ['credit_card', 'debit_card', 'bank_transfer', 'e_wallet']
+        
+        # Build lookup maps for pricing
+        page_price_map = {}  # page_size_id -> price
+        for psp in self.page_size_prices:
+            if psp.get('is_active', True):
+                page_price_map[psp['page_size_id']] = psp['page_price']
+        
+        color_multiplier_map = {}  # color_mode -> multiplier (e.g., 0.8, 1.0, 2.5)
+        for pps in self.color_mode_prices:
+            if pps.get('is_active', True):
+                color_multiplier_map[pps['color_mode']] = pps['price_multiplier']
+        
+        # Default multipliers if not found
+        default_color_multipliers = {
+            'black-white': 0.8,
+            'grayscale': 1.0,
+            'color': 2.5
+        }
+        
+        # Use pre-calculated balance map from deposit generation
+        # This includes deposits and semester bonuses, but not payments yet
+        student_balance_map = getattr(self, 'student_balance_map', {}).copy()
+        
+        # Generate payments only for completed print jobs
+        for job in self.print_jobs:
+            # Only create payment for completed jobs
+            job_record = next((j for j in self.print_jobs if j.get('job_id') == job.get('job_id')), None)
+            if not job_record:
+                continue
+            
+            # Check if this is a test account job
+            student_id = job['student_id']
+            is_test_account = False
+            test_student_emails = [
+                "student.test@edu.vn",
+                "phandienmanhthienk16@siu.edu.vn",
+                "leanhtuank16@siu.edu.vn",
+                "nguyenhongbaongock16@siu.edu.vn",
+                "phanthanhthaituank16@siu.edu.vn",
+                "lengocdangkhoak16@siu.edu.vn",
+                "lyhieuvyk17@siu.edu.vn",
+            ]
+            student = next((s for s in self.students if s['student_id'] == student_id), None)
+            if student:
+                user = next((u for u in self.users if u['user_id'] == student['user_id']), None)
+                if user and user['email'] in test_student_emails:
+                    is_test_account = True
+            
+            # Test account jobs always get payments, regular jobs 90% get payments
+            if not is_test_account and random.random() > 0.9:
+                continue  # Skip 10% of regular jobs (they might be failed/cancelled)
+            
+            payment_id = generate_uuid()
+            
+            # Calculate payment amount based on pages, paper size, color mode, and discounts
+            num_pages = job.get('num_pages', 1)
+            num_copies = job.get('num_copies', 1)
+            paper_size_id = job.get('paper_size_id')
+            color_mode = job.get('color_mode', 'black-white')
+            
+            # Get base price for paper size
+            base_price_per_page = page_price_map.get(paper_size_id, 0.20)  # Default $0.20 if not found
+            
+            # Apply color mode multiplier (e.g., 0.8, 1.0, 2.5)
+            color_multiplier = color_multiplier_map.get(color_mode, default_color_multipliers.get(color_mode, 1.0))
+            price_per_page = base_price_per_page * color_multiplier
+            
+            # Total pages = num_pages * num_copies
+            total_pages = num_pages * num_copies
+            
+            # Calculate base amount
+            base_amount = total_pages * price_per_page
+            
+            # Apply volume discount if applicable
+            applicable_discount = 0.0
+            for pdp in sorted(self.page_discount_packages, key=lambda x: x.get('min_pages', 0), reverse=True):
+                if pdp.get('is_active', True) and total_pages >= pdp.get('min_pages', 0):
+                    applicable_discount = pdp.get('discount_percentage', 0.0)
+                    break
+            
+            # Apply discount
+            total_amount = round(base_amount * (1.0 - applicable_discount), 2)
+            
+            # Determine payment split: use balance first, then direct payment
+            student_balance = student_balance_map.get(student_id, 0.0)
+            amount_paid_from_balance = min(total_amount, student_balance)
+            amount_paid_directly = max(0, total_amount - amount_paid_from_balance)
+            
+            # Update balance tracking (deduct from balance)
+            if student_id in student_balance_map:
+                student_balance_map[student_id] = max(0, student_balance_map[student_id] - amount_paid_from_balance)
+            
+            # Payment method: if using balance, method is 'balance', otherwise random method
+            if amount_paid_from_balance > 0 and amount_paid_directly == 0:
+                method = 'balance'
+            elif amount_paid_directly > 0:
+                method = random.choice(payment_methods)
+            else:
+                method = random.choice(payment_methods)
+            
+            payment_reference = f"PAY-{random.randint(100000, 999999)}"
+            # Test account payments always completed, regular payments 95% completed
+            payment_status = 'completed' if is_test_account else ('completed' if random.random() < 0.95 else 'pending')
+            
+            # Transaction date should match or be slightly after job creation
+            job_created_at = job.get('created_at')
+            if isinstance(job_created_at, str):
+                job_created_at = datetime.strptime(job_created_at, '%Y-%m-%d %H:%M:%S')
+            elif isinstance(job_created_at, datetime):
+                pass
+            else:
+                job_created_at = random_date_in_range(180, 0)
+            
+            # Payment happens at or slightly after job creation (0-2 hours later)
+            transaction_date = job_created_at + timedelta(minutes=random.randint(0, 120))
+            
+            self.payments.append({
+                'payment_id': payment_id,
+                'job_id': job.get('job_id'),
+                'student_id': student_id,
+                'amount_paid_directly': amount_paid_directly,
+                'amount_paid_from_balance': amount_paid_from_balance,
+                'total_amount': total_amount
+            })
+            
+            bulk_payments.add_row([
+                payment_id,
+                job.get('job_id'),
+                student_id,
+                amount_paid_directly,
+                amount_paid_from_balance,
+                total_amount,
+                method,
+                payment_reference,
+                payment_status,
+                transaction_date.strftime('%Y-%m-%d %H:%M:%S')
+            ])
+        
+        for stmt in bulk_payments.get_statements():
+            self.add_sql(stmt)
+        
+        # Note: Balances are computed dynamically via student_balance_view, no UPDATE statements needed
     
     def generate_activity_logs(self):
         """Generate printer logs for the printer_log table."""
@@ -2532,7 +2921,6 @@ def main():
         print(f"Fund sources generated: {len(generator.fund_sources)}")
         print(f"Supplier purchases generated: {len(generator.supplier_purchases)}")
         print(f"Paper purchase items generated: {len(generator.paper_purchase_items)}")
-        print(f"Student page allocations generated: {len(generator.student_page_allocations)}")
         print(f"Printers generated: {len(generator.printers)}")
         print(f"Print jobs generated: {len(generator.print_jobs)}")
         print(f"Output file: {OUTPUT_SQL_FILE}")

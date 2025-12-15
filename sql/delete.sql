@@ -2,7 +2,9 @@
 GO
 
 -- Disable all constraints to avoid dependency errors
-EXEC sp_MSforeachtable "ALTER TABLE ? NOCHECK CONSTRAINT ALL"
+-- Note: sp_MSforeachtable may not be available in all SQL Server versions
+IF OBJECT_ID('sp_MSforeachtable') IS NOT NULL
+    EXEC sp_MSforeachtable "ALTER TABLE ? NOCHECK CONSTRAINT ALL"
 
 -- Drop all foreign key constraints
 DECLARE @sql NVARCHAR(MAX) = ''

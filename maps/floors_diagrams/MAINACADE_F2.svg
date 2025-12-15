@@ -102,17 +102,12 @@
             </text>
 <rect x="400" y="800" width="400" height="400" 
               fill="#F44336" stroke="none"/>
-<g><text x="600.0" y="997.5" 
-                      font-family="Roboto,Segoe UI,Arial,sans-serif" 
-                      font-size="40" font-weight="600"
-                      fill="white" text-anchor="middle" dominant-baseline="middle">
-                  Administrative
-                </text><text x="600.0" y="1042.5" 
-                      font-family="Roboto,Segoe UI,Arial,sans-serif" 
-                      font-size="40" font-weight="600"
-                      fill="white" text-anchor="middle" dominant-baseline="middle">
-                  Office
-                </text></g>
+<text x="600.0" y="1000.0" 
+                  font-family="Roboto,Segoe UI,Arial,sans-serif" 
+                  font-size="40" font-weight="600"
+                  fill="white" text-anchor="middle" dominant-baseline="middle">
+              Office
+            </text>
 <rect x="800" y="800" width="400" height="400" 
               fill="#2196F3" stroke="none"/>
 <text x="1000.0" y="1000.0" 
@@ -135,7 +130,7 @@
                   font-family="Roboto,Segoe UI,Arial,sans-serif" 
                   font-size="40" font-weight="600"
                   fill="#1a1a1a" text-anchor="middle" dominant-baseline="middle">
-              Common Area
+              Student Lounge
             </text>
 <rect x="2000" y="800" width="400" height="400" 
               fill="#757575" stroke="none"/>
@@ -159,7 +154,7 @@
                   font-family="Roboto,Segoe UI,Arial,sans-serif" 
                   font-size="40" font-weight="600"
                   fill="white" text-anchor="middle" dominant-baseline="middle">
-              Lecture Hall
+              Classroom
             </text>
 <rect x="1000" y="1500" width="600" height="300" 
               fill="#9C27B0" stroke="none"/>
@@ -167,7 +162,7 @@
                   font-family="Roboto,Segoe UI,Arial,sans-serif" 
                   font-size="40" font-weight="600"
                   fill="white" text-anchor="middle" dominant-baseline="middle">
-              Library
+              Reading Room
             </text>
 <rect x="1600" y="1500" width="800" height="300" 
               fill="#FF9800" stroke="none"/>

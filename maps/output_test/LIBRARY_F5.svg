@@ -60,7 +60,7 @@
                   font-family="Roboto,Segoe UI,Arial,sans-serif" 
                   font-size="40" font-weight="600"
                   fill="white" text-anchor="middle" dominant-baseline="middle">
-              Reading Room
+              Library
             </text>
 <rect x="1100" y="0" width="500" height="600" 
               fill="#2196F3" stroke="none"/>
@@ -68,7 +68,7 @@
                   font-family="Roboto,Segoe UI,Arial,sans-serif" 
                   font-size="40" font-weight="600"
                   fill="white" text-anchor="middle" dominant-baseline="middle">
-              Hall
+              Lecture Hall
             </text>
 <rect x="1600" y="0" width="400" height="600" 
               fill="#FF9800" stroke="none"/>
@@ -76,7 +76,7 @@
                   font-family="Roboto,Segoe UI,Arial,sans-serif" 
                   font-size="40" font-weight="600"
                   fill="white" text-anchor="middle" dominant-baseline="middle">
-              IT Lab
+              Software Lab
             </text>
 <rect x="500" y="600" width="1500" height="200" 
               fill="#E0E0E0" stroke="none"/>
@@ -124,7 +124,7 @@
                   font-family="Roboto,Segoe UI,Arial,sans-serif" 
                   font-size="40" font-weight="600"
                   fill="white" text-anchor="middle" dominant-baseline="middle">
-              Auditorium
+              Hall
             </text>
 <rect x="1300" y="800" width="400" height="400" 
               fill="#FF9800" stroke="none"/>
@@ -132,16 +132,21 @@
                   font-family="Roboto,Segoe UI,Arial,sans-serif" 
                   font-size="40" font-weight="600"
                   fill="white" text-anchor="middle" dominant-baseline="middle">
-              Software Lab
+              IT Lab
             </text>
 <rect x="1700" y="800" width="300" height="400" 
               fill="#00BCD4" stroke="none"/>
-<text x="1850.0" y="1000.0" 
-                  font-family="Roboto,Segoe UI,Arial,sans-serif" 
-                  font-size="39" font-weight="600"
-                  fill="#1a1a1a" text-anchor="middle" dominant-baseline="middle">
-              Common Area
-            </text>
+<g><text x="1850.0" y="997.5" 
+                      font-family="Roboto,Segoe UI,Arial,sans-serif" 
+                      font-size="40" font-weight="600"
+                      fill="#1a1a1a" text-anchor="middle" dominant-baseline="middle">
+                  Recreation
+                </text><text x="1850.0" y="1042.5" 
+                      font-family="Roboto,Segoe UI,Arial,sans-serif" 
+                      font-size="40" font-weight="600"
+                      fill="#1a1a1a" text-anchor="middle" dominant-baseline="middle">
+                  Room
+                </text></g>
 <rect x="500" y="1200" width="1500" height="300" 
               fill="#E0E0E0" stroke="none"/>
 <text x="1250.0" y="1350.0" 
@@ -172,7 +177,7 @@
                   font-family="Roboto,Segoe UI,Arial,sans-serif" 
                   font-size="40" font-weight="600"
                   fill="white" text-anchor="middle" dominant-baseline="middle">
-              Equipment Storage
+              Supply Room
             </text>
   
   <!-- Printers -->

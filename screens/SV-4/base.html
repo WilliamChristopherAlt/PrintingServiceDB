@@ -99,12 +99,22 @@
     .muted { color: var(--muted); font-size: 14px; }
     .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; }
     .progress {
-      display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 12px;
+      display: flex;
+      gap: 12px;
+      margin-top: 12px;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      padding-bottom: 4px;
     }
+    .progress::-webkit-scrollbar { height: 6px; }
+    .progress::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 999px; }
+    .progress::-webkit-scrollbar-track { background: transparent; }
     .step {
       display: flex; align-items: center; gap: 10px; padding: 10px 12px;
       border: 1px solid var(--border); border-radius: 12px; background: #f8fafc;
       position: relative;
+      flex: 1 1 0;
+      min-width: 140px;
     }
     .step.active { border-color: var(--accent); box-shadow: 0 12px 24px -18px rgba(37, 99, 235, 0.5); background: #eef2ff; }
     .step.done { border-color: var(--accent-2); background: #ecfdf3; }
@@ -195,7 +205,7 @@
       <a class="nav-item" href="#"><span>Printers Info</span></a>
       <a class="nav-item active" href="#"><span>Print Document</span></a>
       <a class="nav-item" href="#"><span>Print History</span></a>
-      <a class="nav-item" href="#"><span>Buy Pages</span></a>
+      <a class="nav-item" href="#"><span>Deposit Money</span></a>
     </nav>
     <div class="sidebar-footer">
       <div>© 2025 HCMSIU</div>
@@ -218,7 +228,7 @@
         <div class="avatar" aria-hidden="true">SV</div>
         <div class="user-meta">
           <strong>Student Name</strong>
-          <small>Balance: <span id="header-balance">150</span> A4</small>
+          <small>Balance: $<span id="header-balance">25.50</span></small>
         </div>
       </div>
     </div>
@@ -236,7 +246,8 @@
         <div class="step active" data-step="1"><div class="badge">1</div><div>Upload Document</div></div>
         <div class="step" data-step="2"><div class="badge">2</div><div>Printer</div></div>
         <div class="step" data-step="3"><div class="badge">3</div><div>Settings</div></div>
-        <div class="step" data-step="4"><div class="badge">4</div><div>Confirm</div></div>
+        <div class="step" data-step="4"><div class="badge">4</div><div>Review</div></div>
+        <div class="step" data-step="5"><div class="badge">5</div><div>Payment</div></div>
       </div>
     </div>
 
@@ -329,7 +340,7 @@
       <div class="row" style="justify-content:space-between; gap:12px; flex-wrap:wrap;">
         <div>
           <h2 class="section-title">Configure Print Settings</h2>
-          <div class="muted">Real-time preview + page balance calculation (A4 equivalent)</div>
+          <div class="muted">Real-time preview + price calculation based on paper size, color mode, and volume discounts</div>
         </div>
         <div class="row">
           <button class="btn ghost" id="back-to-2">Back</button>
@@ -391,22 +402,49 @@
             <div class="preview-box" id="preview-box">Thumbnail updates with settings</div>
             <div class="balance-card" id="balance-card">
               <div style="display:flex;justify-content:space-between;">
-                <strong>Page Balance Summary</strong>
+                <strong>Price & Balance Summary</strong>
                 <span class="info-chip" id="balance-status-chip">Sufficient</span>
               </div>
               <div class="row" style="justify-content:space-between;">
-                <div>Current Balance</div><div><strong id="balance-current">150</strong> A4</div>
+                <div>Current Balance</div><div><strong id="balance-current">$25.50</strong></div>
+              </div>
+              <div style="border-top:1px solid var(--border); margin:8px 0; padding-top:8px;">
+                <div class="muted" style="font-size:12px; margin-bottom:6px;">Price Breakdown:</div>
+                <div class="row" style="justify-content:space-between; font-size:13px;">
+                  <div>Pages × Copies</div><div id="pages-calc">0 × 1 = 0</div>
+                </div>
+                <div class="row" style="justify-content:space-between; font-size:13px; color:var(--muted);" id="duplex-row" style="display:none;">
+                  <div>× Duplex (×2)</div><div id="duplex-calc">—</div>
+                </div>
+                <div class="row" style="justify-content:space-between; font-size:13px;">
+                  <div>Total Physical Pages</div><div><strong id="total-pages">0</strong></div>
+                </div>
+                <div class="row" style="justify-content:space-between; font-size:13px;">
+                  <div>Base Price (per page)</div><div id="base-price-display">$0.20</div>
+                </div>
+                <div class="row" style="justify-content:space-between; font-size:13px; color:var(--muted);" id="color-row">
+                  <div>× Color Mode</div><div id="color-multiplier-display">—</div>
+                </div>
+                <div class="row" style="justify-content:space-between; font-size:13px;">
+                  <div>Price per Page</div><div><strong id="price-per-page">$0.20</strong></div>
+                </div>
+                <div class="row" style="justify-content:space-between; font-size:13px;">
+                  <div>Subtotal</div><div id="subtotal-display">$0.00</div>
+                </div>
+                <div class="row" style="justify-content:space-between; font-size:13px; color:var(--accent-2);" id="discount-row" style="display:none;">
+                  <div>Volume Discount</div><div id="discount-applied">-0%</div>
+                </div>
+              </div>
+              <div class="row" style="justify-content:space-between; border-top:1px solid var(--border); padding-top:8px; margin-top:8px;">
+                <div><strong>Total Price</strong></div><div><strong id="total-price" style="font-size:18px; color:var(--accent);">$0.00</strong></div>
               </div>
               <div class="row" style="justify-content:space-between;">
-                <div>Pages to Print (A4 eq.)</div><div><strong id="balance-required">0</strong> A4</div>
+                <div>Remaining After Print</div><div><strong id="balance-remaining">$25.50</strong></div>
               </div>
-              <div class="row" style="justify-content:space-between;">
-                <div>Remaining After Print</div><div><strong id="balance-remaining">150</strong> A4</div>
-              </div>
-              <div class="row" id="balance-warning" style="display:none; justify-content:space-between;">
+              <div class="row" id="balance-warning" style="display:none; justify-content:space-between; margin-top:8px;">
                 <div>Insufficient balance</div>
                 <div class="row">
-                  <button class="btn danger" id="buy-more">Buy More Pages</button>
+                  <button class="btn danger" id="deposit-money">Deposit Money</button>
                 </div>
               </div>
             </div>
@@ -425,7 +463,7 @@
         <div class="row">
           <button class="btn ghost" id="back-to-3">Back to Edit</button>
           <button class="btn danger" id="cancel-flow">Cancel</button>
-          <button class="btn primary disabled" id="submit-job" aria-disabled="true">Submit Print Job</button>
+          <button class="btn primary disabled" id="to-step-5" aria-disabled="true">Continue to Payment</button>
         </div>
       </div>
 
@@ -460,22 +498,145 @@
               <tr><td>Copies</td><td id="sum-copies">—</td></tr>
             </tbody>
           </table>
-          <h3 class="section-title" style="font-size:16px; margin-top:12px;">Page Balance</h3>
-          <table class="table" aria-label="Balance summary">
+          <h3 class="section-title" style="font-size:16px; margin-top:12px;">Payment Summary</h3>
+          <table class="table" aria-label="Payment summary">
             <tbody>
-              <tr><td>Pages to Print</td><td id="sum-required">—</td></tr>
-              <tr><td>Current balance</td><td id="sum-current">—</td></tr>
-              <tr><td>Remaining after print</td><td id="sum-remaining">—</td></tr>
+              <tr><td>Total Price</td><td id="sum-total-price">—</td></tr>
+              <tr><td>Pay from Balance</td><td id="sum-balance-payment">—</td></tr>
+              <tr><td>Pay Directly</td><td id="sum-direct-payment">—</td></tr>
+              <tr><td>Current Balance</td><td id="sum-current">—</td></tr>
+              <tr><td>Remaining After</td><td id="sum-remaining">—</td></tr>
             </tbody>
           </table>
         </div>
       </div>
 
-      <div class="warn-banner" id="confirm-warning" style="display:none;">⚠️ Balance insufficient. Please adjust settings or buy more pages.</div>
+      <div class="warn-banner" id="confirm-warning" style="display:none;">⚠️ Balance insufficient. You can pay the difference directly or deposit more money.</div>
       <div class="error-banner" id="confirm-error" style="display:none;">❌ Selected printer is no longer available. Please go back to choose another printer.</div>
       <div class="info-banner" id="submit-loading" style="display:none;">Submitting print job...</div>
     </section>
+
+    <!-- Step 5: Payment -->
+    <section class="card" id="step-5" style="display:none;">
+      <div class="row" style="justify-content:space-between; gap:12px; flex-wrap:wrap;">
+        <div>
+          <h2 class="section-title">Payment & Submit</h2>
+          <div class="muted">Choose payment method: balance, QR direct, or split</div>
+        </div>
+        <div class="row">
+          <button class="btn ghost" id="back-to-4">Back</button>
+          <button class="btn primary disabled" id="submit-payment" aria-disabled="true">Confirm & Submit</button>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card" style="box-shadow:none;">
+          <h3 class="section-title" style="font-size:16px;">Price Breakdown</h3>
+          <table class="table" aria-label="Price breakdown">
+            <tbody>
+              <tr><td>Total Pages</td><td id="pay-total-pages">—</td></tr>
+              <tr><td>Base Price (per page)</td><td id="pay-base-price">—</td></tr>
+              <tr><td>Color Mode</td><td id="pay-color-mode">—</td></tr>
+              <tr><td>Duplex</td><td id="pay-duplex">—</td></tr>
+              <tr><td>Subtotal</td><td id="pay-subtotal">—</td></tr>
+              <tr><td>Volume Discount</td><td id="pay-discount">—</td></tr>
+              <tr style="border-top:2px solid var(--border); font-weight:700;">
+                <td>Total Price</td><td id="pay-total-price" style="font-size:16px; color:var(--accent);">—</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="card" style="box-shadow:none;">
+          <h3 class="section-title" style="font-size:16px;">Payment Options</h3>
+          <div class="radio-row" id="pay-method-group" style="margin-bottom:10px;">
+            <div class="radio-chip active" data-method="balance">Use Balance</div>
+            <div class="radio-chip" data-method="direct">Pay Direct (QR)</div>
+            <div class="radio-chip" data-method="split">Split Balance + QR</div>
+          </div>
+
+          <div class="row" style="justify-content:space-between; padding:6px 0;">
+            <div>Current Balance</div><div><strong id="pay-current-balance">—</strong></div>
+          </div>
+
+          <div id="split-control" style="display:none; margin:8px 0;">
+            <label style="font-size:13px;">Amount from Balance
+              <input type="range" id="pay-balance-range" min="0" max="0" step="0.01" value="0" style="width:100%;">
+            </label>
+            <div class="row" style="justify-content:space-between; font-size:13px;">
+              <div>From Balance</div><div id="pay-balance-slider-value">$0.00</div>
+            </div>
+          </div>
+
+          <div class="row" style="justify-content:space-between; padding:6px 0;">
+            <div>Pay from Balance</div><div><strong id="pay-from-balance">—</strong></div>
+          </div>
+          <div class="row" style="justify-content:space-between; padding:6px 0;">
+            <div>Pay Directly</div><div><strong id="pay-directly">—</strong></div>
+          </div>
+          <div class="row" style="justify-content:space-between; padding:6px 0; border-top:1px solid var(--border); margin-top:6px;">
+            <div><strong>Remaining Balance</strong></div><div><strong id="pay-remaining-balance">—</strong></div>
+          </div>
+
+          <div class="warn-banner" id="pay-warning" style="display:none; margin-top:8px;">⚠️ Insufficient balance. The difference will be charged directly.</div>
+
+          <div id="qr-box" class="info-banner" style="display:none; margin-top:10px; flex-direction:column; align-items:center; gap:6px;">
+            <div style="font-weight:700;">Scan to Pay</div>
+            <div style="width:140px; height:140px; background: #eef2ff; border:1px solid var(--border); display:grid; place-items:center;">QR CODE</div>
+            <small class="muted">Use banking/ewallet to complete direct payment</small>
+          </div>
+        </div>
+      </div>
+    </section>
   </main>
+
+  <!-- Payment Confirmation Modal -->
+  <div class="modal" id="payment-modal">
+    <div class="modal-body" style="max-width:600px;">
+      <div class="modal-header">Confirm Payment</div>
+      <div class="muted" style="margin-bottom:16px;">Review your payment details before submitting</div>
+      
+      <div class="card" style="box-shadow:none; border-style:dashed; margin-bottom:12px;">
+        <div class="section-title" style="font-size:16px; margin-bottom:8px;">Price Breakdown</div>
+        <table class="table" style="font-size:14px;">
+          <tbody>
+            <tr><td>Total Pages</td><td id="pay-total-pages">—</td></tr>
+            <tr><td>Base Price (per page)</td><td id="pay-base-price">—</td></tr>
+            <tr><td>Color Mode</td><td id="pay-color-mode">—</td></tr>
+            <tr><td>Duplex</td><td id="pay-duplex">—</td></tr>
+            <tr><td>Subtotal</td><td id="pay-subtotal">—</td></tr>
+            <tr><td>Volume Discount</td><td id="pay-discount">—</td></tr>
+            <tr style="border-top:2px solid var(--border); font-weight:700;">
+              <td>Total Price</td><td id="pay-total-price" style="font-size:16px; color:var(--accent);">—</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card" style="box-shadow:none; border-style:dashed; margin-bottom:12px;">
+        <div class="section-title" style="font-size:16px; margin-bottom:8px;">Payment Method</div>
+        <div class="row" style="justify-content:space-between; padding:8px 0;">
+          <div>Current Balance</div><div><strong id="pay-current-balance">—</strong></div>
+        </div>
+        <div class="row" style="justify-content:space-between; padding:8px 0;">
+          <div>Pay from Balance</div><div><strong id="pay-from-balance">—</strong></div>
+        </div>
+        <div class="row" style="justify-content:space-between; padding:8px 0;">
+          <div>Pay Directly</div><div><strong id="pay-directly">—</strong></div>
+        </div>
+        <div class="row" style="justify-content:space-between; padding:8px 0; border-top:1px solid var(--border); margin-top:8px;">
+          <div><strong>Remaining Balance</strong></div><div><strong id="pay-remaining-balance">—</strong></div>
+        </div>
+      </div>
+
+      <div class="warn-banner" id="pay-warning" style="display:none;">⚠️ Insufficient balance. The difference will be charged directly.</div>
+      
+      <div class="modal-actions">
+        <button class="btn ghost" id="cancel-payment">Cancel</button>
+        <button class="btn primary enabled" id="confirm-payment">Confirm & Submit</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Success Modal -->
   <div class="modal" id="success-modal">
@@ -485,8 +646,9 @@
       <div class="muted">Job ID: <strong id="success-job-id">JOB-123456</strong></div>
       <div class="modal-row"><span>Printer location</span><span id="success-location">CS1 - H1 - 101</span></div>
       <div class="modal-row"><span>Estimated completion</span><span id="success-eta">10 mins</span></div>
-      <div class="modal-row"><span>Pages printed</span><span id="success-pages">12 A4</span></div>
-      <div class="modal-row"><span>Balance remaining</span><span id="success-balance">138 A4</span></div>
+      <div class="modal-row"><span>Pages printed</span><span id="success-pages">12 pages</span></div>
+      <div class="modal-row"><span>Amount paid</span><span id="success-amount">$2.40</span></div>
+      <div class="modal-row"><span>Balance remaining</span><span id="success-balance">$23.10</span></div>
       <div class="modal-actions" style="justify-content:center;">
         <button class="btn ghost" id="view-history">View Print History</button>
         <button class="btn primary enabled" id="print-another" style="width:auto;">Print Another Document</button>
@@ -518,9 +680,29 @@
   -->
 
   <script>
+    // Pricing configuration (from database tables)
+    const pricingConfig = {
+      pagePrices: {
+        'A4': 0.20,  // $0.20 per A4 page
+        'A3': 0.40,  // $0.40 per A3 page
+        'A5': 0.10   // $0.10 per A5 page
+      },
+      colorMultipliers: {
+        'black-white': 0.8,   // 80% of base
+        'grayscale': 1.0,     // 100% of base
+        'color': 2.5           // 250% of base
+      },
+      volumeDiscounts: [
+        { minPages: 500, discount: 0.20 },  // 20% off for 500+ pages
+        { minPages: 200, discount: 0.125 }, // 12.5% off for 200+ pages
+        { minPages: 100, discount: 0.10 },  // 10% off for 100+ pages
+        { minPages: 50, discount: 0.0 }     // No discount
+      ]
+    };
+
     const state = {
       step: 1,
-      balance: 150, // A4 equivalent
+      balance: 25.50, // Dollar balance (in-app currency)
       file: null,
       printers: [
         { id: 'p1', name: 'HP LaserJet Pro M404dn', campus: 'CS1', building: 'H1', room: '101', status: 'available', color: true, duplex: true, queue: 0 },
@@ -550,6 +732,7 @@
       2: document.getElementById('step-2'),
       3: document.getElementById('step-3'),
       4: document.getElementById('step-4'),
+      5: document.getElementById('step-5'),
     };
 
     const fileInput = document.getElementById('file-input');
@@ -589,16 +772,16 @@
     const balanceCard = document.getElementById('balance-card');
     const balanceStatusChip = document.getElementById('balance-status-chip');
     const balanceCurrent = document.getElementById('balance-current');
-    const balanceRequired = document.getElementById('balance-required');
     const balanceRemaining = document.getElementById('balance-remaining');
     const balanceWarning = document.getElementById('balance-warning');
-    const buyMoreBtn = document.getElementById('buy-more');
     const toStep4Btn = document.getElementById('to-step-4');
+    const toStep5Btn = document.getElementById('to-step-5');
 
     const backTo2 = document.getElementById('back-to-2');
     const backTo3 = document.getElementById('back-to-3');
+    const backTo4 = document.getElementById('back-to-4');
     const cancelFlow = document.getElementById('cancel-flow');
-    const submitJob = document.getElementById('submit-job');
+    const submitPayment = document.getElementById('submit-payment');
     const confirmWarning = document.getElementById('confirm-warning');
     const confirmError = document.getElementById('confirm-error');
     const submitLoading = document.getElementById('submit-loading');
@@ -615,7 +798,9 @@
     const sumSides = document.getElementById('sum-sides');
     const sumColor = document.getElementById('sum-color');
     const sumCopies = document.getElementById('sum-copies');
-    const sumRequired = document.getElementById('sum-required');
+    const sumTotalPrice = document.getElementById('sum-total-price');
+    const sumBalancePayment = document.getElementById('sum-balance-payment');
+    const sumDirectPayment = document.getElementById('sum-direct-payment');
     const sumCurrent = document.getElementById('sum-current');
     const sumRemaining = document.getElementById('sum-remaining');
 
@@ -624,6 +809,7 @@
     const successLocation = document.getElementById('success-location');
     const successEta = document.getElementById('success-eta');
     const successPages = document.getElementById('success-pages');
+    const successAmount = document.getElementById('success-amount');
     const successBalance = document.getElementById('success-balance');
     const viewHistory = document.getElementById('view-history');
     const printAnother = document.getElementById('print-another');
@@ -642,7 +828,7 @@
         dot.classList.toggle('active', idx === step);
         dot.classList.toggle('done', idx < step);
       });
-      stepLabel.textContent = `Step ${step} of 4`;
+      stepLabel.textContent = `Step ${step} of 5`;
     }
 
     function resetUploadUI() {
@@ -817,10 +1003,46 @@
       return { pages: Array.from(pages).sort((a, b) => a - b) };
     }
 
-    function calcA4Equivalent(pageCount, paperSize, sides, copies) {
-      const sizeFactor = paperSize === 'A3' ? 2 : paperSize === 'A5' ? 0.5 : 1;
-      const sideFactor = sides === 'double-sided' ? 0.5 : 1;
-      return Math.ceil(pageCount * sizeFactor * sideFactor * copies);
+    function calculatePrice(pageCount, paperSize, colorMode, copies, sides) {
+      // Get base price per page for paper size
+      const basePrice = pricingConfig.pagePrices[paperSize] || 0.20;
+      
+      // Apply color mode multiplier
+      const colorMultiplier = pricingConfig.colorMultipliers[colorMode] || 1.0;
+      const pricePerPage = basePrice * colorMultiplier;
+      
+      // Calculate total pages: duplex doubles the number of physical pages printed
+      // If double-sided, each sheet prints 2 pages, so we multiply by 2
+      const duplexMultiplier = sides === 'double-sided' ? 2 : 1;
+      const totalPages = pageCount * copies * duplexMultiplier;
+      
+      // Find applicable volume discount
+      let discount = 0.0;
+      for (const discountTier of pricingConfig.volumeDiscounts.sort((a, b) => b.minPages - a.minPages)) {
+        if (totalPages >= discountTier.minPages) {
+          discount = discountTier.discount;
+          break;
+        }
+      }
+      
+      // Calculate final price
+      const baseAmount = totalPages * pricePerPage;
+      const discountAmount = baseAmount * discount;
+      const finalPrice = baseAmount - discountAmount;
+      
+      return {
+        pageCount,
+        copies,
+        duplexMultiplier,
+        totalPages,
+        basePrice,
+        colorMultiplier,
+        pricePerPage,
+        discount,
+        baseAmount,
+        discountAmount,
+        finalPrice
+      };
     }
 
     function updateBalance() {
@@ -828,20 +1050,88 @@
         ? state.totalPagesInDoc
         : parsePageRange(state.settings.customRange, state.totalPagesInDoc)?.pages?.length || 0;
 
-      const required = calcA4Equivalent(pages, state.settings.paperSize, state.settings.sides, state.settings.copies);
-      const remaining = state.balance - required;
-      const sufficient = required > 0 && remaining >= 0;
+      if (pages === 0) {
+        balanceCurrent.textContent = `$${state.balance.toFixed(2)}`;
+        document.getElementById('pages-calc').textContent = '0 × 1 = 0';
+        document.getElementById('duplex-row').style.display = 'none';
+        document.getElementById('total-pages').textContent = '0';
+        document.getElementById('base-price-display').textContent = '$0.20';
+        document.getElementById('color-row').style.display = 'none';
+        document.getElementById('price-per-page').textContent = '$0.00';
+        document.getElementById('subtotal-display').textContent = '$0.00';
+        document.getElementById('discount-row').style.display = 'none';
+        document.getElementById('total-price').textContent = '$0.00';
+        document.getElementById('balance-remaining').textContent = `$${state.balance.toFixed(2)}`;
+        toStep4Btn.classList.add('disabled');
+        toStep4Btn.setAttribute('aria-disabled', 'true');
+        return { finalPrice: 0, remaining: state.balance, sufficient: false };
+      }
 
-      balanceCurrent.textContent = state.balance;
-      balanceRequired.textContent = required;
-      balanceRemaining.textContent = Math.max(remaining, 0);
-      balanceStatusChip.textContent = sufficient ? 'Sufficient' : 'Insufficient balance';
+      const priceInfo = calculatePrice(
+        pages,
+        state.settings.paperSize,
+        state.settings.colorMode,
+        state.settings.copies,
+        state.settings.sides
+      );
+
+      const remaining = state.balance - priceInfo.finalPrice;
+      const sufficient = priceInfo.finalPrice > 0 && remaining >= 0;
+
+      // Update display
+      balanceCurrent.textContent = `$${state.balance.toFixed(2)}`;
+      document.getElementById('pages-calc').textContent = `${pages} × ${state.settings.copies} = ${pages * state.settings.copies}`;
+      
+      // Show duplex multiplier if applicable
+      const duplexRow = document.getElementById('duplex-row');
+      const duplexCalc = document.getElementById('duplex-calc');
+      if (priceInfo.duplexMultiplier > 1) {
+        duplexRow.style.display = 'flex';
+        duplexCalc.textContent = `× ${priceInfo.duplexMultiplier} = ${priceInfo.totalPages}`;
+      } else {
+        duplexRow.style.display = 'none';
+      }
+      
+      document.getElementById('total-pages').textContent = priceInfo.totalPages;
+      document.getElementById('base-price-display').textContent = `$${priceInfo.basePrice.toFixed(2)}`;
+      
+      // Show color mode multiplier
+      const colorRow = document.getElementById('color-row');
+      const colorMultiplierDisplay = document.getElementById('color-multiplier-display');
+      const colorModeNames = {
+        'black-white': 'Black & White (×0.8)',
+        'grayscale': 'Grayscale (×1.0)',
+        'color': 'Color (×2.5)'
+      };
+      colorRow.style.display = 'flex';
+      colorMultiplierDisplay.textContent = `${colorModeNames[state.settings.colorMode] || '×1.0'}`;
+      
+      document.getElementById('price-per-page').textContent = `$${priceInfo.pricePerPage.toFixed(2)}`;
+      document.getElementById('subtotal-display').textContent = `$${priceInfo.baseAmount.toFixed(2)}`;
+      
+      // Show discount if applicable
+      const discountRow = document.getElementById('discount-row');
+      if (priceInfo.discount > 0) {
+        discountRow.style.display = 'flex';
+        document.getElementById('discount-applied').textContent = `-${(priceInfo.discount * 100).toFixed(1)}% ($${priceInfo.discountAmount.toFixed(2)})`;
+      } else {
+        discountRow.style.display = 'none';
+      }
+      
+      document.getElementById('total-price').textContent = `$${priceInfo.finalPrice.toFixed(2)}`;
+      document.getElementById('balance-remaining').textContent = `$${Math.max(remaining, 0).toFixed(2)}`;
+      
+      balanceStatusChip.textContent = sufficient ? 'Sufficient' : 'Insufficient';
       balanceCard.classList.toggle('danger', !sufficient);
       balanceWarning.style.display = sufficient ? 'none' : 'flex';
-      toStep4Btn.classList.toggle('disabled', !sufficient || !required);
-      toStep4Btn.classList.toggle('enabled', sufficient && !!state.selectedPrinter && !!state.file);
-      toStep4Btn.setAttribute('aria-disabled', (!sufficient || !required).toString());
-      return { required, remaining, sufficient };
+
+      const canProceed = priceInfo.finalPrice > 0 && !!state.selectedPrinter && !!state.file;
+      toStep4Btn.classList.toggle('disabled', !canProceed);
+      toStep4Btn.classList.toggle('enabled', canProceed);
+      toStep4Btn.setAttribute('aria-disabled', (!canProceed).toString());
+      
+      state.lastPriceInfo = priceInfo;
+      return { finalPrice: priceInfo.finalPrice, remaining, sufficient, priceInfo };
     }
 
     function updatePreview() {
@@ -850,7 +1140,25 @@
     }
 
     function updateSettingsSummary() {
-      const { required, remaining } = updateBalance();
+      const pages = state.settings.pageRangeType === 'all'
+        ? state.totalPagesInDoc
+        : parsePageRange(state.settings.customRange, state.totalPagesInDoc)?.pages?.length || 0;
+      
+      const priceInfo = pages > 0 ? calculatePrice(
+        pages,
+        state.settings.paperSize,
+        state.settings.colorMode,
+        state.settings.copies,
+        state.settings.sides
+      ) : { finalPrice: 0, totalPages: 0 };
+
+      const { finalPrice, remaining } = updateBalance();
+      state.lastPriceInfo = priceInfo;
+      
+      // Calculate payment split: use balance first, then direct payment
+      const amountFromBalance = Math.min(finalPrice, state.balance);
+      const amountDirect = Math.max(0, finalPrice - amountFromBalance);
+
       sumFile.textContent = state.file?.name || '—';
       sumSize.textContent = state.file ? `${(state.file.size / (1024 * 1024)).toFixed(2)} MB` : '—';
       sumPages.textContent = state.totalPagesInDoc;
@@ -862,14 +1170,25 @@
         ? 'All pages'
         : state.settings.customRange || '—';
       sumOrientation.textContent = state.settings.orientation;
-      sumSides.textContent = state.settings.sides === 'double-sided' ? 'Two-sided' : 'One-sided';
-      sumColor.textContent = state.settings.colorMode;
+      sumSides.textContent = state.settings.sides === 'double-sided' ? 'Two-sided (Duplex)' : 'One-sided';
+      const colorModeNames = {
+        'black-white': 'Black & White',
+        'grayscale': 'Grayscale',
+        'color': 'Color'
+      };
+      sumColor.textContent = `${colorModeNames[state.settings.colorMode] || state.settings.colorMode} (×${priceInfo.colorMultiplier || 1.0})`;
       sumCopies.textContent = state.settings.copies;
-      sumRequired.textContent = `${required} A4`;
-      sumCurrent.textContent = `${state.balance} A4`;
-      sumRemaining.textContent = `${Math.max(remaining, 0)} A4`;
-      submitJob.classList.toggle('disabled', remaining < 0);
-      submitJob.setAttribute('aria-disabled', (remaining < 0).toString());
+      sumTotalPrice.textContent = `$${finalPrice.toFixed(2)}`;
+      sumBalancePayment.textContent = amountFromBalance > 0 ? `$${amountFromBalance.toFixed(2)}` : '$0.00';
+      sumDirectPayment.textContent = amountDirect > 0 ? `$${amountDirect.toFixed(2)}` : '$0.00';
+      sumCurrent.textContent = `$${state.balance.toFixed(2)}`;
+      sumRemaining.textContent = `$${Math.max(remaining, 0).toFixed(2)}`;
+      const canPay = finalPrice > 0 && !!state.selectedPrinter && !!state.file;
+      toStep5Btn.classList.toggle('disabled', !canPay);
+      toStep5Btn.classList.toggle('enabled', canPay);
+      toStep5Btn.setAttribute('aria-disabled', (!canPay).toString());
+      submitPayment.classList.toggle('disabled', finalPrice === 0);
+      submitPayment.setAttribute('aria-disabled', (finalPrice === 0).toString());
       confirmWarning.style.display = remaining < 0 ? 'flex' : 'none';
     }
 
@@ -878,7 +1197,7 @@
         chip.addEventListener('click', () => {
           groupEl.querySelectorAll('.radio-chip').forEach(c => c.classList.remove('active'));
           chip.classList.add('active');
-          state.settings[key] = chip.dataset.value || chip.dataset.range;
+          state.settings[key] = chip.dataset.value || chip.dataset.range || chip.dataset.method;
           if (key === 'pageRangeType') {
             const custom = state.settings.pageRangeType === 'custom';
             rangeInput.disabled = !custom;
@@ -887,6 +1206,10 @@
               rangeInput.value = '';
               rangeError.style.display = 'none';
             }
+          }
+          // Update balance when sides or orientation changes (affects price)
+          if (key === 'sides' || key === 'orientation') {
+            updateBalance();
           }
           updatePreview();
           updateSettingsSummary();
@@ -921,7 +1244,11 @@
       state.settings.copies = val;
       updateSettingsSummary();
     });
-    colorMode?.addEventListener('change', (e) => { state.settings.colorMode = e.target.value; updateSettingsSummary(); });
+    colorMode?.addEventListener('change', (e) => { 
+      state.settings.colorMode = e.target.value; 
+      updateBalance();
+      updateSettingsSummary(); 
+    });
 
     toStep2Btn?.addEventListener('click', () => {
       if (toStep2Btn.classList.contains('disabled')) return;
@@ -940,6 +1267,7 @@
       updateSettingsSummary();
     });
     backTo3?.addEventListener('click', () => setStep(3));
+    backTo4?.addEventListener('click', () => setStep(4));
     cancelFlow?.addEventListener('click', () => {
       if (!confirm('Are you sure you want to cancel?')) return;
       resetUploadUI();
@@ -947,35 +1275,151 @@
       setStep(1);
     });
 
-    submitJob?.addEventListener('click', () => {
-      if (submitJob.classList.contains('disabled')) return;
+    // Payment step elements
+    const payTotalPages = document.getElementById('pay-total-pages');
+    const payBasePrice = document.getElementById('pay-base-price');
+    const payColorMode = document.getElementById('pay-color-mode');
+    const payDuplex = document.getElementById('pay-duplex');
+    const paySubtotal = document.getElementById('pay-subtotal');
+    const payDiscount = document.getElementById('pay-discount');
+    const payTotalPrice = document.getElementById('pay-total-price');
+    const payCurrentBalance = document.getElementById('pay-current-balance');
+    const payFromBalance = document.getElementById('pay-from-balance');
+    const payDirectly = document.getElementById('pay-directly');
+    const payRemainingBalance = document.getElementById('pay-remaining-balance');
+    const payWarning = document.getElementById('pay-warning');
+    const payMethodGroup = document.getElementById('pay-method-group');
+    const payBalanceRange = document.getElementById('pay-balance-range');
+    const payBalanceSliderValue = document.getElementById('pay-balance-slider-value');
+    const qrBox = document.getElementById('qr-box');
+
+    let paymentMethod = 'balance';
+
+    function updatePaymentSummary() {
+      const pages = state.settings.pageRangeType === 'all'
+        ? state.totalPagesInDoc
+        : parsePageRange(state.settings.customRange, state.totalPagesInDoc)?.pages?.length || 0;
+      const priceInfo = calculatePrice(pages, state.settings.paperSize, state.settings.colorMode, state.settings.copies, state.settings.sides);
+      state.lastPriceInfo = priceInfo;
+
+      payTotalPages.textContent = `${priceInfo.totalPages} pages`;
+      payBasePrice.textContent = `$${priceInfo.basePrice.toFixed(2)}`;
+      const colorModeNames = {
+        'black-white': 'Black & White (×0.8)',
+        'grayscale': 'Grayscale (×1.0)',
+        'color': 'Color (×2.5)'
+      };
+      payColorMode.textContent = colorModeNames[state.settings.colorMode] || '—';
+      payDuplex.textContent = state.settings.sides === 'double-sided' ? 'Yes (×2 pages)' : 'No';
+      paySubtotal.textContent = `$${priceInfo.baseAmount.toFixed(2)}`;
+      payDiscount.textContent = priceInfo.discount > 0
+        ? `${(priceInfo.discount * 100).toFixed(1)}% ($${priceInfo.discountAmount.toFixed(2)})`
+        : 'None';
+      payTotalPrice.textContent = `$${priceInfo.finalPrice.toFixed(2)}`;
+      payCurrentBalance.textContent = `$${state.balance.toFixed(2)}`;
+
+      const maxBalanceUse = Math.min(state.balance, priceInfo.finalPrice);
+      payBalanceRange.max = maxBalanceUse.toFixed(2);
+      if (paymentMethod !== 'split') {
+        payBalanceRange.value = maxBalanceUse.toFixed(2);
+      }
+
+      let fromBalance = 0;
+      if (paymentMethod === 'balance') {
+        fromBalance = maxBalanceUse;
+      } else if (paymentMethod === 'direct') {
+        fromBalance = 0;
+      } else if (paymentMethod === 'split') {
+        fromBalance = Math.min(parseFloat(payBalanceRange.value) || 0, maxBalanceUse);
+      }
+      const direct = Math.max(0, priceInfo.finalPrice - fromBalance);
+      const remainingBalance = Math.max(state.balance - fromBalance, 0);
+
+      payBalanceSliderValue.textContent = `$${fromBalance.toFixed(2)}`;
+      payFromBalance.textContent = `$${fromBalance.toFixed(2)}`;
+      payDirectly.textContent = `$${direct.toFixed(2)}`;
+      payRemainingBalance.textContent = `$${remainingBalance.toFixed(2)}`;
+      payWarning.style.display = direct > 0 ? 'flex' : 'none';
+      qrBox.style.display = direct > 0 ? 'flex' : 'none';
+
+      submitPayment.classList.toggle('disabled', priceInfo.finalPrice === 0);
+      submitPayment.setAttribute('aria-disabled', (priceInfo.finalPrice === 0).toString());
+    }
+
+    function setPaymentMethod(method) {
+      paymentMethod = method;
+      document.querySelectorAll('#pay-method-group .radio-chip').forEach(chip => {
+        chip.classList.toggle('active', chip.dataset.method === method);
+      });
+      document.getElementById('split-control').style.display = method === 'split' ? 'block' : 'none';
+      updatePaymentSummary();
+    }
+
+    payMethodGroup?.querySelectorAll('.radio-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        setPaymentMethod(chip.dataset.method);
+      });
+    });
+    setPaymentMethod('balance');
+
+    payBalanceRange?.addEventListener('input', () => {
+      if (paymentMethod === 'split') updatePaymentSummary();
+    });
+
+    toStep5Btn?.addEventListener('click', () => {
+      if (toStep5Btn.classList.contains('disabled')) return;
+      setStep(5);
+      updatePaymentSummary();
+    });
+
+    document.getElementById('back-to-4')?.addEventListener('click', () => setStep(4));
+
+    submitPayment?.addEventListener('click', () => {
+      if (submitPayment.classList.contains('disabled')) return;
+
+      // Double-check printer status
+      const printerStillOnline = state.selectedPrinter?.status !== 'offline';
+      if (!printerStillOnline) {
+        confirmError.style.display = 'flex';
+        open(errorModal);
+        return;
+      }
+
+      // Final computation
+      const pages = state.settings.pageRangeType === 'all'
+        ? state.totalPagesInDoc
+        : parsePageRange(state.settings.customRange, state.totalPagesInDoc)?.pages?.length || 0;
+      const priceInfo = calculatePrice(pages, state.settings.paperSize, state.settings.colorMode, state.settings.copies, state.settings.sides);
+      const maxBalanceUse = Math.min(state.balance, priceInfo.finalPrice);
+      let fromBalance = 0;
+      if (paymentMethod === 'balance') fromBalance = maxBalanceUse;
+      else if (paymentMethod === 'direct') fromBalance = 0;
+      else if (paymentMethod === 'split') fromBalance = Math.min(parseFloat(payBalanceRange.value) || 0, maxBalanceUse);
+      const direct = Math.max(0, priceInfo.finalPrice - fromBalance);
+
       submitLoading.style.display = 'flex';
-      confirmError.style.display = 'none';
       setTimeout(() => {
         submitLoading.style.display = 'none';
-        // Double-check balance and printer status
-        const printerStillOnline = state.selectedPrinter?.status !== 'offline';
-        if (!printerStillOnline) {
-          confirmError.style.display = 'flex';
-          open(errorModal);
-          return;
-        }
-        // Success path
+
+        state.balance = Math.max(state.balance - fromBalance, 0);
+        headerBalance.textContent = state.balance.toFixed(2);
+
         successJobId.textContent = `JOB-${Math.floor(Math.random() * 900000 + 100000)}`;
         successLocation.textContent = sumLocation.textContent;
         successEta.textContent = '10 mins';
-        successPages.textContent = sumRequired.textContent;
-        successBalance.textContent = sumRemaining.textContent;
-        headerBalance.textContent = Math.max(state.balance - Number(balanceRequired.textContent), 0);
+        successPages.textContent = `${priceInfo.totalPages} pages`;
+        successAmount.textContent = `$${priceInfo.finalPrice.toFixed(2)}`;
+        successBalance.textContent = `$${state.balance.toFixed(2)}`;
         open(successModal);
-      }, 900);
+      }, 800);
     });
 
     errorBack?.addEventListener('click', () => { close(errorModal); setStep(2); });
     viewHistory?.addEventListener('click', () => alert('Navigate to print history'));
     printAnother?.addEventListener('click', () => { close(successModal); resetUploadUI(); setStep(1); });
 
-    buyMoreBtn?.addEventListener('click', () => window.open('#buy-pages', '_blank'));
+    const depositMoneyBtn = document.getElementById('deposit-money');
+    depositMoneyBtn?.addEventListener('click', () => window.open('#deposit', '_blank'));
 
     // Init
     setStep(1);
