@@ -1,0 +1,1301 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Print History - Student Printing Service</title>
+  <style>
+    :root {
+      --bg: #f7f7fb;
+      --card: #ffffff;
+      --border: #e5e7eb;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --accent: #2563eb;
+      --accent-2: #10b981;
+      --danger: #dc2626;
+      --warn: #f59e0b;
+      --shadow: 0 12px 30px -18px rgba(15, 23, 42, 0.4);
+      font-family: "Inter", system-ui, -apple-system, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      display: grid;
+      grid-template-rows: 72px 1fr;
+      grid-template-columns: 260px 1fr;
+      grid-template-areas:
+        "sidebar header"
+        "sidebar main";
+      min-height: 100vh;
+    }
+    header {
+      grid-area: header;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      z-index: 10;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 18px; }
+    .brand span { color: var(--muted); font-weight: 500; }
+    .actions { display: flex; align-items: center; gap: 16px; }
+    .icon-btn {
+      width: 40px; height: 40px; display: grid; place-items: center;
+      border-radius: 10px; border: 1px solid var(--border); background: var(--card);
+      cursor: pointer; transition: 0.2s ease;
+    }
+    .icon-btn:hover { border-color: var(--accent); }
+    .user-menu {
+      display: flex; align-items: center; gap: 10px; padding: 8px 12px;
+      border: 1px solid var(--border); border-radius: 12px; background: var(--card);
+      cursor: pointer; transition: 0.2s ease; min-width: 160px;
+    }
+    .user-menu:hover { border-color: var(--accent); }
+    .avatar {
+      width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, #2563eb, #10b981);
+      color: #fff; display: grid; place-items: center; font-weight: 700;
+    }
+    .user-meta { display: flex; flex-direction: column; line-height: 1.2; }
+    .user-meta small { color: var(--muted); }
+    aside {
+      grid-area: sidebar;
+      background: #0f172a;
+      color: #e2e8f0;
+      display: flex;
+      flex-direction: column;
+      padding: 20px 16px;
+      gap: 16px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+    }
+    nav { display: flex; flex-direction: column; gap: 6px; }
+    .nav-item {
+      padding: 12px 14px; border-radius: 10px; color: inherit; text-decoration: none;
+      display: flex; align-items: center; gap: 10px; transition: 0.2s ease;
+    }
+    .nav-item:hover, .nav-item.active { background: rgba(59, 130, 246, 0.15); color: #fff; }
+    .sidebar-footer {
+      margin-top: auto; padding: 12px 14px; border-radius: 10px;
+      background: rgba(226, 232, 240, 0.05); color: #cbd5e1; font-size: 13px; line-height: 1.5;
+    }
+    main { grid-area: main; padding: 28px 28px 40px; display: flex; flex-direction: column; gap: 20px; }
+    .page-title { font-size: 28px; font-weight: 700; margin: 0; }
+    .sub { color: var(--muted); margin-top: 6px; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: var(--shadow);
+    }
+    .filter-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 16px; }
+    .filter-group { display: flex; flex-direction: column; gap: 6px; }
+    .filter-label { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .filter-input, .filter-select {
+      padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; font-size: 14px;
+      background: var(--card); color: var(--text);
+    }
+    .filter-actions { display: flex; gap: 8px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+    .btn {
+      border: none; border-radius: 10px; cursor: pointer; transition: 0.2s ease;
+      padding: 12px 16px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;
+    }
+    .btn-primary { background: linear-gradient(135deg, #2563eb, #3b82f6); color: #fff; box-shadow: var(--shadow); }
+    .btn-secondary { border: 1px solid var(--border); background: #f8fafc; color: var(--text); }
+    .btn-danger { background: #fee2e2; color: #b91c1c; border: 1px solid #fecdd3; }
+    .btn-sm { padding: 8px 12px; font-size: 12px; }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+    .stat-label { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; margin-bottom: 8px; }
+    .stat-value { font-size: 32px; font-weight: 700; margin: 0 0 4px 0; }
+    .stat-description { font-size: 12px; color: var(--muted); }
+    .jobs-table-container { background: var(--card); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; box-shadow: var(--shadow); }
+    .jobs-table { width: 100%; border-collapse: collapse; }
+    .jobs-table thead { background: #f8fafc; border-bottom: 2px solid var(--border); }
+    .jobs-table th {
+      padding: 14px 16px; text-align: left; font-size: 12px; font-weight: 600; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .jobs-table td {
+      padding: 16px; border-bottom: 1px solid #f1f5f9; font-size: 14px; color: var(--text);
+      vertical-align: middle;
+    }
+    .jobs-table tbody tr:hover { background: #fafbfc; }
+    .jobs-table tbody tr:last-child td { border-bottom: none; }
+    .file-cell { display: flex; align-items: center; gap: 12px; }
+    .file-icon { width: 36px; height: 36px; border-radius: 8px; background: #f1f5f9; display: grid; place-items: center; font-size: 11px; font-weight: 600; color: var(--muted); flex-shrink: 0; }
+    .file-name { font-weight: 600; color: var(--text); }
+    .status-badge {
+      padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.5px; white-space: nowrap; display: inline-block;
+    }
+    .status-badge.completed { background: rgba(16, 185, 129, 0.12); color: #047857; }
+    .status-badge.failed { background: rgba(239, 68, 68, 0.15); color: #b91c1c; }
+    .status-badge.cancelled { background: rgba(148, 163, 184, 0.15); color: #475569; }
+    .status-badge.queued { background: rgba(251, 191, 36, 0.18); color: #92400e; }
+    .status-badge.printing { background: rgba(59, 130, 246, 0.15); color: #1e40af; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+    .table-actions { display: flex; gap: 6px; }
+    .table-progress { display: flex; flex-direction: column; gap: 6px; }
+    .table-progress-bar { width: 100%; height: 6px; background: #e5e7eb; border-radius: 999px; overflow: hidden; }
+    .table-progress-fill { height: 100%; background: var(--accent); transition: width 0.3s ease; border-radius: 999px; }
+    .table-progress-text { font-size: 11px; color: var(--muted); }
+    .empty-state { text-align: center; padding: 60px 20px; background: var(--card); border: 1px solid var(--border); border-radius: 14px; box-shadow: var(--shadow); }
+    .empty-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.3; font-weight: 600; color: var(--muted); }
+    .empty-title { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+    .empty-text { font-size: 14px; color: var(--muted); }
+    .pagination { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; background: var(--card); border: 1px solid var(--border); border-radius: 14px; box-shadow: var(--shadow); flex-wrap: wrap; gap: 12px; }
+    .pagination-info { font-size: 13px; color: var(--muted); }
+    .pagination-controls { display: flex; align-items: center; gap: 8px; }
+    .pagination-btn {
+      padding: 6px 12px; border: 1px solid var(--border); border-radius: 6px; background: var(--card);
+      cursor: pointer; font-size: 13px; font-weight: 500; color: var(--text); transition: 0.2s ease;
+    }
+    .pagination-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+    .pagination-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .pagination-btn.active { background: var(--accent); border-color: var(--accent); color: white; }
+    .page-size-select { padding: 6px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; }
+    .modal {
+      position: fixed; inset: 0; background: rgba(15, 23, 42, 0.55); display: none;
+      align-items: center; justify-content: center; padding: 16px; z-index: 1000;
+    }
+    .modal.active { display: flex; }
+    .modal-body {
+      background: var(--card); border-radius: 12px; padding: 32px; width: min(900px, 100%);
+      max-height: 90vh; overflow-y: auto; box-shadow: 0 24px 60px -30px rgba(0, 0, 0, 0.45);
+    }
+    .modal-header { 
+      display: flex; justify-content: space-between; align-items: flex-start; 
+      margin-bottom: 32px; padding-bottom: 20px; border-bottom: 2px solid var(--border); 
+    }
+    .modal-title { font-size: 24px; font-weight: 700; margin: 0 0 8px 0; color: var(--text); }
+    .modal-subtitle { font-size: 14px; color: var(--muted); margin: 0; }
+    .modal-close { 
+      width: 36px; height: 36px; border: 1px solid var(--border); background: var(--card); 
+      border-radius: 8px; cursor: pointer; display: grid; place-items: center;
+      font-size: 18px; color: var(--muted); transition: 0.2s ease;
+    }
+    .modal-close:hover { border-color: var(--text); color: var(--text); background: #f8fafc; }
+    .modal-section { 
+      display: flex; flex-direction: column; gap: 16px; 
+      margin-bottom: 32px; padding-bottom: 24px; border-bottom: 1px solid #f1f5f9;
+    }
+    .modal-section:last-of-type { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+    .modal-section-title { 
+      font-size: 15px; font-weight: 600; color: var(--text); 
+      margin: 0 0 4px 0; text-transform: none; letter-spacing: 0;
+    }
+    .modal-grid { 
+      display: grid; grid-template-columns: repeat(2, 1fr); gap: 0;
+      background: #fafbfc; border-radius: 8px; padding: 4px; border: 1px solid #f1f5f9;
+    }
+    .modal-row { 
+      display: flex; flex-direction: column; padding: 12px 16px; 
+      background: var(--card); border-radius: 6px; margin: 4px;
+    }
+    .modal-label { 
+      font-size: 12px; color: var(--muted); 
+      margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.3px; font-weight: 500;
+    }
+    .modal-value { 
+      font-size: 15px; font-weight: 600; color: var(--text); 
+      text-align: left; line-height: 1.4;
+    }
+    .modal-footer { 
+      display: flex; justify-content: flex-end; gap: 12px; 
+      padding-top: 24px; margin-top: 24px; border-top: 2px solid var(--border); 
+    }
+    .toast {
+      position: fixed; top: 80px; right: 24px; background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 16px; box-shadow: var(--shadow); display: none; align-items: center;
+      gap: 12px; z-index: 2000; min-width: 320px;
+    }
+    .toast.active { display: flex; animation: slideIn 0.3s ease; }
+    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    .toast.success { border-left: 4px solid var(--accent-2); }
+    .toast.error { border-left: 4px solid var(--danger); }
+    .toast-icon { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; font-size: 16px; }
+    .toast.success .toast-icon { background: rgba(16, 185, 129, 0.1); color: var(--accent-2); }
+    .toast.error .toast-icon { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+    .muted { color: var(--muted); font-size: 13px; }
+    @media (max-width: 1024px) {
+      body { grid-template-columns: 82px 1fr; }
+      aside { width: 82px; padding: 16px 10px; }
+      .nav-item span { display: none; }
+      .sidebar-footer { display: none; }
+    }
+    @media (max-width: 768px) {
+      body { grid-template-areas: "header header" "main main"; grid-template-columns: 1fr; }
+      aside { display: none; }
+      .jobs-table-container { overflow-x: auto; }
+      .jobs-table { min-width: 800px; }
+      .filter-grid { grid-template-columns: 1fr; }
+      .modal-body { padding: 24px; }
+      .modal-grid { grid-template-columns: 1fr; }
+      .modal-header { flex-direction: column; gap: 16px; }
+      .modal-close { align-self: flex-end; }
+    }
+  </style>
+</head>
+<body>
+  <aside>
+    <nav aria-label="Main navigation">
+      <a class="nav-item" href="#"><span>Home</span></a>
+      <a class="nav-item" href="#"><span>Printers Info</span></a>
+      <a class="nav-item" href="#"><span>Print Document</span></a>
+      <a class="nav-item active" href="#"><span>Print History</span></a>
+      <a class="nav-item" href="#"><span>Buy Pages</span></a>
+    </nav>
+    <div class="sidebar-footer">
+      <div>© 2025 HCMSIU</div>
+      <div>Contact: support@siu.edu</div>
+      <div>Version: 1.0.0</div>
+    </div>
+  </aside>
+
+  <header>
+    <div class="brand">
+      <div class="avatar" aria-hidden="true">SIU</div>
+      <div>
+        Student Printing Service
+        <span>→ Print History</span>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="icon-btn" aria-label="Notifications" title="Notifications" style="font-size: 16px; font-weight: 600;">N</button>
+      <div class="user-menu" aria-haspopup="menu" aria-expanded="false">
+        <div class="avatar" aria-hidden="true">SV</div>
+        <div class="user-meta">
+          <strong>Student Name</strong>
+          <small>Balance: 150 A4</small>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div>
+      <h1 class="page-title">Print History</h1>
+      <div class="sub">View print jobs, track progress, cancel and reprint</div>
+    </div>
+
+    <!-- Filter Section -->
+    <section class="card">
+      <div class="filter-grid">
+        <div class="filter-group">
+          <label class="filter-label">Date Range</label>
+          <select class="filter-select" id="date-range">
+            <option value="today">Today</option>
+            <option value="7days">7 days</option>
+            <option value="30days">30 days</option>
+            <option value="thisyear">This year</option>
+            <option value="all" selected>All</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">Status</label>
+          <select class="filter-select" id="filter-status">
+            <option value="">All</option>
+            <option value="completed">Completed</option>
+            <option value="failed">Failed</option>
+            <option value="cancelled">Cancelled</option>
+            <option value="queued">Queued</option>
+            <option value="printing">Printing</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">Paper Size</label>
+          <select class="filter-select" id="filter-paper-size">
+            <option value="" selected>All</option>
+            <option value="A3">A3</option>
+            <option value="A4">A4</option>
+            <option value="A5">A5</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">Color Mode</label>
+          <select class="filter-select" id="filter-color-mode">
+            <option value="" selected>All</option>
+            <option value="color">Color</option>
+            <option value="grayscale">Grayscale</option>
+            <option value="black-white">Black & White</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">Search File Name</label>
+          <input type="text" class="filter-input" id="search-file" placeholder="Enter file name..." />
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">Sort By</label>
+          <select class="filter-select" id="sort-by">
+            <option value="newest">Newest</option>
+            <option value="oldest">Oldest</option>
+            <option value="name-asc">File Name (A-Z)</option>
+            <option value="name-desc">File Name (Z-A)</option>
+            <option value="pages-desc">Pages (Most)</option>
+            <option value="pages-asc">Pages (Least)</option>
+          </select>
+        </div>
+      </div>
+      <div class="filter-actions">
+        <button class="btn btn-primary" id="apply-filters">Apply Filters</button>
+        <button class="btn btn-secondary" id="clear-filters">Clear Filters</button>
+      </div>
+    </section>
+
+    <!-- Statistics Cards -->
+    <section class="stats-grid">
+      <div class="card">
+        <div class="stat-label">Total Print Jobs</div>
+        <div class="stat-value" id="stat-total-jobs">0</div>
+        <div class="stat-description">Filtered jobs</div>
+      </div>
+      <div class="card">
+        <div class="stat-label">Total Pages Printed</div>
+        <div class="stat-value" id="stat-total-pages">0</div>
+        <div class="stat-description">A4 equivalent</div>
+      </div>
+      <div class="card">
+        <div class="stat-label">Printing</div>
+        <div class="stat-value" id="stat-printing">0</div>
+        <div class="stat-description">Jobs in progress</div>
+      </div>
+      <div class="card">
+        <div class="stat-label">Failed</div>
+        <div class="stat-value" id="stat-failed">0</div>
+        <div class="stat-description">Failed jobs</div>
+      </div>
+    </section>
+
+    <!-- Jobs Table -->
+    <section id="jobs-section">
+      <div class="jobs-table-container">
+        <table class="jobs-table" id="jobs-table">
+          <thead>
+            <tr>
+              <th>File</th>
+              <th>Printer</th>
+              <th>Pages</th>
+              <th>Started</th>
+              <th>Completed</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="jobs-tbody"></tbody>
+        </table>
+      </div>
+      <div class="empty-state" id="empty-state" style="display: none;">
+        <div class="empty-icon" style="font-size: 48px; opacity: 0.3;">DOC</div>
+        <div class="empty-title">No print jobs found</div>
+        <div class="empty-text">Try changing filters or date range</div>
+      </div>
+    </section>
+
+    <!-- Pagination -->
+    <section class="pagination">
+      <div class="pagination-info" id="pagination-info">Showing 0-0 of 0 results</div>
+      <div class="pagination-controls">
+        <select class="page-size-select" id="page-size-select">
+          <option value="12" selected>12 per page</option>
+          <option value="24">24 per page</option>
+          <option value="48">48 per page</option>
+          <option value="96">96 per page</option>
+        </select>
+        <button class="pagination-btn" id="prev-page" disabled>◀ Previous</button>
+        <span id="page-numbers"></span>
+        <button class="pagination-btn" id="next-page" disabled>Next ▶</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- Job Detail Modal -->
+  <div class="modal" id="job-modal">
+    <div class="modal-body">
+      <div class="modal-header">
+        <div style="flex: 1;">
+          <h2 class="modal-title">Print Job Details</h2>
+          <div class="modal-subtitle" id="modal-job-id">Job ID: #JOB-123456</div>
+          <div style="margin-top: 12px;">
+            <span class="status-badge" id="modal-status-badge" style="display: inline-block;"></span>
+          </div>
+        </div>
+        <button class="modal-close" id="close-modal">×</button>
+      </div>
+
+      <div class="modal-section">
+        <h3 class="modal-section-title">Document Information</h3>
+        <div class="modal-grid">
+          <div class="modal-row">
+            <span class="modal-label">File Name</span>
+            <span class="modal-value" id="modal-file-name">—</span>
+          </div>
+          <div class="modal-row">
+            <span class="modal-label">File Type</span>
+            <span class="modal-value" id="modal-file-type">—</span>
+          </div>
+          <div class="modal-row">
+            <span class="modal-label">File Size</span>
+            <span class="modal-value" id="modal-file-size">—</span>
+          </div>
+          <div class="modal-row">
+            <span class="modal-label">Total Pages</span>
+            <span class="modal-value" id="modal-total-pages">—</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-section">
+        <h3 class="modal-section-title">Printer Information</h3>
+        <div class="modal-grid">
+          <div class="modal-row">
+            <span class="modal-label">Printer Name</span>
+            <span class="modal-value" id="modal-printer-name">—</span>
+          </div>
+          <div class="modal-row">
+            <span class="modal-label">Model</span>
+            <span class="modal-value" id="modal-printer-model">—</span>
+          </div>
+          <div class="modal-row">
+            <span class="modal-label">Brand</span>
+            <span class="modal-value" id="modal-printer-brand">—</span>
+          </div>
+          <div class="modal-row">
+            <span class="modal-label">Location</span>
+            <span class="modal-value" id="modal-printer-location">—</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-section">
+        <h3 class="modal-section-title">Print Settings</h3>
+        <div class="modal-grid">
+          <div class="modal-row">
+            <span class="modal-label">Paper Size</span>
+            <span class="modal-value" id="modal-paper-size">—</span>
+          </div>
+          <div class="modal-row">
+            <span class="modal-label">Page Range</span>
+            <span class="modal-value" id="modal-page-range">—</span>
+          </div>
+          <div class="modal-row">
+            <span class="modal-label">Orientation</span>
+            <span class="modal-value" id="modal-orientation">—</span>
+          </div>
+          <div class="modal-row">
+            <span class="modal-label">Print Side</span>
+            <span class="modal-value" id="modal-print-side">—</span>
+          </div>
+          <div class="modal-row">
+            <span class="modal-label">Color Mode</span>
+            <span class="modal-value" id="modal-color-mode">—</span>
+          </div>
+          <div class="modal-row">
+            <span class="modal-label">Copies</span>
+            <span class="modal-value" id="modal-copies">—</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-section">
+        <h3 class="modal-section-title">Page Analysis</h3>
+        <div class="modal-grid">
+          <div class="modal-row">
+            <span class="modal-label">Selected Pages</span>
+            <span class="modal-value" id="modal-selected-pages">—</span>
+          </div>
+          <div class="modal-row">
+            <span class="modal-label">Number of Copies</span>
+            <span class="modal-value" id="modal-copies-count">—</span>
+          </div>
+          <div class="modal-row">
+            <span class="modal-label">Total Pages to Print</span>
+            <span class="modal-value" id="modal-total-print">—</span>
+          </div>
+          <div class="modal-row">
+            <span class="modal-label">A4 Equivalent</span>
+            <span class="modal-value" id="modal-a4-equivalent">—</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-section">
+        <h3 class="modal-section-title">Time Information</h3>
+        <div class="modal-grid">
+          <div class="modal-row">
+            <span class="modal-label">Created At</span>
+            <span class="modal-value" id="modal-created-at">—</span>
+          </div>
+          <div class="modal-row">
+            <span class="modal-label">Start Time</span>
+            <span class="modal-value" id="modal-start-time">—</span>
+          </div>
+          <div class="modal-row">
+            <span class="modal-label">End Time</span>
+            <span class="modal-value" id="modal-end-time">—</span>
+          </div>
+          <div class="modal-row">
+            <span class="modal-label">Duration</span>
+            <span class="modal-value" id="modal-duration">—</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-section" id="modal-progress-section" style="display: none; background: #fafbfc; padding: 20px; border-radius: 8px; border: 1px solid #f1f5f9;">
+        <h3 class="modal-section-title" style="margin-bottom: 16px;">Print Progress</h3>
+        <div class="progress-container active" style="background: transparent; border: none; padding: 0;">
+          <div class="progress-bar" style="margin-bottom: 12px;">
+            <div class="progress-bar-fill" id="modal-progress-bar" style="width: 0%"></div>
+          </div>
+          <div class="progress-text" style="font-size: 13px;">
+            <span id="modal-progress-text">Printing... 0%</span>
+            <span id="modal-remaining-time">About 0 min remaining</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="modal-close-btn">Close</button>
+        <button class="btn btn-danger" id="modal-cancel-btn" style="display: none;">Cancel Job</button>
+        <button class="btn btn-primary" id="modal-reprint-btn" style="display: none;">Reprint</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirm Cancel Modal -->
+  <div class="modal" id="cancel-modal">
+    <div class="modal-body" style="width: min(480px, 100%);">
+      <div class="modal-header">
+        <h2 class="modal-title">Confirm Cancel Print Job</h2>
+        <button class="modal-close" id="close-cancel-modal">X</button>
+      </div>
+      <div style="text-align: center; padding: 20px 0;">
+        <div style="font-size: 48px; margin-bottom: 16px; color: var(--warn); font-weight: 700;">!</div>
+        <p style="font-size: 16px; margin-bottom: 12px; font-weight: 600;">Are you sure you want to cancel this print job?</p>
+        <div class="muted" style="margin-bottom: 20px;">
+          <div id="cancel-job-name">—</div>
+          <div id="cancel-job-pages">—</div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="cancel-cancel-btn">Cancel</button>
+        <button class="btn btn-danger" id="confirm-cancel-btn">Confirm Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reprint Confirm Modal -->
+  <div class="modal" id="reprint-modal">
+    <div class="modal-body" style="width: min(480px, 100%);">
+      <div class="modal-header">
+        <h2 class="modal-title">Confirm Reprint</h2>
+        <button class="modal-close" id="close-reprint-modal">X</button>
+      </div>
+      <div style="text-align: center; padding: 20px 0;">
+        <div style="font-size: 48px; margin-bottom: 16px; color: var(--accent); font-weight: 700;">i</div>
+        <p style="font-size: 16px; margin-bottom: 12px; font-weight: 600;">Are you sure you want to reprint this document?</p>
+        <div class="muted" style="margin-bottom: 20px;">
+          <div id="reprint-job-name">—</div>
+          <div id="reprint-job-pages">—</div>
+        </div>
+        <div id="reprint-balance-info" style="padding: 12px; background: #f8fafc; border-radius: 8px; margin-bottom: 16px; text-align: left;">
+          <div style="margin-bottom: 8px;"><strong>Current Balance:</strong> <span id="reprint-current-balance">—</span> pages</div>
+          <div style="margin-bottom: 8px;"><strong>Required:</strong> <span id="reprint-required-pages">—</span> pages</div>
+          <div><strong>Remaining After:</strong> <span id="reprint-remaining-pages">—</span> pages</div>
+        </div>
+        <div id="reprint-warning" style="display: none; padding: 12px; background: #fee2e2; border: 1px solid #fecdd3; border-radius: 8px; margin-bottom: 16px; color: #b91c1c;">
+          <div style="font-weight: 600; margin-bottom: 4px;">Insufficient Balance</div>
+          <div>Shortage: <span id="reprint-shortage">—</span> pages</div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="cancel-reprint-btn">Cancel</button>
+        <button class="btn btn-primary" id="confirm-reprint-btn" disabled>Confirm Reprint</button>
+        <button class="btn btn-primary" id="buy-pages-btn" style="display: none;">Buy More Pages</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="toast">
+    <div class="toast-icon" id="toast-icon"></div>
+    <div style="flex: 1;">
+      <div style="font-weight: 600; font-size: 14px;" id="toast-title">Success</div>
+      <div class="muted" id="toast-message">Operation completed</div>
+    </div>
+  </div>
+
+  <script>
+    // Mock Data
+    const mockJobs = [
+      {
+        job_id: 'job-001',
+        file_name: 'Assignment_Report.pdf',
+        file_type: 'pdf',
+        file_size_kb: 2048,
+        total_pages: 50,
+        selected_pages: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
+        printer_name: 'HP LaserJet Pro M404dn',
+        printer_brand: 'HP',
+        printer_model: 'LaserJet Pro M404dn',
+        location: 'CS1 - H1 - 101',
+        paper_size: 'A4',
+        color_mode: 'black-white',
+        print_side: 'one-sided',
+        copies: 2,
+        print_status: 'printing',
+        progress: 45,
+        estimated_minutes: 3,
+        created_at: new Date(Date.now() - 60000).toISOString(),
+        start_time: new Date(Date.now() - 10000).toISOString(),
+        end_time: null,
+        pages_per_second: 2.5
+      },
+      {
+        job_id: 'job-002',
+        file_name: 'Lecture_Notes.docx',
+        file_type: 'docx',
+        file_size_kb: 1536,
+        total_pages: 30,
+        selected_pages: 'all',
+        printer_name: 'Canon iR-ADV 4525',
+        printer_brand: 'Canon',
+        printer_model: 'iR-ADV 4525',
+        location: 'CS1 - H1 - 102',
+        paper_size: 'A4',
+        color_mode: 'grayscale',
+        print_side: 'double-sided',
+        copies: 1,
+        print_status: 'completed',
+        progress: 100,
+        created_at: '2024-12-03T14:20:00',
+        start_time: '2024-12-03T14:21:00',
+        end_time: '2024-12-03T14:25:00',
+        pages_per_second: 3.0
+      },
+      {
+        job_id: 'job-003',
+        file_name: 'Research_Paper.pdf',
+        file_type: 'pdf',
+        file_size_kb: 4096,
+        total_pages: 25,
+        selected_pages: [1, 2, 3, 4, 5],
+        printer_name: 'Epson EcoTank L3250',
+        printer_brand: 'Epson',
+        printer_model: 'EcoTank L3250',
+        location: 'CS2 - B1 - 03',
+        paper_size: 'A3',
+        color_mode: 'color',
+        print_side: 'one-sided',
+        copies: 1,
+        print_status: 'failed',
+        progress: 0,
+        created_at: '2024-12-02T09:15:00',
+        start_time: '2024-12-02T09:16:00',
+        end_time: '2024-12-02T09:18:00',
+        pages_per_second: 2.0
+      },
+      {
+        job_id: 'job-004',
+        file_name: 'Lab_Report.pdf',
+        file_type: 'pdf',
+        file_size_kb: 1024,
+        total_pages: 12,
+        selected_pages: 'all',
+        printer_name: 'Brother HL-L2375',
+        printer_brand: 'Brother',
+        printer_model: 'HL-L2375',
+        location: 'CS1 - H2 - 201',
+        paper_size: 'A4',
+        color_mode: 'black-white',
+        print_side: 'one-sided',
+        copies: 3,
+        print_status: 'queued',
+        progress: 0,
+        created_at: '2024-12-04T11:00:00',
+        start_time: null,
+        end_time: null,
+        pages_per_second: 2.5
+      },
+      {
+        job_id: 'job-005',
+        file_name: 'Presentation_Slides.pdf',
+        file_type: 'pdf',
+        file_size_kb: 5120,
+        total_pages: 40,
+        selected_pages: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
+        printer_name: 'HP LaserJet Pro M404dn',
+        printer_brand: 'HP',
+        printer_model: 'LaserJet Pro M404dn',
+        location: 'CS1 - H1 - 101',
+        paper_size: 'A4',
+        color_mode: 'color',
+        print_side: 'double-sided',
+        copies: 1,
+        print_status: 'cancelled',
+        progress: 0,
+        created_at: '2024-12-01T16:45:00',
+        start_time: '2024-12-01T16:46:00',
+        end_time: '2024-12-01T16:47:00',
+        pages_per_second: 2.5
+      },
+      {
+        job_id: 'job-006',
+        file_name: 'Exam_Preparation.pdf',
+        file_type: 'pdf',
+        file_size_kb: 3072,
+        total_pages: 60,
+        selected_pages: 'all',
+        printer_name: 'Canon iR-ADV 4525',
+        printer_brand: 'Canon',
+        printer_model: 'iR-ADV 4525',
+        location: 'CS1 - H1 - 102',
+        paper_size: 'A5',
+        color_mode: 'black-white',
+        print_side: 'one-sided',
+        copies: 2,
+        print_status: 'completed',
+        progress: 100,
+        created_at: '2024-11-30T08:00:00',
+        start_time: '2024-11-30T08:01:00',
+        end_time: '2024-11-30T08:05:00',
+        pages_per_second: 3.0
+      },
+      {
+        job_id: 'job-007',
+        file_name: 'Project_Proposal.docx',
+        file_type: 'docx',
+        file_size_kb: 2560,
+        total_pages: 35,
+        selected_pages: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+        printer_name: 'Epson EcoTank L3250',
+        printer_brand: 'Epson',
+        printer_model: 'EcoTank L3250',
+        location: 'CS2 - B1 - 03',
+        paper_size: 'A4',
+        color_mode: 'grayscale',
+        print_side: 'one-sided',
+        copies: 1,
+        print_status: 'printing',
+        progress: 72,
+        estimated_minutes: 2,
+        created_at: new Date(Date.now() - 60000).toISOString(),
+        start_time: new Date(Date.now() - 10000).toISOString(),
+        end_time: null,
+        pages_per_second: 2.0
+      },
+      {
+        job_id: 'job-008',
+        file_name: 'Summary_Notes.pdf',
+        file_type: 'pdf',
+        file_size_kb: 768,
+        total_pages: 8,
+        selected_pages: 'all',
+        printer_name: 'HP LaserJet Pro M404dn',
+        printer_brand: 'HP',
+        printer_model: 'LaserJet Pro M404dn',
+        location: 'CS1 - H1 - 101',
+        paper_size: 'A4',
+        color_mode: 'black-white',
+        print_side: 'one-sided',
+        copies: 1,
+        print_status: 'completed',
+        progress: 100,
+        created_at: '2024-11-29T15:30:00',
+        start_time: '2024-11-29T15:31:00',
+        end_time: '2024-11-29T15:32:00',
+        pages_per_second: 2.5
+      }
+    ];
+
+    // State
+    const state = {
+      jobs: [...mockJobs],
+      filteredJobs: [...mockJobs],
+      currentPage: 1,
+      pageSize: 12,
+      filters: {
+        dateFrom: null,
+        dateTo: null,
+        status: '',
+        paperSizes: [],
+        colorModes: [],
+        search: '',
+        sort: 'newest'
+      },
+      selectedJob: null,
+      pollingIntervals: {}
+    };
+
+    // Helper functions
+    function formatDate(dateStr) {
+      if (!dateStr) return '—';
+      const date = new Date(dateStr);
+      return date.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' }) + ' ' +
+             date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function formatDateOnly(dateStr) {
+      if (!dateStr) return '—';
+      const date = new Date(dateStr);
+      return date.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' });
+    }
+
+    function calculateA4Equivalent(pageCount, paperSize, copies) {
+      const factor = paperSize === 'A3' ? 2 : paperSize === 'A5' ? 0.5 : 1;
+      return Math.ceil(pageCount * factor * copies);
+    }
+
+    function formatPages(pages) {
+      if (pages === 'all') return 'All';
+      if (Array.isArray(pages)) {
+        if (pages.length <= 10) return pages.join(', ');
+        return pages.slice(0, 10).join(', ') + '...';
+      }
+      return String(pages);
+    }
+
+    function getStatusBadgeClass(status) {
+      const map = { completed: 'completed', failed: 'failed', cancelled: 'cancelled', queued: 'queued', printing: 'printing' };
+      return map[status] || 'queued';
+    }
+
+    function getStatusText(status) {
+      const map = { completed: 'Completed', failed: 'Failed', cancelled: 'Cancelled', queued: 'Queued', printing: 'Printing' };
+      return map[status] || status;
+    }
+
+    function calculateProgress(job) {
+      if (job.print_status !== 'printing' || !job.start_time) return { progress: 0, minutes: 0 };
+      const now = new Date();
+      const start = new Date(job.start_time);
+      const elapsed = (now - start) / 1000;
+      const selectedCount = job.selected_pages === 'all' ? job.total_pages : Array.isArray(job.selected_pages) ? job.selected_pages.length : 0;
+      const totalPages = selectedCount * job.copies;
+      const pagesPerSecond = job.pages_per_second || 2.5;
+      
+      // If job just started (less than 30 seconds), set to 50% progress
+      if (elapsed < 30) {
+        const remaining = totalPages * 0.5;
+        const minutes = Math.ceil(remaining / pagesPerSecond / 60);
+        return { progress: 50, minutes };
+      }
+      
+      const pagesPrinted = Math.min(totalPages, elapsed * pagesPerSecond);
+      let progress = Math.min(99, (pagesPrinted / totalPages) * 100);
+      const remaining = Math.max(0, totalPages - pagesPrinted);
+      const minutes = Math.ceil(remaining / pagesPerSecond / 60);
+      return { progress, minutes };
+    }
+
+    // Filter and sort
+    function applyFilters() {
+      let filtered = [...state.jobs];
+      if (state.filters.dateFrom) {
+        const from = new Date(state.filters.dateFrom);
+        filtered = filtered.filter(job => new Date(job.created_at) >= from);
+      }
+      if (state.filters.dateTo) {
+        const to = new Date(state.filters.dateTo);
+        to.setHours(23, 59, 59, 999);
+        filtered = filtered.filter(job => new Date(job.created_at) <= to);
+      }
+      if (state.filters.status) filtered = filtered.filter(job => job.print_status === state.filters.status);
+      if (state.filters.paperSizes.length > 0) filtered = filtered.filter(job => state.filters.paperSizes.includes(job.paper_size));
+      if (state.filters.colorModes.length > 0) filtered = filtered.filter(job => state.filters.colorModes.includes(job.color_mode));
+      if (state.filters.search) {
+        const search = state.filters.search.toLowerCase();
+        filtered = filtered.filter(job => job.file_name.toLowerCase().includes(search));
+      }
+      filtered.sort((a, b) => {
+        switch (state.filters.sort) {
+          case 'oldest': return new Date(a.created_at) - new Date(b.created_at);
+          case 'name-asc': return a.file_name.localeCompare(b.file_name);
+          case 'name-desc': return b.file_name.localeCompare(a.file_name);
+          case 'pages-desc': return calculateA4Equivalent(Array.isArray(a.selected_pages) ? a.selected_pages.length : a.total_pages, a.paper_size, a.copies) - calculateA4Equivalent(Array.isArray(b.selected_pages) ? b.selected_pages.length : b.total_pages, b.paper_size, b.copies);
+          case 'pages-asc': return calculateA4Equivalent(Array.isArray(b.selected_pages) ? b.selected_pages.length : b.total_pages, b.paper_size, b.copies) - calculateA4Equivalent(Array.isArray(a.selected_pages) ? a.selected_pages.length : a.total_pages, a.paper_size, a.copies);
+          default: return new Date(b.created_at) - new Date(a.created_at);
+        }
+      });
+      state.filteredJobs = filtered;
+      updateStatistics();
+      renderJobs();
+    }
+
+    function updateStatistics() {
+      const jobs = state.filteredJobs;
+      const totalJobs = jobs.length;
+      const totalPages = jobs.filter(j => j.print_status === 'completed').reduce((sum, j) => {
+        const count = j.selected_pages === 'all' ? j.total_pages : Array.isArray(j.selected_pages) ? j.selected_pages.length : 0;
+        return sum + calculateA4Equivalent(count, j.paper_size, j.copies);
+      }, 0);
+      const printing = jobs.filter(j => j.print_status === 'printing').length;
+      const failed = jobs.filter(j => j.print_status === 'failed').length;
+      document.getElementById('stat-total-jobs').textContent = totalJobs;
+      document.getElementById('stat-total-pages').textContent = totalPages;
+      document.getElementById('stat-printing').textContent = printing;
+      document.getElementById('stat-failed').textContent = failed;
+    }
+
+    function renderJobs() {
+      const start = (state.currentPage - 1) * state.pageSize;
+      const end = start + state.pageSize;
+      const pageJobs = state.filteredJobs.slice(start, end);
+      const jobsTable = document.getElementById('jobs-table');
+      const jobsTbody = document.getElementById('jobs-tbody');
+      const emptyState = document.getElementById('empty-state');
+
+      if (pageJobs.length === 0) {
+        jobsTable.style.display = 'none';
+        emptyState.style.display = 'block';
+        return;
+      }
+
+      jobsTable.style.display = 'table';
+      emptyState.style.display = 'none';
+
+      jobsTbody.innerHTML = pageJobs.map(job => {
+        const selectedCount = job.selected_pages === 'all' ? job.total_pages : Array.isArray(job.selected_pages) ? job.selected_pages.length : 0;
+        const totalPrint = selectedCount * job.copies;
+        const a4Eq = calculateA4Equivalent(selectedCount, job.paper_size, job.copies);
+        const { progress, minutes } = calculateProgress(job);
+        const showProgress = job.print_status === 'printing';
+        const canCancel = ['queued', 'printing'].includes(job.print_status);
+        const canReprint = ['completed', 'failed', 'cancelled'].includes(job.print_status);
+
+        return `
+          <tr data-job-id="${job.job_id}">
+            <td>
+              <div class="file-cell">
+                <div class="file-icon">DOC</div>
+                <div class="file-name" title="${job.file_name}">${job.file_name}</div>
+              </div>
+            </td>
+            <td>${job.printer_name}</td>
+            <td>${totalPrint} pages (${a4Eq} A4)</td>
+            <td>${job.start_time ? formatDate(job.start_time) : '—'}</td>
+            <td>${job.end_time ? formatDate(job.end_time) : '—'}</td>
+            <td>
+              ${showProgress ? `
+                <div class="table-progress">
+                  <div class="table-progress-bar">
+                    <div class="table-progress-fill" style="width: ${progress}%"></div>
+                  </div>
+                  <div class="table-progress-text">${progress >= 99 ? 'Finishing...' : Math.round(progress) + '%'} • ${minutes} min remaining</div>
+                </div>
+              ` : ''}
+              <span class="status-badge ${getStatusBadgeClass(job.print_status)}">${getStatusText(job.print_status)}</span>
+            </td>
+            <td>
+              <div class="table-actions">
+                ${canCancel ? `<button class="btn btn-danger btn-sm" onclick="handleCancel('${job.job_id}')">Cancel</button>` : ''}
+                ${canReprint ? `<button class="btn btn-primary btn-sm" onclick="handleReprint('${job.job_id}')">Reprint</button>` : ''}
+                <button class="btn btn-secondary btn-sm" onclick="showJobDetail('${job.job_id}')">Details</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      updatePagination();
+      startPollingForPrintingJobs();
+    }
+
+    function updatePagination() {
+      const total = state.filteredJobs.length;
+      const totalPages = Math.ceil(total / state.pageSize);
+      const start = total === 0 ? 0 : (state.currentPage - 1) * state.pageSize + 1;
+      const end = Math.min(state.currentPage * state.pageSize, total);
+      document.getElementById('pagination-info').textContent = `Showing ${start}-${end} of ${total} results`;
+      const pageNumbers = document.getElementById('page-numbers');
+      if (totalPages <= 1) {
+        pageNumbers.innerHTML = '';
+      } else {
+        let html = '';
+        for (let i = 1; i <= Math.min(totalPages, 10); i++) {
+          html += `<button class="pagination-btn ${i === state.currentPage ? 'active' : ''}" onclick="goToPage(${i})">${i}</button>`;
+        }
+        pageNumbers.innerHTML = html;
+      }
+      document.getElementById('prev-page').disabled = state.currentPage === 1;
+      document.getElementById('next-page').disabled = state.currentPage >= totalPages;
+    }
+
+    function goToPage(page) {
+      state.currentPage = page;
+      renderJobs();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function showJobDetail(jobId) {
+      const job = state.jobs.find(j => j.job_id === jobId);
+      if (!job) return;
+      state.selectedJob = job;
+      const selectedCount = job.selected_pages === 'all' ? job.total_pages : Array.isArray(job.selected_pages) ? job.selected_pages.length : 0;
+      const totalPrint = selectedCount * job.copies;
+      const a4Eq = calculateA4Equivalent(selectedCount, job.paper_size, job.copies);
+      const { progress, minutes } = calculateProgress(job);
+      const showProgress = job.print_status === 'printing';
+      const canCancel = ['queued', 'printing'].includes(job.print_status);
+      const canReprint = ['completed', 'failed', 'cancelled'].includes(job.print_status);
+
+      document.getElementById('modal-job-id').textContent = `Job ID: #${job.job_id.toUpperCase()}`;
+      const statusBadge = document.getElementById('modal-status-badge');
+      statusBadge.className = `status-badge ${getStatusBadgeClass(job.print_status)}`;
+      statusBadge.textContent = getStatusText(job.print_status);
+      document.getElementById('modal-file-name').textContent = job.file_name;
+      document.getElementById('modal-file-type').textContent = job.file_type.toUpperCase();
+      document.getElementById('modal-file-size').textContent = `${(job.file_size_kb / 1024).toFixed(2)} MB`;
+      document.getElementById('modal-total-pages').textContent = `${job.total_pages} pages`;
+      document.getElementById('modal-printer-name').textContent = job.printer_name;
+      document.getElementById('modal-printer-model').textContent = job.printer_model;
+      document.getElementById('modal-printer-brand').textContent = job.printer_brand;
+      document.getElementById('modal-printer-location').textContent = job.location;
+      document.getElementById('modal-paper-size').textContent = job.paper_size;
+      document.getElementById('modal-page-range').textContent = formatPages(job.selected_pages);
+      document.getElementById('modal-orientation').textContent = 'Portrait';
+      document.getElementById('modal-print-side').textContent = job.print_side === 'double-sided' ? 'Double-sided' : 'One-sided';
+      document.getElementById('modal-color-mode').textContent = job.color_mode === 'color' ? 'Color' : job.color_mode === 'grayscale' ? 'Grayscale' : 'Black & White';
+      document.getElementById('modal-copies').textContent = `${job.copies} copy${job.copies > 1 ? 'ies' : ''}`;
+      document.getElementById('modal-selected-pages').textContent = `${selectedCount} pages`;
+      document.getElementById('modal-copies-count').textContent = `${job.copies} copy${job.copies > 1 ? 'ies' : ''}`;
+      document.getElementById('modal-total-print').textContent = `${totalPrint} pages`;
+      document.getElementById('modal-a4-equivalent').textContent = `${a4Eq} A4 pages`;
+      document.getElementById('modal-created-at').textContent = formatDate(job.created_at);
+      document.getElementById('modal-start-time').textContent = formatDate(job.start_time);
+      document.getElementById('modal-end-time').textContent = formatDate(job.end_time);
+      const duration = job.end_time && job.start_time ? Math.round((new Date(job.end_time) - new Date(job.start_time)) / 1000 / 60) : 0;
+      document.getElementById('modal-duration').textContent = duration > 0 ? `${duration} minutes` : '—';
+
+      const progressSection = document.getElementById('modal-progress-section');
+      if (showProgress) {
+        progressSection.style.display = 'block';
+        document.getElementById('modal-progress-bar').style.width = `${progress}%`;
+        document.getElementById('modal-progress-text').textContent = `Printing... ${progress >= 99 ? 'Finishing...' : Math.round(progress) + '%'}`;
+        document.getElementById('modal-remaining-time').textContent = `About ${minutes} min remaining`;
+      } else {
+        progressSection.style.display = 'none';
+      }
+
+      document.getElementById('modal-cancel-btn').style.display = canCancel ? 'block' : 'none';
+      document.getElementById('modal-reprint-btn').style.display = canReprint ? 'block' : 'none';
+      document.getElementById('job-modal').classList.add('active');
+    }
+
+    function handleCancel(jobId) {
+      const job = state.jobs.find(j => j.job_id === jobId);
+      if (!job) return;
+      document.getElementById('cancel-job-name').textContent = job.file_name;
+      const selectedCount = job.selected_pages === 'all' ? job.total_pages : Array.isArray(job.selected_pages) ? job.selected_pages.length : 0;
+      document.getElementById('cancel-job-pages').textContent = `${selectedCount} pages • ${job.paper_size}`;
+      state.selectedJob = job;
+      document.getElementById('cancel-modal').classList.add('active');
+    }
+
+    function confirmCancel() {
+      if (!state.selectedJob) return;
+      const job = state.jobs.find(j => j.job_id === state.selectedJob.job_id);
+      if (job) {
+        job.print_status = 'cancelled';
+        job.end_time = new Date().toISOString();
+        if (state.pollingIntervals[job.job_id]) {
+          clearInterval(state.pollingIntervals[job.job_id]);
+          delete state.pollingIntervals[job.job_id];
+        }
+      }
+      document.getElementById('cancel-modal').classList.remove('active');
+      showToast('success', 'Print job cancelled', `Job ${state.selectedJob.file_name} has been cancelled`);
+      applyFilters();
+    }
+
+    function handleReprint(jobId) {
+      const job = state.jobs.find(j => j.job_id === jobId);
+      if (!job) return;
+      const selectedCount = job.selected_pages === 'all' ? job.total_pages : Array.isArray(job.selected_pages) ? job.selected_pages.length : 0;
+      const a4Eq = calculateA4Equivalent(selectedCount, job.paper_size, job.copies);
+      const balance = 150;
+      
+      document.getElementById('reprint-job-name').textContent = job.file_name;
+      document.getElementById('reprint-job-pages').textContent = `${selectedCount} pages • ${job.paper_size} • A4 Equivalent: ${a4Eq} pages`;
+      document.getElementById('reprint-current-balance').textContent = balance;
+      document.getElementById('reprint-required-pages').textContent = a4Eq;
+      document.getElementById('reprint-remaining-pages').textContent = Math.max(0, balance - a4Eq);
+      
+      const warningDiv = document.getElementById('reprint-warning');
+      const confirmBtn = document.getElementById('confirm-reprint-btn');
+      const buyBtn = document.getElementById('buy-pages-btn');
+      
+      if (balance < a4Eq) {
+        warningDiv.style.display = 'block';
+        document.getElementById('reprint-shortage').textContent = (a4Eq - balance);
+        confirmBtn.disabled = true;
+        confirmBtn.style.display = 'none';
+        buyBtn.style.display = 'inline-flex';
+      } else {
+        warningDiv.style.display = 'none';
+        confirmBtn.disabled = false;
+        confirmBtn.style.display = 'inline-flex';
+        buyBtn.style.display = 'none';
+      }
+      
+      state.selectedJob = job;
+      document.getElementById('reprint-modal').classList.add('active');
+    }
+    
+    function confirmReprint() {
+      if (!state.selectedJob) return;
+      const job = state.selectedJob;
+      const selectedCount = job.selected_pages === 'all' ? job.total_pages : Array.isArray(job.selected_pages) ? job.selected_pages.length : 0;
+      const a4Eq = calculateA4Equivalent(selectedCount, job.paper_size, job.copies);
+      const balance = 150;
+      
+      if (balance < a4Eq) {
+        showToast('error', 'Insufficient balance', `Need ${a4Eq} A4 pages but only have ${balance}. Please buy more.`);
+        return;
+      }
+      
+      const newJob = { ...job, job_id: `job-${Date.now()}`, print_status: 'queued', progress: 0, created_at: new Date().toISOString(), start_time: null, end_time: null };
+      state.jobs.unshift(newJob);
+      document.getElementById('reprint-modal').classList.remove('active');
+      showToast('success', 'New print job created', `Job ${newJob.file_name} has been added to queue`);
+      applyFilters();
+      if (document.getElementById('job-modal').classList.contains('active')) {
+        document.getElementById('job-modal').classList.remove('active');
+      }
+    }
+
+    function showToast(type, title, message) {
+      const toast = document.getElementById('toast');
+      toast.className = `toast ${type}`;
+      const icon = document.getElementById('toast-icon');
+      icon.textContent = type === 'success' ? 'OK' : 'X';
+      icon.style.fontWeight = '700';
+      document.getElementById('toast-title').textContent = title;
+      document.getElementById('toast-message').textContent = message;
+      toast.classList.add('active');
+      setTimeout(() => toast.classList.remove('active'), 3000);
+    }
+
+    function startPollingForPrintingJobs() {
+      Object.values(state.pollingIntervals).forEach(clearInterval);
+      state.pollingIntervals = {};
+      state.filteredJobs.filter(job => job.print_status === 'printing').forEach(job => {
+        const interval = setInterval(() => {
+          const { progress } = calculateProgress(job);
+          if (progress >= 99) {
+            job.print_status = 'completed';
+            job.end_time = new Date().toISOString();
+            clearInterval(interval);
+            delete state.pollingIntervals[job.job_id];
+            showToast('success', 'Print job completed', `${job.file_name} has finished printing`);
+            applyFilters();
+          } else {
+            renderJobs();
+          }
+        }, 2000);
+        state.pollingIntervals[job.job_id] = interval;
+      });
+    }
+
+    // Event listeners
+    document.getElementById('apply-filters').addEventListener('click', () => {
+      const dateRange = document.getElementById('date-range').value;
+      const today = new Date();
+      let dateFrom = null;
+      let dateTo = null;
+      
+      switch (dateRange) {
+        case 'today':
+          dateFrom = today.toISOString().split('T')[0];
+          dateTo = today.toISOString().split('T')[0];
+          break;
+        case '7days':
+          const sevenDaysAgo = new Date(today);
+          sevenDaysAgo.setDate(today.getDate() - 7);
+          dateFrom = sevenDaysAgo.toISOString().split('T')[0];
+          dateTo = today.toISOString().split('T')[0];
+          break;
+        case '30days':
+          const thirtyDaysAgo = new Date(today);
+          thirtyDaysAgo.setDate(today.getDate() - 30);
+          dateFrom = thirtyDaysAgo.toISOString().split('T')[0];
+          dateTo = today.toISOString().split('T')[0];
+          break;
+        case 'thisyear':
+          const yearStart = new Date(today.getFullYear(), 0, 1);
+          dateFrom = yearStart.toISOString().split('T')[0];
+          dateTo = today.toISOString().split('T')[0];
+          break;
+        case 'all':
+          dateFrom = null;
+          dateTo = null;
+          break;
+      }
+      
+      state.filters.dateFrom = dateFrom;
+      state.filters.dateTo = dateTo;
+      state.filters.status = document.getElementById('filter-status').value;
+      const paperSizeValue = document.getElementById('filter-paper-size').value;
+      state.filters.paperSizes = paperSizeValue ? [paperSizeValue] : [];
+      const colorModeValue = document.getElementById('filter-color-mode').value;
+      state.filters.colorModes = colorModeValue ? [colorModeValue] : [];
+      state.filters.search = document.getElementById('search-file').value;
+      state.filters.sort = document.getElementById('sort-by').value;
+      state.currentPage = 1;
+      applyFilters();
+    });
+
+    document.getElementById('clear-filters').addEventListener('click', () => {
+      document.getElementById('date-range').value = 'all';
+      document.getElementById('filter-status').value = '';
+      document.getElementById('filter-paper-size').value = '';
+      document.getElementById('filter-color-mode').value = '';
+      document.getElementById('search-file').value = '';
+      document.getElementById('sort-by').value = 'newest';
+      state.filters = { dateFrom: null, dateTo: null, status: '', paperSizes: [], colorModes: [], search: '', sort: 'newest' };
+      state.currentPage = 1;
+      applyFilters();
+    });
+
+    document.getElementById('date-range').addEventListener('change', () => {
+      document.getElementById('apply-filters').click();
+    });
+
+    document.getElementById('close-modal').addEventListener('click', () => document.getElementById('job-modal').classList.remove('active'));
+    document.getElementById('modal-close-btn').addEventListener('click', () => document.getElementById('job-modal').classList.remove('active'));
+    document.getElementById('close-cancel-modal').addEventListener('click', () => document.getElementById('cancel-modal').classList.remove('active'));
+    document.getElementById('cancel-cancel-btn').addEventListener('click', () => document.getElementById('cancel-modal').classList.remove('active'));
+    document.getElementById('confirm-cancel-btn').addEventListener('click', confirmCancel);
+    document.getElementById('modal-cancel-btn').addEventListener('click', () => {
+      document.getElementById('job-modal').classList.remove('active');
+      handleCancel(state.selectedJob.job_id);
+    });
+    document.getElementById('modal-reprint-btn').addEventListener('click', () => handleReprint(state.selectedJob.job_id));
+    document.getElementById('close-reprint-modal').addEventListener('click', () => document.getElementById('reprint-modal').classList.remove('active'));
+    document.getElementById('cancel-reprint-btn').addEventListener('click', () => document.getElementById('reprint-modal').classList.remove('active'));
+    document.getElementById('confirm-reprint-btn').addEventListener('click', confirmReprint);
+    document.getElementById('buy-pages-btn').addEventListener('click', () => {
+      window.open('#', '_blank');
+    });
+    document.getElementById('prev-page').addEventListener('click', () => { if (state.currentPage > 1) goToPage(state.currentPage - 1); });
+    document.getElementById('next-page').addEventListener('click', () => {
+      const totalPages = Math.ceil(state.filteredJobs.length / state.pageSize);
+      if (state.currentPage < totalPages) goToPage(state.currentPage + 1);
+    });
+    document.getElementById('page-size-select').addEventListener('change', (e) => {
+      state.pageSize = Number(e.target.value);
+      state.currentPage = 1;
+      renderJobs();
+    });
+
+    // Initial render
+    applyFilters();
+  </script>
+</body>
+</html>
