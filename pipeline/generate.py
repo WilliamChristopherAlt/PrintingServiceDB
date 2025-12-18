@@ -1563,14 +1563,14 @@ class PrintingServiceDataGenerator:
         
         for setting in color_settings:
             setting_id = generate_uuid()
-            
+                
             self.color_mode_prices.append({
                 'setting_id': setting_id,
                 'color_mode': setting["mode"],
                 'price_multiplier': setting["multiplier"],
                 'is_active': True
-            })
-            
+                })
+                
             bulk_print_prices.add_row([
                 setting_id,
                 setting["mode"],
@@ -1579,7 +1579,7 @@ class PrintingServiceDataGenerator:
                 1,  # is_active
                 created_at.strftime('%Y-%m-%d %H:%M:%S'),
                 created_at.strftime('%Y-%m-%d %H:%M:%S')
-            ])
+                ])
         
         for stmt in bulk_print_prices.get_statements():
             self.add_sql(stmt)
@@ -1775,7 +1775,7 @@ class PrintingServiceDataGenerator:
         
         for stmt in bulk_student_semester_bonuses.get_statements():
             self.add_sql(stmt)
-        
+    
         # 5. Generate deposits (students depositing money)
         self.add_sql("\n-- Deposits")
         bulk_deposits = BulkInsertHelper("deposit", [
@@ -1859,7 +1859,7 @@ class PrintingServiceDataGenerator:
                         'bonus_amount': bonus_amount,
                         'total_credited': total_credited,
                         'payment_status': status
-                    }
+            }
                     self.deposits.append(deposit_data)
                     
                     # Update balance tracking for payment generation (only completed deposits)
@@ -1880,7 +1880,7 @@ class PrintingServiceDataGenerator:
                         reference,
                         status,
                         transaction_date.strftime('%Y-%m-%d %H:%M:%S')
-                    ])
+            ])
         
         for stmt in bulk_deposits.get_statements():
             self.add_sql(stmt)

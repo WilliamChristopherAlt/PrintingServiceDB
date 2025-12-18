@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Student Printing Service - Buy Pages</title>
+  <title>Student Printing Service - Deposit Money</title>
   <style>
     :root {
       --bg: #f7f7fb;
@@ -161,6 +161,17 @@
       margin: 10px 0 6px;
     }
     .balance-meta { color: var(--muted); }
+    .info-banner {
+      padding: 10px 12px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      background: #eef2ff;
+      color: #1d4ed8;
+      border: 1px solid #c7d2fe;
+    }
     .package-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -174,13 +185,26 @@
       background: var(--card);
       cursor: pointer;
       transition: 0.2s ease;
+      position: relative;
     }
     .package:hover { border-color: var(--accent); }
     .package.active {
       border-color: var(--accent);
       box-shadow: 0 12px 30px -18px rgba(37, 99, 235, 0.7);
     }
-    .package .price { font-weight: 700; margin: 6px 0; }
+    .package .price { font-weight: 700; margin: 6px 0; font-size: 18px; }
+    .bonus-badge {
+      position: absolute;
+      top: -8px;
+      right: 8px;
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
     .muted { color: var(--muted); font-size: 13px; }
     .custom {
       display: flex;
@@ -268,6 +292,7 @@
       align-items: center;
       justify-content: center;
       padding: 16px;
+      z-index: 100;
     }
     .modal.active { display: flex; }
     .modal-body {
@@ -307,6 +332,49 @@
       font-size: 28px;
       margin: 0 auto 12px;
     }
+    .qr-container {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+      margin: 12px 0;
+    }
+    .qr-box {
+      width: 200px;
+      height: 200px;
+      background: white;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      margin: 12px auto;
+      font-size: 14px;
+      color: var(--muted);
+    }
+    .breakdown {
+      background: #f8fafc;
+      border-radius: 10px;
+      padding: 12px;
+      margin: 12px 0;
+    }
+    .breakdown-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 0;
+      font-size: 14px;
+    }
+    .breakdown-row.total {
+      border-top: 2px solid var(--border);
+      margin-top: 6px;
+      padding-top: 10px;
+      font-weight: 700;
+      font-size: 16px;
+    }
+    .bonus-highlight {
+      color: var(--accent-2);
+      font-weight: 700;
+    }
     @media (max-width: 1024px) {
       body {
         grid-template-columns: 82px 1fr;
@@ -328,29 +396,29 @@
   </style>
 </head>
 <body>
-  <!-- Sticky sidebar (SV-1-1 requirement) -->
+  <!-- Sticky sidebar -->
   <aside>
     <nav aria-label="Main navigation">
       <a class="nav-item" href="#"><span>Home</span></a>
       <a class="nav-item" href="#"><span>Printers Info</span></a>
       <a class="nav-item" href="#"><span>Print Document</span></a>
       <a class="nav-item" href="#"><span>Print History</span></a>
-      <a class="nav-item active" href="#"><span>Buy Pages</span></a>
+      <a class="nav-item active" href="#"><span>Deposit Money</span></a>
     </nav>
     <div class="sidebar-footer">
       <div>© 2025 HCMSIU</div>
-      <div>Contact: support@siu.edu</div>
+      <div>Contact: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="becdcbceced1cccafecdd7cb90dbdacb">[email&#160;protected]</a></div>
       <div>Version: 1.0.0</div>
     </div>
   </aside>
 
-  <!-- Sticky header with notification + user menu (SV-1-1 + SV-1-2 anchor) -->
+  <!-- Sticky header -->
   <header>
     <div class="brand">
       <div class="avatar" aria-hidden="true">SIU</div>
       <div>
         Student Printing Service
-        <span>→ Buy Pages</span>
+        <span>→ Deposit Money</span>
       </div>
     </div>
     <div class="actions">
@@ -359,85 +427,94 @@
         <div class="avatar" aria-hidden="true">SV</div>
         <div class="user-meta">
           <strong>Student Name</strong>
-          <small>Balance: 250 A4</small>
+          <small>Balance: $<span id="header-balance">25.50</span></small>
         </div>
       </div>
     </div>
   </header>
 
-  <!-- Main content: SV-3 Buy Pages -->
+  <!-- Main content: SV-3 Deposit Money -->
   <main>
     <div>
-      <h1 class="page-title">Buy Pages</h1>
-      <div class="sub">SV-3 | Packages + custom amount + payment flow</div>
+      <h1 class="page-title">Deposit Money</h1>
+      <div class="sub">SV-3 | Add funds to your account • Bonus packages available</div>
     </div>
 
     <section class="split">
       <div class="card">
         <h3>Current Balance</h3>
-        <div class="balance-value">250 A4</div>
-        <div class="balance-meta">Equivalent: 125 A3</div>
-        <div class="balance-meta">Also equals: 500 A5</div>
-        <small>Data: sum(completed purchases) - sum(completed print jobs)</small>
-        <small style="display:block;margin-top:6px;">Conversion: 1 A3 = 2 A4 • 1 A4 = 2 A5</small>
+        <div class="balance-value">$<span id="current-balance">25.50</span></div>
+        <small>Available for printing • Balance = deposits + bonuses - print payments</small>
+        <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border);">
+          <div class="balance-meta">This semester's bonus: $<span id="semester-bonus">10.00</span> <small>(received)</small></div>
+          <div class="balance-meta">Total deposited: $<span id="total-deposited">50.00</span></div>
+          <div class="balance-meta">Total spent: $<span id="total-spent">34.50</span></div>
+        </div>
       </div>
       <div class="card">
-        <h3>Action</h3>
-        <small>Enable when a package or valid custom input is selected</small>
-        <button id="proceed-btn" class="primary disabled" aria-disabled="true">Proceed to Payment (opens modal)</button>
+        <h3>Quick Action</h3>
+        <small style="display: block; margin-bottom: 12px;">Select a deposit amount below to proceed</small>
+        <button id="proceed-btn" class="primary disabled" aria-disabled="true">Proceed to Payment</button>
       </div>
     </section>
 
     <section class="card">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
         <div>
-          <h3>Select Package</h3>
-          <small>Choose a preset or set a custom amount (all priced in A4)</small>
+          <h3>Select Deposit Amount</h3>
+          <small>Choose a preset package (with bonus!) or set a custom amount</small>
         </div>
-        <small class="muted">Prices use A4 as the base unit • 1 A3 = 2 A4 • 1 A4 = 2 A5</small>
+        <small class="muted">💡 Larger deposits = bigger bonuses</small>
       </div>
 
-      <div class="package-grid" role="group" aria-label="Preset packages">
-        <div class="package" data-pages="50">
-          <div class="price">50 pages</div>
-          <div>$10.00</div>
-          <div class="muted">$0.200/page</div>
+      <div class="package-grid" role="group" aria-label="Deposit packages">
+        <div class="package" data-amount="10">
+          <div class="price">$10.00</div>
+          <div class="muted">Base deposit</div>
+          <div class="muted" style="margin-top: 6px;">You'll receive: <strong>$10.00</strong></div>
         </div>
-        <div class="package active" data-pages="100">
-          <div class="price">100 pages</div>
-          <div>$18.00</div>
-          <div class="muted">$0.180/page (10% off)</div>
+        <div class="package active" data-amount="20" data-bonus="5">
+          <div class="bonus-badge">+5% bonus</div>
+          <div class="price">$20.00</div>
+          <div class="muted">Popular choice</div>
+          <div class="muted" style="margin-top: 6px;">You'll receive: <strong class="bonus-highlight">$21.00</strong></div>
+          <small class="muted">($20.00 + $1.00 bonus)</small>
         </div>
-        <div class="package" data-pages="200">
-          <div class="price">200 pages</div>
-          <div>$35.00</div>
-          <div class="muted">$0.175/page (12.5% off)</div>
+        <div class="package" data-amount="50" data-bonus="10">
+          <div class="bonus-badge">+10% bonus</div>
+          <div class="price">$50.00</div>
+          <div class="muted">Best value</div>
+          <div class="muted" style="margin-top: 6px;">You'll receive: <strong class="bonus-highlight">$55.00</strong></div>
+          <small class="muted">($50.00 + $5.00 bonus)</small>
         </div>
-        <div class="package" data-pages="500">
-          <div class="price">500 pages</div>
-          <div>$80.00</div>
-          <div class="muted">$0.160/page (20% off)</div>
+        <div class="package" data-amount="100" data-bonus="15">
+          <div class="bonus-badge">+15% bonus</div>
+          <div class="price">$100.00</div>
+          <div class="muted">Maximum bonus</div>
+          <div class="muted" style="margin-top: 6px;">You'll receive: <strong class="bonus-highlight">$115.00</strong></div>
+          <small class="muted">($100.00 + $15.00 bonus)</small>
         </div>
         <div class="package custom" data-custom="true">
           <div class="price">Custom Amount</div>
-          <div class="muted">Enter 1 - 1000 pages • base $0.20 per A4</div>
+          <div class="muted">Enter $5 - $500 • Bonuses apply at $20+</div>
           <div class="input-row">
-            <input type="number" min="1" max="1000" placeholder="Number of pages" />
+            <input type="number" id="custom-amount" min="5" max="500" step="0.01" placeholder="Amount in $" />
             <div class="stepper">
               <button aria-label="Decrease">-</button>
               <button aria-label="Increase">+</button>
             </div>
           </div>
-          <div class="muted">Price: $<span>0.00</span> | Errors inline on invalid</div>
+          <div class="muted">You'll receive: $<span id="custom-total">0.00</span></div>
+          <small class="muted" id="custom-bonus-text">Enter amount to see bonus</small>
         </div>
       </div>
     </section>
 
     <section class="card">
-      <h3>Recent Transactions</h3>
-      <small>Show 5 latest; load more via dropdown and support filter/sort/pagination</small>
+      <h3>Recent Deposit History</h3>
+      <small>Show 5 latest transactions • Full history available with filters</small>
       <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:10px;">
-        <label class="muted">Filter
+        <label class="muted">Filter by Status
           <select style="margin-left:6px;padding:6px 8px;border:1px solid var(--border);border-radius:8px;">
             <option>All</option>
             <option>Completed</option>
@@ -452,45 +529,40 @@
             <option>Date (oldest)</option>
             <option>Amount (high → low)</option>
             <option>Amount (low → high)</option>
-            <option>Status</option>
           </select>
         </label>
         <div class="muted" id="pagination-label" style="margin-left:auto;">Page 1 of 1</div>
       </div>
-      <table class="table" aria-label="Recent transactions">
+      <table class="table" aria-label="Recent deposits">
         <thead>
           <tr>
             <th>Date</th>
-            <th>Package/Amount</th>
-            <th>Pages Added</th>
-            <th>Amount</th>
-            <th>Method</th>
+            <th>Deposit Amount</th>
+            <th>Bonus Received</th>
+            <th>Total Credited</th>
             <th>Status</th>
           </tr>
         </thead>
         <tbody>
           <tr>
             <td>2024-12-01</td>
-            <td>100 pages</td>
-            <td>100</td>
-            <td>$18.00</td>
-            <td>BKPay</td>
+            <td>$20.00</td>
+            <td class="bonus-highlight">+$1.00 (5%)</td>
+            <td><strong>$21.00</strong></td>
             <td><span class="status completed">Completed</span></td>
           </tr>
           <tr>
             <td>2024-11-15</td>
-            <td>Custom (75)</td>
-            <td>75</td>
             <td>$15.00</td>
-            <td>Credit Card</td>
+            <td>$0.00</td>
+            <td><strong>$15.00</strong></td>
             <td><span class="status completed">Completed</span></td>
           </tr>
           <tr>
             <td>2024-11-04</td>
-            <td>200 pages</td>
-            <td>200</td>
-            <td>$35.00</td>
-            <td>Bank Transfer</td>
+            <td>$50.00</td>
+            <td class="bonus-highlight">+$5.00 (10%)</td>
+            <td><strong>$55.00</strong></td>
             <td><span class="status pending">Pending</span></td>
           </tr>
         </tbody>
@@ -504,29 +576,62 @@
           Load more ▼
         </button>
       </div>
-      <small class="muted" style="display:block;margin-top:6px;">Dropdown loads next 5 rows without navigation; keep table anchored.</small>
     </section>
   </main>
 
-  <!-- Payment modal (open after Proceed) -->
+  <!-- Payment modal (QR code + payment methods) -->
   <div class="modal" id="payment-modal">
     <div class="modal-body">
-      <div class="modal-header">Payment Summary</div>
-      <div class="modal-row"><span>Package</span><span id="modal-package">100 pages</span></div>
-      <div class="modal-row"><span>Pages</span><span id="modal-pages">100 A4</span></div>
-      <div class="modal-row"><span>Total</span><span id="modal-total">$18.00</span></div>
-      <div class="modal-row"><span>New Balance</span><span id="modal-balance">350 A4</span></div>
+      <div class="modal-header">Deposit Summary</div>
+      
+      <div class="breakdown">
+        <div class="breakdown-row">
+          <span>Deposit Amount</span>
+          <span id="modal-deposit-amount">$20.00</span>
+        </div>
+        <div class="breakdown-row">
+          <span>Bonus Applied</span>
+          <span class="bonus-highlight" id="modal-bonus-amount">+$1.00 (5%)</span>
+        </div>
+        <div class="breakdown-row total">
+          <span>Total Credit to Balance</span>
+          <span id="modal-total-credited">$21.00</span>
+        </div>
+        <div class="breakdown-row" style="border-top: 1px solid var(--border); margin-top: 6px; padding-top: 6px;">
+          <span>New Balance After Deposit</span>
+          <span id="modal-new-balance">$46.50</span>
+        </div>
+      </div>
 
-      <div class="pill-group" role="group" aria-label="Payment methods">
-        <div class="pill active">BKPay</div>
-        <div class="pill">Bank Transfer</div>
-        <div class="pill">Credit/Debit Card</div>
-        <div class="pill">E-Wallet</div>
+      <div class="modal-header" style="margin-top: 16px; font-size: 16px;">Payment Method</div>
+      <div style="padding: 12px; background: #f8fafc; border-radius: 10px; margin: 12px 0;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="width: 32px; height: 32px; background: linear-gradient(135deg, #2563eb, #10b981); border-radius: 8px; display: grid; place-items: center; color: white; font-weight: 700; font-size: 14px;">SP</div>
+          <div>
+            <div style="font-weight: 700;">SePay QR Code</div>
+            <small class="muted">Scan with your banking app or e-wallet</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="qr-container" id="qr-container">
+        <div style="font-weight: 700; margin-bottom: 8px;">Scan SePay QR Code to Pay</div>
+        <div class="qr-box">
+          <div>SEPAY QR<br>$<span id="qr-amount">20.00</span></div>
+        </div>
+        <small class="muted">Use your banking app or e-wallet to scan and complete payment via SePay</small>
+        <div style="margin-top: 8px; font-size: 12px; color: var(--muted);">
+          Transaction ID: <strong>TXN-<span id="txn-ref">123456</span></strong>
+        </div>
+      </div>
+
+      <div class="info-banner" style="margin-top: 12px;">
+        ⏱️ Payment pending • Once confirmed, your balance will be updated automatically
       </div>
 
       <div class="modal-actions">
         <button id="cancel-payment" class="ghost">Cancel</button>
-        <button id="confirm-payment" class="primary enabled">Confirm Payment</button>
+        <button id="confirm-payment" class="primary enabled">I've Completed Payment</button>
       </div>
     </div>
   </div>
@@ -535,160 +640,107 @@
   <div class="modal" id="success-modal">
     <div class="modal-body" style="text-align:center;">
       <div class="success-icon">✓</div>
-      <div class="modal-header">Payment Successful</div>
-      <div class="muted">Transaction ID: TXN123456</div>
-      <div class="modal-row"><span>Pages added</span><span>+100 A4</span></div>
-      <div class="modal-row"><span>New balance</span><span>350 A4</span></div>
-      <div class="modal-row"><span>Amount paid</span><span>$18.00</span></div>
+      <div class="modal-header">Deposit Successful!</div>
+      <div class="muted">Transaction ID: <strong id="success-txn-id">TXN-123456</strong></div>
+      <div class="breakdown" style="margin: 16px 0;">
+        <div class="breakdown-row">
+          <span>Deposited</span>
+          <span id="success-deposit">$20.00</span>
+        </div>
+        <div class="breakdown-row">
+          <span>Bonus</span>
+          <span class="bonus-highlight" id="success-bonus">+$1.00</span>
+        </div>
+        <div class="breakdown-row total">
+          <span>Total Credited</span>
+          <span id="success-credited">$21.00</span>
+        </div>
+        <div class="breakdown-row" style="border-top: 1px solid var(--border); margin-top: 6px; padding-top: 6px;">
+          <span>New Balance</span>
+          <span id="success-balance">$46.50</span>
+        </div>
+      </div>
       <div class="modal-actions" style="justify-content:center;">
-        <button id="done-success" class="ghost">Done</button>
-        <button class="primary enabled" style="width:auto;">View Transaction History</button>
+        <button id="done-success" class="primary enabled" style="width:auto;">Done</button>
       </div>
     </div>
   </div>
 
-  <!-- Notes for FE devs (non-rendered instructions) -->
-  <!--
-    SV-1-1: Header + sidebar sticky on all pages. Hover states change color.
-    SV-1-2: Logout lives in user dropdown; confirm if pending/printing jobs.
-    SV-3-1: Buying flow
-      - Enable Proceed only when package selected or custom amount valid (1-1000).
-      - Custom clears preset selection; preset clears custom.
-      - Price: preset table; custom = pages * 0.20.
-      - Create pending purchase before redirect; update status after gateway callback.
-    SV-3-2: Balance + history
-      - Balance = sum(completed purchases, A4) - sum(completed print jobs).
-      - Show A3 equivalent = balance / 2.
-      - History default 5 rows; full page supports filter (status, date range) and search by id/ref.
-      - Empty state: message + Buy Pages CTA.
-    Data hooks
-      - student_id from session.
-      - page_size_id = A4 when writing student_page_purchase.
-      - payment_status values: pending/completed/failed.
-      - Keep UI loaders + inline errors for network/validation failures.
-    Interaction cues
-      - Payment modal opens after Proceed; confirm leads to gateway redirect.
-      - Cancel closes modal, retains selection.
-      - Success modal shows after completed callback; buttons: view history, done.
-    Layout mapping to dummy app
-      - Reuse global font/colors; header/footer match temp/app layout (SIU identity).
-      - Keep components client-side ready for Next.js with Suspense/providers already in layout.tsx.
-  -->
-  <script>
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+    // Bonus package configuration (from deposit_bonus_package table)
+    const bonusPackages = [
+      { minAmount: 100, bonusPercent: 0.15, name: 'Premium' },
+      { minAmount: 50, bonusPercent: 0.10, name: 'Value' },
+      { minAmount: 20, bonusPercent: 0.05, name: 'Basic' },
+      { minAmount: 0, bonusPercent: 0, name: 'None' }
+    ];
+
+    function calculateBonus(amount) {
+      for (const pkg of bonusPackages) {
+        if (amount >= pkg.minAmount) {
+          return {
+            bonusAmount: amount * pkg.bonusPercent,
+            bonusPercent: pkg.bonusPercent,
+            packageName: pkg.name,
+            totalCredited: amount + (amount * pkg.bonusPercent)
+          };
+        }
+      }
+      return { bonusAmount: 0, bonusPercent: 0, packageName: 'None', totalCredited: amount };
+    }
+
+    const state = {
+      balance: 25.50,
+      selectedAmount: 20,
+      selectedBonus: 0.05
+    };
+
     const proceed = document.getElementById('proceed-btn');
     const packageCards = Array.from(document.querySelectorAll('.package'));
-    const customInput = document.querySelector('.package.custom input');
-    const customPrice = document.querySelector('.package.custom span');
+    const customInput = document.getElementById('custom-amount');
+    const customTotal = document.getElementById('custom-total');
+    const customBonusText = document.getElementById('custom-bonus-text');
     const stepButtons = document.querySelectorAll('.package.custom .stepper button');
 
-    const modalPackage = document.getElementById('modal-package');
-    const modalPages = document.getElementById('modal-pages');
-    const modalTotal = document.getElementById('modal-total');
-    const modalBalance = document.getElementById('modal-balance');
+    const modalDepositAmount = document.getElementById('modal-deposit-amount');
+    const modalBonusAmount = document.getElementById('modal-bonus-amount');
+    const modalTotalCredited = document.getElementById('modal-total-credited');
+    const modalNewBalance = document.getElementById('modal-new-balance');
+    const qrAmount = document.getElementById('qr-amount');
+    const txnRef = document.getElementById('txn-ref');
 
     const paymentModal = document.getElementById('payment-modal');
     const successModal = document.getElementById('success-modal');
     const cancelPayment = document.getElementById('cancel-payment');
     const confirmPayment = document.getElementById('confirm-payment');
     const doneSuccess = document.getElementById('done-success');
-
-    const loadMoreBtn = document.getElementById('load-more');
-    const prevPageBtn = document.getElementById('prev-page');
-    const nextPageBtn = document.getElementById('next-page');
-    const paginationLabel = document.getElementById('pagination-label');
-    const tableBody = document.querySelector('.table tbody');
+    const headerBalance = document.getElementById('header-balance');
+    const currentBalance = document.getElementById('current-balance');
 
     const open = (el) => el?.classList.add('active');
     const close = (el) => el?.classList.remove('active');
 
-    // Transactions mock (10 rows)
-    const transactions = [
-      { date: '2024-12-01', label: '100 pages', pages: 100, amount: '$18.00', method: 'BKPay', status: 'completed' },
-      { date: '2024-11-15', label: 'Custom (75)', pages: 75, amount: '$15.00', method: 'Credit Card', status: 'completed' },
-      { date: '2024-11-04', label: '200 pages', pages: 200, amount: '$35.00', method: 'Bank Transfer', status: 'pending' },
-      { date: '2024-10-22', label: '50 pages', pages: 50, amount: '$10.00', method: 'E-Wallet', status: 'completed' },
-      { date: '2024-10-10', label: '500 pages', pages: 500, amount: '$80.00', method: 'BKPay', status: 'failed' },
-      { date: '2024-09-28', label: 'Custom (120)', pages: 120, amount: '$24.00', method: 'Credit Card', status: 'completed' },
-      { date: '2024-09-15', label: '100 pages', pages: 100, amount: '$18.00', method: 'BKPay', status: 'completed' },
-      { date: '2024-09-01', label: '200 pages', pages: 200, amount: '$35.00', method: 'Bank Transfer', status: 'completed' },
-      { date: '2024-08-21', label: 'Custom (30)', pages: 30, amount: '$6.00', method: 'E-Wallet', status: 'pending' },
-      { date: '2024-08-05', label: '50 pages', pages: 50, amount: '$10.00', method: 'Credit Card', status: 'completed' },
-    ];
-
-    let currentPage = 1;
-    const pageSize = 5;
-    const totalPages = Math.ceil(transactions.length / pageSize);
-
-    const statusClass = {
-      completed: 'completed',
-      pending: 'pending',
-      failed: 'failed',
-      refunded: 'pending',
-    };
-
-    function renderTable() {
-      const visibleCount = currentPage * pageSize;
-      const rows = transactions.slice(0, visibleCount).map(tx => `
-        <tr>
-          <td>${tx.date}</td>
-          <td>${tx.label}</td>
-          <td>${tx.pages}</td>
-          <td>${tx.amount}</td>
-          <td>${tx.method}</td>
-          <td><span class="status ${statusClass[tx.status] || 'pending'}">${tx.status.charAt(0).toUpperCase() + tx.status.slice(1)}</span></td>
-        </tr>
-      `).join('');
-      tableBody.innerHTML = rows;
-      paginationLabel.textContent = `Page ${currentPage} of ${totalPages}`;
-      loadMoreBtn.classList.toggle('disabled', currentPage >= totalPages);
-      loadMoreBtn.setAttribute('aria-disabled', currentPage >= totalPages);
-      prevPageBtn.disabled = currentPage === 1;
-      nextPageBtn.disabled = currentPage >= totalPages;
+    function clearActive() {
+      packageCards.forEach(card => card.classList.remove('active'));
     }
 
-    loadMoreBtn?.addEventListener('click', () => {
-      if (currentPage < totalPages) {
-        currentPage += 1;
-        renderTable();
-      }
-    });
-
-    prevPageBtn?.addEventListener('click', () => {
-      if (currentPage > 1) {
-        currentPage -= 1;
-        renderTable();
-      }
-    });
-
-    nextPageBtn?.addEventListener('click', () => {
-      if (currentPage < totalPages) {
-        currentPage += 1;
-        renderTable();
-      }
-    });
-
-    // Package selection + proceed enablement
-    let selectedPackage = { type: 'preset', pages: 100, price: 18 };
-
     function updateProceedState() {
-      const isValid = selectedPackage && selectedPackage.pages > 0;
+      const isValid = state.selectedAmount >= 5 && state.selectedAmount <= 500;
       proceed.classList.toggle('disabled', !isValid);
       proceed.classList.toggle('enabled', isValid);
       proceed.setAttribute('aria-disabled', (!isValid).toString());
 
       if (isValid) {
-        modalPackage.textContent = selectedPackage.type === 'custom'
-          ? `Custom (${selectedPackage.pages} pages)`
-          : `${selectedPackage.pages} pages`;
-        modalPages.textContent = `${selectedPackage.pages} A4`;
-        modalTotal.textContent = `$${selectedPackage.price.toFixed(2)}`;
-        const currentBalance = 250;
-        modalBalance.textContent = `${currentBalance + selectedPackage.pages} A4`;
+        const bonus = calculateBonus(state.selectedAmount);
+        modalDepositAmount.textContent = `$${state.selectedAmount.toFixed(2)}`;
+        modalBonusAmount.textContent = bonus.bonusAmount > 0 
+          ? `+$${bonus.bonusAmount.toFixed(2)} (${(bonus.bonusPercent * 100).toFixed(0)}%)`
+          : 'No bonus';
+        modalTotalCredited.textContent = `$${bonus.totalCredited.toFixed(2)}`;
+        modalNewBalance.textContent = `$${(state.balance + bonus.totalCredited).toFixed(2)}`;
+        qrAmount.textContent = state.selectedAmount.toFixed(2);
+        txnRef.textContent = Math.floor(Math.random() * 900000 + 100000);
       }
-    }
-
-    function clearActive() {
-      packageCards.forEach(card => card.classList.remove('active'));
     }
 
     packageCards.forEach(card => {
@@ -696,27 +748,48 @@
       card.addEventListener('click', () => {
         clearActive();
         card.classList.add('active');
-        const pages = Number(card.dataset.pages);
-        const price = Number(card.querySelector('div:nth-child(2)')?.textContent?.replace(/[^0-9.]/g, '')) || 0;
-        selectedPackage = { type: 'preset', pages, price };
+        state.selectedAmount = Number(card.dataset.amount);
+        state.selectedBonus = Number(card.dataset.bonus || 0) / 100;
         customInput.value = '';
-        customPrice.textContent = '0.00';
         updateProceedState();
       });
     });
 
     const updateCustom = (val) => {
       const num = Number(val);
-      if (Number.isNaN(num) || num < 1 || num > 1000) {
-        selectedPackage = null;
-        customPrice.textContent = '0.00';
-      } else {
-        clearActive();
-        document.querySelector('.package.custom')?.classList.add('active');
-        const price = num * 0.2;
-        customPrice.textContent = price.toFixed(2);
-        selectedPackage = { type: 'custom', pages: num, price };
+      if (Number.isNaN(num) || num < 5 || num > 500) {
+        state.selectedAmount = 0;
+        customTotal.textContent = '0.00';
+        customBonusText.textContent = 'Enter valid amount (5-500)';
+        updateProceedState();
+        return;
       }
+      
+      clearActive();
+      document.querySelector('.package.custom')?.classList.add('active');
+      state.selectedAmount = num;
+      
+      const bonus = calculateBonus(num);
+      customTotal.textContent = bonus.totalCredited.toFixed(2);
+      
+      if (bonus.bonusAmount > 0) {
+        let nextThreshold = '';
+        if (num >= 100) {
+          nextThreshold = 'Maximum bonus reached!';
+        } else if (num >= 50) {
+          nextThreshold = `Deposit $${(100 - num).toFixed(2)} more for 15% bonus`;
+        } else if (num >= 20) {
+          nextThreshold = `Deposit $${(50 - num).toFixed(2)} more for 10% bonus`;
+        }
+        
+        customBonusText.textContent = `${(bonus.bonusPercent * 100).toFixed(0)}% bonus applied (+$${bonus.bonusAmount.toFixed(2)})${nextThreshold ? ' • ' + nextThreshold : ''}`;
+        customBonusText.classList.add('bonus-highlight');
+      } else {
+        const toNextBonus = 20 - num;
+        customBonusText.textContent = `Deposit $${toNextBonus.toFixed(2)} more to unlock 5% bonus`;
+        customBonusText.classList.remove('bonus-highlight');
+      }
+      
       updateProceedState();
     };
 
@@ -724,31 +797,41 @@
 
     stepButtons?.forEach(btn => {
       btn.addEventListener('click', () => {
-        const delta = btn.textContent.trim() === '+' ? 1 : -1;
+        const delta = btn.textContent.trim() === '+' ? 5 : -5;
         const current = Number(customInput.value) || 0;
-        const next = Math.min(1000, Math.max(1, current + delta));
+        const next = Math.min(500, Math.max(5, current + delta));
         customInput.value = next;
         updateCustom(next);
       });
     });
 
-    // Demo wiring: open payment modal, then success modal
     proceed?.addEventListener('click', () => {
       if (proceed.classList.contains('disabled')) return;
       open(paymentModal);
     });
 
-    // Initial render
-    renderTable();
-    clearActive();
-    document.querySelector('.package[data-pages="100"]')?.classList.add('active');
-    updateProceedState();
     cancelPayment?.addEventListener('click', () => close(paymentModal));
+    
     confirmPayment?.addEventListener('click', () => {
+      // Simulate payment processing
+      const bonus = calculateBonus(state.selectedAmount);
+      
+      // Update balance
+      state.balance += bonus.totalCredited;
+      headerBalance.textContent = state.balance.toFixed(2);
+      currentBalance.textContent = state.balance.toFixed(2);
+      
+      // Update success modal
+      document.getElementById('success-txn-id').textContent = `TXN-${Math.floor(Math.random() * 900000 + 100000)}`;
+      document.getElementById('success-deposit').textContent = `$${state.selectedAmount.toFixed(2)}`;
+      document.getElementById('success-bonus').textContent = bonus.bonusAmount > 0 
+        ? `+$${bonus.bonusAmount.toFixed(2)}`
+        : '$0.00';
+      document.getElementById('success-credited').textContent = `$${bonus.totalCredited.toFixed(2)}`;
+      document.getElementById('success-balance').textContent = `$${state.balance.toFixed(2)}`;
+      
       close(paymentModal);
       open(successModal);
     });
-    doneSuccess?.addEventListener('click', () => close(successModal));
-  </script>
-</body>
-</html>
+    
+    doneSuccess?.addEve
