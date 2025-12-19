@@ -108,7 +108,12 @@ def generate_uuid():
         # Return bare GUID string; BulkInsertHelper will add quotes
         return str(uuid.uuid4()).upper()
     else:
-        return str(uuid.uuid4()).upper()
+        return str(uuid.uuid4())
+
+def generate_deposit_code():
+    """Generate an 8-character alphanumeric code (A-Z, 0-9) for deposit reference."""
+    chars = string.ascii_uppercase + string.digits
+    return ''.join(random.choice(chars) for _ in range(8)).upper()
 
 def random_date_in_range(start_days_ago, end_days_ago=0):
     """Generate a random date within a range of days ago."""
@@ -334,6 +339,9 @@ class PrintingServiceDataGenerator:
         self.supplier_purchases = []
         self.paper_purchase_items = []
         
+        # Language and translation data
+        self.languages = []
+        
         # System state
         self.current_academic_year = spec['current_academic_year']
         self.semester_names = spec['semester_names']
@@ -410,6 +418,9 @@ class PrintingServiceDataGenerator:
         
         print("Generating audit logs...")
         self.generate_audit_logs()
+        
+        print("Generating languages and translations...")
+        self.generate_languages_and_translations()
         
         return "\n\n".join(self.sql_statements)
     
@@ -627,6 +638,7 @@ class PrintingServiceDataGenerator:
                 'faculty_id': faculty_id,
                 'name': faculty_config['name'],
                 'code': faculty_config['code'],
+                'description': faculty_config.get('description', ''),
                 'departments': faculty_config['departments']
             }
             
@@ -657,15 +669,21 @@ class PrintingServiceDataGenerator:
                     'faculty_id': faculty['faculty_id'],
                     'name': dept_config['name'],
                     'code': dept_config['code'],
+                    'description': f"Department of {dept_config['name']}",
                     'majors': dept_config['majors']
                 }
                 
                 self.departments.append(dept_data)
                 
+                # Get established_date from faculty config or use a default
+                faculties_config = self.spec['faculties']
+                faculty_config = next((f for f in faculties_config if f['code'] == faculty['code']), None)
+                established_date = faculty_config['established_date'] if faculty_config else "2000-01-01"
+                
                 bulk_departments.add_row([
                     department_id, faculty['faculty_id'], dept_config['name'],
                     dept_config['code'], f"Department of {dept_config['name']}",
-                    faculty_config['established_date'], created_at.strftime('%Y-%m-%d %H:%M:%S')
+                    established_date, created_at.strftime('%Y-%m-%d %H:%M:%S')
                 ])
         
         for stmt in bulk_departments.get_statements():
@@ -687,6 +705,7 @@ class PrintingServiceDataGenerator:
                     'department_id': department['department_id'],
                     'name': major_config['name'],
                     'code': major_config['code'],
+                    'description': f"Major in {major_config['name']}",
                     'degree_type': major_config['degree_type'],
                     'duration_years': major_config['duration_years']
                 }
@@ -999,6 +1018,7 @@ class PrintingServiceDataGenerator:
                     'model_id': model_id,
                     'brand_id': brand['brand_id'],
                     'name': model_config['name'],
+                    'description': description,
                     'max_paper_size_id': max_paper_size_id,
                     'supports_color': model_config['supports_color'],
                     'supports_duplex': model_config['supports_duplex'],
@@ -1674,35 +1694,39 @@ class PrintingServiceDataGenerator:
         # 1. Generate deposit bonus packages
         self.add_sql("\n-- Deposit Bonus Packages")
         bulk_bonus_packages = BulkInsertHelper("deposit_bonus_package", [
-            "package_id", "amount_cap", "bonus_percentage", "package_name", "description", "is_active", "created_at", "updated_at"
+            "package_id", "code", "amount_cap", "bonus_percentage", "package_name", "description", "is_active", "created_at", "updated_at"
         ])
         
         # Deposit bonus packages (VND-based), stored as amount_cap (min deposit) and bonus_percentage (0-1 range)
         # These match the business spec and are emitted verbatim into insert.sql
         bonus_packages = [
             {
+                "code": "BASIC",
                 "amount_cap": 50000.00,
                 "bonus_percentage": 0.00,
-                "name": "Gói Cơ Bản",
-                "desc": "BASIC - Nạp 50,000₫, bonus 0₫ (0%), tổng nhận 50,000₫."
+                "name": "Basic Package",
+                "desc": "BASIC - Deposit 50,000₫, bonus 0₫ (0%), total receive 50,000₫."
             },
             {
+                "code": "SAVE_10",
                 "amount_cap": 100000.00,
                 "bonus_percentage": 0.10,
-                "name": "Gói Tiết Kiệm",
-                "desc": "SAVE_10 - Nạp 100,000₫, bonus 10,000₫ (10%), tổng nhận 110,000₫."
+                "name": "Save Package",
+                "desc": "SAVE_10 - Deposit 100,000₫, bonus 10,000₫ (10%), total receive 110,000₫."
             },
             {
+                "code": "XMAS_25",
                 "amount_cap": 200000.00,
                 "bonus_percentage": 0.25,
-                "name": "Gói Giáng Sinh",
-                "desc": "XMAS_25 - Nạp 200,000₫, bonus 50,000₫ (25%), tổng nhận 250,000₫."
+                "name": "Christmas Package",
+                "desc": "XMAS_25 - Deposit 200,000₫, bonus 50,000₫ (25%), total receive 250,000₫."
             },
             {
+                "code": "SAVE_30",
                 "amount_cap": 500000.00,
                 "bonus_percentage": 0.30,
-                "name": "Gói Siêu Tiết Kiệm",
-                "desc": "SAVE_30 - Nạp 500,000₫, bonus 150,000₫ (30%), tổng nhận 650,000₫."
+                "name": "Super Save Package",
+                "desc": "SAVE_30 - Deposit 500,000₫, bonus 150,000₫ (30%), total receive 650,000₫."
             },
         ]
         
@@ -1712,12 +1736,16 @@ class PrintingServiceDataGenerator:
             
             self.deposit_bonus_packages.append({
                 'package_id': package_id,
+                'code': pkg['code'],
                 'amount_cap': pkg['amount_cap'],
-                'bonus_percentage': pkg['bonus_percentage']
+                'bonus_percentage': pkg['bonus_percentage'],
+                'package_name': pkg['name'],  # Store for translation generation
+                'description': pkg['desc']    # Store for translation generation
             })
             
             bulk_bonus_packages.add_row([
                 package_id,
+                pkg['code'],
                 pkg['amount_cap'],
                 pkg['bonus_percentage'],
                 pkg['name'],
@@ -1842,9 +1870,13 @@ class PrintingServiceDataGenerator:
         # 5. Generate deposits (students depositing money)
         self.add_sql("\n-- Deposits")
         bulk_deposits = BulkInsertHelper("deposit", [
-            "deposit_id", "student_id", "deposit_amount", "bonus_amount", "total_credited",
-            "deposit_bonus_package_id", "payment_method", "payment_reference", "payment_status", "transaction_date"
+            "deposit_id", "student_id", "deposit_code", "deposit_amount", "bonus_amount", "total_credited",
+            "deposit_bonus_package_id", "payment_method", "payment_reference", "payment_status", 
+            "cancellation_reason", "expired_at", "transaction_date"
         ])
+        
+        # Track generated deposit codes to ensure uniqueness
+        generated_deposit_codes = set()
         
         # Get payment methods - ensure it's a list
         payment_methods_raw = self.spec.get('payment_methods', ['credit_card', 'debit_card', 'bank_transfer', 'e_wallet'])
@@ -1861,10 +1893,10 @@ class PrintingServiceDataGenerator:
         student_balance_map = {}
         
         # Identify test students to ensure they get guaranteed deposits
+        # NOTE: leanhtuank16@siu.edu.vn is excluded from deposits/payments
         test_student_emails = [
             "student.test@edu.vn",
             "phandienmanhthienk16@siu.edu.vn",
-            "leanhtuank16@siu.edu.vn",
             "nguyenhongbaongock16@siu.edu.vn",
             "phanthanhthaituank16@siu.edu.vn",
             "lengocdangkhoak16@siu.edu.vn",
@@ -1878,7 +1910,20 @@ class PrintingServiceDataGenerator:
                 if student:
                     test_student_ids.add(student['student_id'])
         
+        # Identify leanhtuank16 account to exclude from deposits/payments
+        leanhtuan_email = "leanhtuank16@siu.edu.vn"
+        leanhtuan_student_id = None
+        leanhtuan_user = next((u for u in self.users if u['email'] == leanhtuan_email), None)
+        if leanhtuan_user:
+            leanhtuan_student = next((s for s in self.students if s['user_id'] == leanhtuan_user['user_id']), None)
+            if leanhtuan_student:
+                leanhtuan_student_id = leanhtuan_student['student_id']
+        
         for student in self.students:
+            # Skip leanhtuank16 account - no deposits/payments for this account
+            if student['student_id'] == leanhtuan_student_id:
+                continue
+            
             is_test_account = student['student_id'] in test_student_ids
             # Test accounts always get deposits, regular students have 30% chance
             should_generate_deposit = True if is_test_account else (random.random() < deposit_rate)
@@ -1889,6 +1934,15 @@ class PrintingServiceDataGenerator:
                 
                 for _ in range(num_deposits):
                     deposit_id = generate_uuid()
+                    
+                    # Generate unique deposit_code (8 alphanumeric characters)
+                    deposit_code = generate_deposit_code()
+                    retry_count = 0
+                    while deposit_code in generated_deposit_codes and retry_count < 10:
+                        deposit_code = generate_deposit_code()
+                        retry_count += 1
+                    generated_deposit_codes.add(deposit_code)
+                    
                     # Deposit amounts: $5-$100, weighted towards lower amounts
                     deposit_amount = round(random.choices(
                         [5, 10, 15, 20, 25, 30, 50, 75, 100],
@@ -1908,11 +1962,46 @@ class PrintingServiceDataGenerator:
                     total_credited = deposit_amount + bonus_amount
                     method = random.choice(payment_methods)
                     reference = f"DEP-{random.randint(100000, 999999)}"
-                    # Test accounts always have completed deposits, regular students 95% completed
-                    status = 'completed' if is_test_account else ('completed' if random.random() < 0.95 else 'pending')
+                    
+                    # Payment status distribution: completed (85%), pending (8%), expired (4%), cancelled (2%), failed (1%)
+                    if is_test_account:
+                        status = 'completed'  # Test accounts always completed
+                    else:
+                        rand = random.random()
+                        if rand < 0.85:
+                            status = 'completed'
+                        elif rand < 0.93:
+                            status = 'pending'
+                        elif rand < 0.97:
+                            status = 'expired'
+                        elif rand < 0.99:
+                            status = 'cancelled'
+                        else:
+                            status = 'failed'
                     
                     # Transaction date: within last 6 months
                     transaction_date = random_date_in_range(180, 0)
+                    
+                    # Set expired_at for pending deposits (expires after 24-72 hours)
+                    expired_at = None
+                    if status == 'pending':
+                        hours_until_expiry = random.randint(24, 72)
+                        expired_at = transaction_date + timedelta(hours=hours_until_expiry)
+                    elif status == 'expired':
+                        # Expired deposits: expired_at is in the past
+                        hours_ago = random.randint(1, 48)
+                        expired_at = datetime.now() - timedelta(hours=hours_ago)
+                    
+                    # Set cancellation_reason for cancelled deposits
+                    cancellation_reason = None
+                    if status == 'cancelled':
+                        reasons = [
+                            "Người dùng hủy đơn",
+                            "Hết thời gian chờ thanh toán",
+                            "Lỗi hệ thống",
+                            "Yêu cầu hủy từ ngân hàng"
+                        ]
+                        cancellation_reason = random.choice(reasons)
                     
                     # Store deposit data
                     deposit_data = {
@@ -1936,6 +2025,7 @@ class PrintingServiceDataGenerator:
                     bulk_deposits.add_row([
                         deposit_id,
                         student['student_id'],
+                        deposit_code,
                         deposit_amount,
                         bonus_amount,
                         total_credited,
@@ -1943,8 +2033,10 @@ class PrintingServiceDataGenerator:
                         method,
                         reference,
                         status,
+                        cancellation_reason,
+                        expired_at.strftime('%Y-%m-%d %H:%M:%S') if expired_at else None,
                         transaction_date.strftime('%Y-%m-%d %H:%M:%S')
-            ])
+                    ])
         
         for stmt in bulk_deposits.get_statements():
             self.add_sql(stmt)
@@ -2553,12 +2645,26 @@ class PrintingServiceDataGenerator:
                 continue
             
             # Check if this is a test account job
+            # NOTE: leanhtuank16@siu.edu.vn is excluded from payments
             student_id = job['student_id']
+            
+            # Identify leanhtuank16 account to exclude from payments
+            leanhtuan_email = "leanhtuank16@siu.edu.vn"
+            leanhtuan_student_id = None
+            leanhtuan_user = next((u for u in self.users if u['email'] == leanhtuan_email), None)
+            if leanhtuan_user:
+                leanhtuan_student = next((s for s in self.students if s['user_id'] == leanhtuan_user['user_id']), None)
+                if leanhtuan_student:
+                    leanhtuan_student_id = leanhtuan_student['student_id']
+            
+            # Skip payments for leanhtuank16 account
+            if student_id == leanhtuan_student_id:
+                continue
+            
             is_test_account = False
             test_student_emails = [
                 "student.test@edu.vn",
                 "phandienmanhthienk16@siu.edu.vn",
-                "leanhtuank16@siu.edu.vn",
                 "nguyenhongbaongock16@siu.edu.vn",
                 "phanthanhthaituank16@siu.edu.vn",
                 "lengocdangkhoak16@siu.edu.vn",
@@ -3001,6 +3107,383 @@ class PrintingServiceDataGenerator:
             ])
         
         for stmt in bulk.get_statements():
+            self.add_sql(stmt)
+    
+    def generate_languages_and_translations(self):
+        """Generate language data and Vietnamese translations for all name/description columns."""
+        self.add_sql("\n-- ============================================")
+        self.add_sql("-- LANGUAGE AND TRANSLATION DATA")
+        self.add_sql("-- ============================================")
+        
+        # Generate languages
+        self.add_sql("\n-- Languages")
+        bulk_languages = BulkInsertHelper("language", [
+            "language_id", "language_name", "acronym", "created_at"
+        ])
+        
+        languages_data = [
+            {"name": "English", "acronym": "en"},
+            {"name": "Vietnamese", "acronym": "vi"}
+        ]
+        
+        self.languages = []
+        created_at = datetime.now()
+        
+        for lang_data in languages_data:
+            language_id = generate_uuid()
+            self.languages.append({
+                'language_id': language_id,
+                'language_name': lang_data['name'],
+                'acronym': lang_data['acronym']
+            })
+            
+            bulk_languages.add_row([
+                language_id,
+                lang_data['name'],
+                lang_data['acronym'],
+                created_at.strftime('%Y-%m-%d %H:%M:%S')
+            ])
+        
+        for stmt in bulk_languages.get_statements():
+            self.add_sql(stmt)
+        
+        # Get Vietnamese language ID
+        vietnamese_lang_id = next((l['language_id'] for l in self.languages if l['acronym'] == 'vi'), None)
+        if not vietnamese_lang_id:
+            return  # Cannot proceed without Vietnamese language
+        
+        # Generate translations
+        self.add_sql("\n-- Name Translations (Vietnamese)")
+        bulk_translations = BulkInsertHelper("name_translation", [
+            "translation_id", "table_name", "entry_id", "column_name", "language_id", "translation", "created_at"
+        ])
+        
+        created_at = datetime.now()
+        
+        # Helper function to translate common terms
+        def translate_to_vietnamese(text):
+            """Translate English text to Vietnamese for common academic and system terms.
+            Returns the Vietnamese translation, or None if translation is not possible."""
+            if not text:
+                return None
+            
+            text_lower = text.lower()
+            original_text = text
+            
+            # Common term translations (exact matches)
+            translations = {
+                'Computer Lab': 'Phòng máy tính',
+                'IT Lab': 'Phòng IT',
+                'Programming Lab': 'Phòng lập trình',
+                'Software Lab': 'Phòng phần mềm',
+                'Hardware Lab': 'Phòng phần cứng',
+                'Lecture Hall': 'Giảng đường',
+                'Classroom': 'Phòng học',
+                'Hall': 'Hội trường',
+                'Auditorium': 'Phòng hội thảo',
+                'Library': 'Thư viện',
+                'Reading Room': 'Phòng đọc',
+                'Study Area': 'Khu học tập',
+                'Reference Section': 'Khu tham khảo',
+                'Office': 'Văn phòng',
+                'Faculty Office': 'Văn phòng Khoa',
+                'Staff Office': 'Văn phòng Nhân viên',
+                'Administrative Office': 'Văn phòng Hành chính',
+                'Student Lounge': 'Phòng sinh hoạt',
+                'Common Area': 'Khu chung',
+                'Recreation Room': 'Phòng giải trí',
+                'Break Room': 'Phòng nghỉ',
+                'Storage Room': 'Kho',
+                'Supply Room': 'Kho vật tư',
+                'Equipment Storage': 'Kho thiết bị',
+                "Men's": "Nhà vệ sinh Nam",
+                "Women's": "Nhà vệ sinh Nữ",
+                'Stairwell': 'Cầu thang',
+                'Stairs': 'Thang bộ',
+                'Elevator': 'Thang máy',
+                'Main Campus': 'Khuôn viên chính',
+                'Main Academic Building': 'Tòa nhà Học thuật Chính',
+                'Science & Technology Building': 'Tòa nhà Khoa học & Công nghệ',
+                'Library & Research Center': 'Trung tâm Thư viện & Nghiên cứu',
+                'color': 'Màu',
+                'grayscale': 'Xám',
+                'black-white': 'Đen trắng',
+                'fall': 'Thu',
+                'spring': 'Xuân',
+                'summer': 'Hè'
+            }
+            
+            # Direct match
+            if text in translations:
+                return translations[text]
+            
+            # Pattern-based translations for academic terms
+            result = text
+            
+            # Faculty/Department/Major patterns
+            if text.startswith('Faculty of '):
+                result = 'Khoa ' + text[11:]
+            elif text.startswith('Department of '):
+                result = 'Bộ môn ' + text[14:]
+            elif text.startswith('Major in '):
+                result = 'Ngành ' + text[9:]
+            
+            # Common academic field translations
+            field_translations = {
+                'computer science': 'Khoa học Máy tính',
+                'computer engineering': 'Kỹ thuật Máy tính',
+                'software engineering': 'Kỹ thuật Phần mềm',
+                'data science': 'Khoa học Dữ liệu',
+                'information systems': 'Hệ thống Thông tin',
+                'electrical engineering': 'Kỹ thuật Điện',
+                'electronics engineering': 'Kỹ thuật Điện tử',
+                'telecommunications engineering': 'Kỹ thuật Viễn thông',
+                'control & automation engineering': 'Kỹ thuật Điều khiển & Tự động hóa',
+                'mechanical engineering': 'Kỹ thuật Cơ khí',
+                'automotive engineering': 'Kỹ thuật Ô tô',
+                'manufacturing engineering': 'Kỹ thuật Sản xuất',
+                'mechatronics engineering': 'Kỹ thuật Cơ điện tử',
+                'computer science & engineering': 'Khoa học & Kỹ thuật Máy tính',
+                'electrical & electronics engineering': 'Kỹ thuật Điện & Điện tử'
+            }
+            
+            # Check for field matches (case-insensitive)
+            for eng_field, vi_field in field_translations.items():
+                if eng_field in text_lower:
+                    # Replace the English field name with Vietnamese
+                    # Handle "&" variations
+                    if ' & ' in text or ' &' in text or '& ' in text:
+                        # Replace "&" with "và" in Vietnamese
+                        result = result.replace(' & ', ' và ').replace(' &', ' và').replace('& ', 'và ')
+                    result = result.replace(eng_field.title(), vi_field).replace(eng_field, vi_field)
+                    break
+            
+            # Common word replacements
+            replacements = [
+                ('Lab', 'Phòng'),
+                ('Building', 'Tòa nhà'),
+                ('Center', 'Trung tâm'),
+                ('Engineering', 'Kỹ thuật'),
+                ('Science', 'Khoa học'),
+                ('Technology', 'Công nghệ'),
+                ('Research', 'Nghiên cứu'),
+                ('Academic', 'Học thuật')
+            ]
+            
+            # Apply replacements if not already translated
+            if result == text:
+                for eng, vi in replacements:
+                    if eng in result:
+                        result = result.replace(eng, vi)
+            
+            # If still unchanged, return None (don't add to translation table)
+            # Only add translations that are actually different from the original
+            if result == original_text:
+                return None
+            
+            # Check if result still contains common English words - if so, it's not fully translated
+            # Common English words that shouldn't appear in Vietnamese translations
+            english_indicators = ['Engineering', 'Science', 'Technology', 'Building', 'Center', 
+                                'Research', 'Academic', 'and ', ' of ', 'Paper Distributors',
+                                'Printing Materials', 'Campus Supply', 'Educational Supplies',
+                                'Stationery Solutions', 'Electrical', 'Mechanical', 'Computer',
+                                'Materials Corp', 'Materials Inc', 'Distributors', 'Supplies Co',
+                                'Solutions', 'Corp', 'Inc', 'Ltd', 'Co']
+            
+            # If result contains English words, it's not a proper translation - return None
+            if any(indicator in result for indicator in english_indicators):
+                return None
+            
+            return result
+        
+        def add_translation_if_different(table_name, entry_id, column_name, original_text):
+            """Add translation to bulk_translations only if it's different from original and fully Vietnamese."""
+            if not original_text:
+                return
+            translated = translate_to_vietnamese(original_text)
+            if translated and translated != original_text:
+                translation_id = generate_uuid()
+                bulk_translations.add_row([
+                    translation_id, table_name, entry_id, column_name,
+                    vietnamese_lang_id, translated,
+                    created_at.strftime('%Y-%m-%d %H:%M:%S')
+                ])
+        
+        # 1. Faculty translations
+        for faculty in self.faculties:
+            add_translation_if_different('faculty', faculty['faculty_id'], 'faculty_name', faculty.get('name'))
+            add_translation_if_different('faculty', faculty['faculty_id'], 'description', faculty.get('description'))
+        
+        # 2. Department translations
+        for dept in self.departments:
+            add_translation_if_different('department', dept['department_id'], 'department_name', dept.get('name'))
+            add_translation_if_different('department', dept['department_id'], 'description', dept.get('description'))
+        
+        # 3. Major translations
+        for major in self.majors:
+            add_translation_if_different('major', major['major_id'], 'major_name', major.get('name'))
+            add_translation_if_different('major', major['major_id'], 'description', major.get('description'))
+        
+        # 4. Class translations
+        # Skip class translations - class names are codes (e.g., "CS0101") and don't need translation
+        # for class_info in self.classes:
+        #     if class_info.get('class_name'):
+        #         translation_id = generate_uuid()
+        #         bulk_translations.add_row([
+        #             translation_id, 'class', class_info['class_id'], 'class_name',
+        #             vietnamese_lang_id, translate_to_vietnamese(class_info['class_name']),
+        #             created_at.strftime('%Y-%m-%d %H:%M:%S')
+        #         ])
+        
+        # 5. Page size translations
+        # Skip page size translations - size names are standard (A3, A4, A5) and don't need translation
+        # for page_size in self.page_sizes:
+        #     if page_size.get('size_name'):
+        #         translation_id = generate_uuid()
+        #         bulk_translations.add_row([
+        #             translation_id, 'page_size', page_size['page_size_id'], 'size_name',
+        #             vietnamese_lang_id, page_size['size_name'],  # A3, A4, A5 are the same
+        #             created_at.strftime('%Y-%m-%d %H:%M:%S')
+        #         ])
+        
+        # 6. Building translations
+        for building in self.buildings:
+            add_translation_if_different('building', building['building_id'], 'campus_name', building.get('campus_name'))
+        
+        # 7. Room translations
+        # Only translate rooms that have meaningful names (skip if name is just a code)
+        for room in self.rooms:
+            room_name = room.get('room_name', '')
+            # Skip if room_name looks like a code (e.g., "101", "F1R01") or is too short
+            if room_name and len(room_name) > 3 and not room_name.replace(' ', '').replace('-', '').isdigit():
+                add_translation_if_different('room', room['room_id'], 'room_name', room_name)
+        
+        # 8. Brand translations
+        for brand in self.brands:
+            add_translation_if_different('brand', brand['brand_id'], 'brand_name', brand.get('name'))
+        
+        # 9. Printer model translations
+        for model in self.models:
+            add_translation_if_different('printer_model', model['model_id'], 'model_name', model.get('name'))
+            add_translation_if_different('printer_model', model['model_id'], 'description', model.get('description'))
+        
+        # 10. Semester translations
+        # Only translate term_name (fall, spring, summer) - these are already handled in translate_to_vietnamese
+        for semester in self.semesters:
+            term_name = semester.get('term_name', '')
+            if term_name in ['fall', 'spring', 'summer']:
+                add_translation_if_different('semester', semester['semester_id'], 'term_name', term_name)
+        
+        # 11. Deposit bonus package translations
+        # Note: The package_name and description in the database columns are assumed to be in English
+        # We provide Vietnamese translations
+        # Since the current data has Vietnamese names, we'll use them as Vietnamese translations
+        # (The English versions would be: "Basic Package", "Save Package", "Christmas Package", "Super Save Package")
+        bonus_packages_vi_translations = {
+            "BASIC": {"name": "Gói Cơ Bản", "desc": "BASIC - Nạp 50,000₫, bonus 0₫ (0%), tổng nhận 50,000₫."},
+            "SAVE_10": {"name": "Gói Tiết Kiệm", "desc": "SAVE_10 - Nạp 100,000₫, bonus 10,000₫ (10%), tổng nhận 110,000₫."},
+            "XMAS_25": {"name": "Gói Giáng Sinh", "desc": "XMAS_25 - Nạp 200,000₫, bonus 50,000₫ (25%), tổng nhận 250,000₫."},
+            "SAVE_30": {"name": "Gói Siêu Tiết Kiệm", "desc": "SAVE_30 - Nạp 500,000₫, bonus 150,000₫ (30%), tổng nhận 650,000₫."},
+        }
+        for pkg in self.deposit_bonus_packages:
+            pkg_code = pkg.get('code')
+            vi_data = bonus_packages_vi_translations.get(pkg_code)
+            if vi_data:
+                # Translate package_name
+                translation_id = generate_uuid()
+                bulk_translations.add_row([
+                    translation_id, 'deposit_bonus_package', pkg['package_id'], 'package_name',
+                    vietnamese_lang_id, vi_data['name'],
+                    created_at.strftime('%Y-%m-%d %H:%M:%S')
+                ])
+                # Translate description
+                translation_id = generate_uuid()
+                bulk_translations.add_row([
+                    translation_id, 'deposit_bonus_package', pkg['package_id'], 'description',
+                    vietnamese_lang_id, vi_data['desc'],
+                    created_at.strftime('%Y-%m-%d %H:%M:%S')
+                ])
+        
+        # 12. Semester bonus translations
+        for bonus in self.semester_bonuses:
+            if bonus.get('description'):
+                translation_id = generate_uuid()
+                # Description is already in English format, translate it
+                desc = bonus.get('description', '')
+                vi_desc = desc.replace('Semester bonus for', 'Bonus học kỳ cho').replace('semester', 'học kỳ')
+                bulk_translations.add_row([
+                    translation_id, 'semester_bonus', bonus['bonus_id'], 'description',
+                    vietnamese_lang_id, vi_desc,
+                    created_at.strftime('%Y-%m-%d %H:%M:%S')
+                ])
+        
+        # 13. Color mode translations
+        for color_mode in self.color_modes:
+            if color_mode.get('color_mode_name'):
+                translation_id = generate_uuid()
+                bulk_translations.add_row([
+                    translation_id, 'color_mode', color_mode['color_mode_id'], 'color_mode_name',
+                    vietnamese_lang_id, translate_to_vietnamese(color_mode['color_mode_name']),
+                    created_at.strftime('%Y-%m-%d %H:%M:%S')
+                ])
+        
+        # 14. Page discount package translations
+        # Note: Package names are like "50 pages", "100 pages", etc.
+        # Descriptions are like "50 pages: no discount"
+        # We need to look up the original data from generate_page_allocation_system
+        discount_packages_data = [
+            {"min_pages": 50, "name": "50 pages", "desc": "50 pages: no discount"},
+            {"min_pages": 100, "name": "100 pages", "desc": "100 pages: 10% discount"},
+            {"min_pages": 200, "name": "200 pages", "desc": "200 pages: 12.5% discount"},
+            {"min_pages": 500, "name": "500 pages", "desc": "500 pages: 20% discount"}
+        ]
+        for pkg in self.page_discount_packages:
+            min_pages = pkg.get('min_pages', 0)
+            pkg_data = next((p for p in discount_packages_data if p['min_pages'] == min_pages), None)
+            if pkg_data:
+                # Translate package_name: "50 pages" -> "50 trang"
+                translation_id = generate_uuid()
+                bulk_translations.add_row([
+                    translation_id, 'page_discount_package', pkg['package_id'], 'package_name',
+                    vietnamese_lang_id, pkg_data['name'].replace('pages', 'trang'),
+                    created_at.strftime('%Y-%m-%d %H:%M:%S')
+                ])
+                # Translate description: "50 pages: no discount" -> "50 trang: không giảm giá"
+                translation_id = generate_uuid()
+                vi_desc = pkg_data['desc'].replace('pages', 'trang').replace('no discount', 'không giảm giá').replace('discount', 'giảm giá')
+                bulk_translations.add_row([
+                    translation_id, 'page_discount_package', pkg['package_id'], 'description',
+                    vietnamese_lang_id, vi_desc,
+                    created_at.strftime('%Y-%m-%d %H:%M:%S')
+                ])
+        
+        # 15. Fund source translations
+        for fund in self.fund_sources:
+            add_translation_if_different('fund_source', fund['fund_id'], 'fund_source_name', fund.get('fund_source_name'))
+            add_translation_if_different('fund_source', fund['fund_id'], 'description', fund.get('description'))
+        
+        # 16. Supplier paper purchase translations
+        for purchase in self.supplier_purchases:
+            add_translation_if_different('supplier_paper_purchase', purchase['purchase_id'], 'supplier_name', purchase.get('supplier_name'))
+        
+        # 17. System configuration translations
+        # Note: config_value might need translation, but descriptions definitely do
+        # We'll skip config_value as it's usually technical, but translate descriptions if needed
+        
+        # 18. Permitted file type translations
+        # Note: descriptions might need translation, but extensions don't
+        
+        # 19. Uploaded file translations
+        # Note: file_name usually doesn't need translation (it's the actual filename)
+        
+        # 20. Student wallet ledger translations
+        # Note: descriptions are generated dynamically, we'll translate common patterns
+        # This would be done at application level when creating ledger entries
+        
+        # 21. Printer log translations
+        # Note: descriptions are generated dynamically, translation would be at application level
+        
+        for stmt in bulk_translations.get_statements():
             self.add_sql(stmt)
 
 # ============================================================================

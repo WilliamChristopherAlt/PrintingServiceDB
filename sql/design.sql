@@ -281,6 +281,7 @@ GO
 -- Deposit bonus package table - defines bonus tiers for deposits
 CREATE TABLE deposit_bonus_package (
     package_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    code VARCHAR(20) NOT NULL UNIQUE, -- Package code: BASIC, SAVE_10, XMAS_25, SAVE_30, etc.
     amount_cap DECIMAL(10, 2) NOT NULL CHECK (amount_cap > 0), -- Minimum deposit amount to qualify
     bonus_percentage DECIMAL(5, 4) NOT NULL CHECK (bonus_percentage >= 0 AND bonus_percentage <= 1), -- Bonus percentage (0-1 range)
     package_name NVARCHAR(100),
@@ -289,6 +290,7 @@ CREATE TABLE deposit_bonus_package (
     created_at DATETIME DEFAULT GETDATE(),
     updated_at DATETIME DEFAULT GETDATE()
 );
+CREATE INDEX idx_deposit_bonus_package_code ON deposit_bonus_package (code);
 CREATE INDEX idx_deposit_bonus_package_amount ON deposit_bonus_package (amount_cap);
 CREATE INDEX idx_deposit_bonus_package_active ON deposit_bonus_package (is_active);
 GO
@@ -297,21 +299,27 @@ GO
 CREATE TABLE deposit (
     deposit_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     student_id UNIQUEIDENTIFIER NOT NULL,
+    deposit_code VARCHAR(8) NOT NULL UNIQUE, -- Short alphanumeric code (8 characters) for deposit reference
     deposit_amount DECIMAL(10, 2) NOT NULL CHECK (deposit_amount > 0), -- Real dollars deposited
     bonus_amount DECIMAL(10, 2) NOT NULL DEFAULT 0 CHECK (bonus_amount >= 0), -- Bonus received
     total_credited DECIMAL(10, 2) NOT NULL CHECK (total_credited > 0), -- deposit_amount + bonus_amount
     deposit_bonus_package_id UNIQUEIDENTIFIER NULL, -- Link to bonus package if applicable
     payment_method VARCHAR(50) NOT NULL,
     payment_reference VARCHAR(100),
-    payment_status VARCHAR(20) NOT NULL DEFAULT 'pending' CHECK (payment_status IN ('pending', 'completed', 'failed', 'refunded')),
+    payment_status VARCHAR(20) NOT NULL DEFAULT 'pending' CHECK (payment_status IN ('pending', 'completed', 'failed', 'refunded', 'expired', 'cancelled')),
+    cancellation_reason NVARCHAR(500) NULL, -- Reason for cancellation if payment_status = 'cancelled'
+    expired_at DATETIME NULL, -- Expiration time for pending deposits
     transaction_date DATETIME DEFAULT GETDATE(),
     FOREIGN KEY (student_id) REFERENCES student(student_id) ON DELETE CASCADE,
     FOREIGN KEY (deposit_bonus_package_id) REFERENCES deposit_bonus_package(package_id)
 );
 CREATE INDEX idx_deposit_student ON deposit (student_id);
+CREATE INDEX idx_deposit_code ON deposit (deposit_code);
 CREATE INDEX idx_deposit_transaction_date ON deposit (transaction_date);
 CREATE INDEX idx_deposit_payment_status ON deposit (payment_status);
 CREATE INDEX idx_deposit_bonus_package ON deposit (deposit_bonus_package_id);
+CREATE INDEX idx_deposit_expired_at ON deposit (expired_at);
+CREATE INDEX idx_deposit_student_status_expired ON deposit (student_id, payment_status, expired_at);
 GO
 
 -- Semester bonus table - defines how much money is given per semester
@@ -596,6 +604,21 @@ CREATE INDEX idx_payment_transaction_date ON payment (transaction_date);
 CREATE INDEX idx_payment_status ON payment (payment_status);
 GO
 
+-- Payment Webhook Log table - logs all webhook requests from payment gateway (SePay)
+CREATE TABLE payment_webhook_log (
+    log_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    gateway_transaction_id VARCHAR(50), -- ID from payment gateway (SePay id in payload)
+    bank_reference_code VARCHAR(50), -- Bank transaction reference code (referenceCode)
+    payload_content NVARCHAR(MAX), -- Full JSON body received from webhook
+    processed_status VARCHAR(20) CHECK (processed_status IN ('success', 'failed', 'duplicate', 'ignored', 'processing')),
+    error_message NVARCHAR(MAX) NULL,
+    created_at DATETIME DEFAULT GETDATE()
+);
+CREATE INDEX idx_webhook_gateway_id ON payment_webhook_log (gateway_transaction_id);
+CREATE INDEX idx_webhook_reference_code ON payment_webhook_log (bank_reference_code);
+CREATE INDEX idx_webhook_created_at ON payment_webhook_log (created_at);
+GO
+
 -- Student Wallet Ledger Table - Central ledger for all financial transactions
 -- ============================================
 -- This table implements a ledger pattern: every financial transaction (deposit, payment, refund, bonus)
@@ -689,6 +712,38 @@ CREATE INDEX idx_table_name ON system_audit_log(table_name);
 CREATE INDEX idx_record_id ON system_audit_log(record_id);
 CREATE INDEX idx_previous_audit ON system_audit_log(previous_audit_id);
 GO
+
+-- Language and Translation Tables
+-- ============================================
+-- Support for multi-language translations of names and descriptions
+-- All existing name/description columns are assumed to be in English
+-- Translations for other languages are stored in name_translation table
+
+CREATE TABLE language (
+    language_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    language_name NVARCHAR(50) NOT NULL UNIQUE, -- e.g., 'English', 'Vietnamese'
+    acronym VARCHAR(10) NOT NULL UNIQUE, -- e.g., 'en', 'vi'
+    created_at DATETIME DEFAULT GETDATE()
+);
+CREATE INDEX idx_language_acronym ON language (acronym);
+GO
+
+CREATE TABLE name_translation (
+    translation_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    table_name VARCHAR(100) NOT NULL, -- Name of the table containing the column
+    entry_id UNIQUEIDENTIFIER NOT NULL, -- ID of the record in the source table
+    column_name VARCHAR(100) NOT NULL, -- Name of the column being translated
+    language_id UNIQUEIDENTIFIER NOT NULL, -- Language of the translation
+    translation NVARCHAR(500) NOT NULL, -- Translated text
+    created_at DATETIME DEFAULT GETDATE(),
+    FOREIGN KEY (language_id) REFERENCES language(language_id) ON DELETE CASCADE
+);
+CREATE INDEX idx_translation_table_entry ON name_translation (table_name, entry_id);
+CREATE INDEX idx_translation_column ON name_translation (column_name);
+CREATE INDEX idx_translation_language ON name_translation (language_id);
+CREATE INDEX idx_translation_table_column ON name_translation (table_name, column_name);
+GO
+
 -- ============================================
 -- Composite Indexes for Query Optimization
 -- ============================================

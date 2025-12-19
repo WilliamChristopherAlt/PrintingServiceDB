@@ -151,7 +151,7 @@ def get_predefined_modules() -> Dict[str, List[str]]:
         "Quản lý Thanh toán & Số dư": [
             'deposit', 'deposit_bonus_package', 'payment', 'semester_bonus', 
             'student_semester_bonus', 'student', 'print_job', 'refund_print_job',
-            'student_wallet_ledger'
+            'student_wallet_ledger', 'payment_webhook_log'
         ],
         "Cấu hình Giá": [
             'color_mode', 'color_mode_price', 'page_size_price', 'page_discount_package', 'page_size', 'print_job'
@@ -161,7 +161,7 @@ def get_predefined_modules() -> Dict[str, List[str]]:
             'page_size', 'staff'
         ],
         "Cấu hình Hệ thống": [
-            'system_configuration', 'permitted_file_type', 'staff'
+            'system_configuration', 'permitted_file_type', 'staff', 'language', 'name_translation'
         ],
         "Kiểm tra & Ghi nhật ký": [
             'printer_log', 'system_audit_log', 'user', 'printer_physical', 'print_job'

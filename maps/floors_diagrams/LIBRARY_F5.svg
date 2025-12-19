@@ -60,7 +60,7 @@
                   font-family="Roboto,Segoe UI,Arial,sans-serif" 
                   font-size="40" font-weight="600"
                   fill="white" text-anchor="middle" dominant-baseline="middle">
-              Reading Room
+              Study Area
             </text>
 <rect x="1100" y="0" width="500" height="600" 
               fill="#2196F3" stroke="none"/>
@@ -68,7 +68,7 @@
                   font-family="Roboto,Segoe UI,Arial,sans-serif" 
                   font-size="40" font-weight="600"
                   fill="white" text-anchor="middle" dominant-baseline="middle">
-              Classroom
+              Lecture Hall
             </text>
 <rect x="1600" y="0" width="400" height="600" 
               fill="#FF9800" stroke="none"/>
@@ -76,7 +76,7 @@
                   font-family="Roboto,Segoe UI,Arial,sans-serif" 
                   font-size="40" font-weight="600"
                   fill="white" text-anchor="middle" dominant-baseline="middle">
-              Programming Lab
+              Computer Lab
             </text>
 <rect x="500" y="600" width="1500" height="200" 
               fill="#E0E0E0" stroke="none"/>
@@ -116,7 +116,7 @@
                   font-family="Roboto,Segoe UI,Arial,sans-serif" 
                   font-size="40" font-weight="600"
                   fill="white" text-anchor="middle" dominant-baseline="middle">
-              Office
+              Staff Office
             </text>
 <rect x="900" y="800" width="400" height="400" 
               fill="#2196F3" stroke="none"/>
@@ -161,7 +161,7 @@
                   font-family="Roboto,Segoe UI,Arial,sans-serif" 
                   font-size="40" font-weight="600"
                   fill="white" text-anchor="middle" dominant-baseline="middle">
-              Lecture Hall
+              Classroom
             </text>
 <rect x="1000" y="1500" width="500" height="300" 
               fill="#9C27B0" stroke="none"/>
@@ -169,7 +169,7 @@
                   font-family="Roboto,Segoe UI,Arial,sans-serif" 
                   font-size="40" font-weight="600"
                   fill="white" text-anchor="middle" dominant-baseline="middle">
-              Library
+              Study Area
             </text>
 <rect x="1500" y="1500" width="500" height="300" 
               fill="#757575" stroke="none"/>
