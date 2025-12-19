@@ -1676,13 +1676,33 @@ class PrintingServiceDataGenerator:
             "package_id", "amount_cap", "bonus_percentage", "package_name", "description", "is_active", "created_at", "updated_at"
         ])
         
-        # Realistic bonus packages: 10% bonus if $10+, 20% bonus if $15+, 25% bonus if $25+, 30% bonus if $50+
-        # Stored as 0-1 range: 0.10 = 10%, 0.20 = 20%, etc.
+        # Deposit bonus packages (VND-based), stored as amount_cap (min deposit) and bonus_percentage (0-1 range)
+        # These match the business spec and are emitted verbatim into insert.sql
         bonus_packages = [
-            {"amount_cap": 10.00, "bonus_percentage": 0.10, "name": "Starter Bonus", "desc": "10% bonus for deposits of $10 or more"},
-            {"amount_cap": 15.00, "bonus_percentage": 0.20, "name": "Premium Bonus", "desc": "20% bonus for deposits of $15 or more"},
-            {"amount_cap": 25.00, "bonus_percentage": 0.25, "name": "Super Bonus", "desc": "25% bonus for deposits of $25 or more"},
-            {"amount_cap": 50.00, "bonus_percentage": 0.30, "name": "Mega Bonus", "desc": "30% bonus for deposits of $50 or more"},
+            {
+                "amount_cap": 50000.00,
+                "bonus_percentage": 0.00,
+                "name": "Gói Cơ Bản",
+                "desc": "BASIC - Nạp 50,000₫, bonus 0₫ (0%), tổng nhận 50,000₫."
+            },
+            {
+                "amount_cap": 100000.00,
+                "bonus_percentage": 0.10,
+                "name": "Gói Tiết Kiệm",
+                "desc": "SAVE_10 - Nạp 100,000₫, bonus 10,000₫ (10%), tổng nhận 110,000₫."
+            },
+            {
+                "amount_cap": 200000.00,
+                "bonus_percentage": 0.25,
+                "name": "Gói Giáng Sinh",
+                "desc": "XMAS_25 - Nạp 200,000₫, bonus 50,000₫ (25%), tổng nhận 250,000₫."
+            },
+            {
+                "amount_cap": 500000.00,
+                "bonus_percentage": 0.30,
+                "name": "Gói Siêu Tiết Kiệm",
+                "desc": "SAVE_30 - Nạp 500,000₫, bonus 150,000₫ (30%), tổng nhận 650,000₫."
+            },
         ]
         
         for pkg in bonus_packages:
@@ -1863,8 +1883,8 @@ class PrintingServiceDataGenerator:
             should_generate_deposit = True if is_test_account else (random.random() < deposit_rate)
             
             if should_generate_deposit:
-                # Test accounts get 2-4 deposits, regular students get 1-3
-                num_deposits = random.randint(2, 4) if is_test_account else random.randint(1, 3)
+                # Test accounts get exactly 20 deposits, regular students get 1-3
+                num_deposits = 20 if is_test_account else random.randint(1, 3)
                 
                 for _ in range(num_deposits):
                     deposit_id = generate_uuid()
@@ -2211,12 +2231,16 @@ class PrintingServiceDataGenerator:
             self.add_sql(stmt)
     
     def generate_print_jobs(self):
-        """Generate realistic print jobs with pages."""
+        """Generate realistic print jobs with pages.
+
+        Hard-coded test accounts: exactly 20 jobs each.
+        Other students: random number of jobs based on spec distribution.
+        """
         self.add_sql("\n-- ============================================")
         self.add_sql("-- PRINT JOBS DATA")
         self.add_sql("-- ============================================")
         
-        # Debug: Show available page sizes
+        # Ensure page sizes are available
         if not hasattr(self, 'page_sizes') or not self.page_sizes:
             raise ValueError("Page sizes not generated yet. Ensure generate_page_allocation_system() runs before generate_print_jobs().")
         
@@ -2225,7 +2249,7 @@ class PrintingServiceDataGenerator:
         avg_jobs = self.spec['avg_print_jobs_per_student']
         variance = self.spec['print_job_variance']
         
-        # Get distributions
+        # Distributions
         file_type_dist = self.spec['file_types']
         paper_size_dist = self.spec['paper_size_distribution']
         orientation_dist = self.spec['orientation_distribution']
@@ -2235,29 +2259,30 @@ class PrintingServiceDataGenerator:
         copy_dist = self.spec['copy_distribution']
         
         # Activity patterns
-        peak_hours = self.spec['peak_hours']
-        normal_hours = self.spec['normal_hours']
-        low_hours = self.spec['low_hours']
-        
         hour_patterns = {
-            'peak': peak_hours,
-            'normal': normal_hours,
-            'low': low_hours
+            'peak': self.spec['peak_hours'],
+            'normal': self.spec['normal_hours'],
+            'low': self.spec['low_hours'],
         }
         
         # Document templates
         doc_templates = self.spec['document_name_templates']
         courses = self.spec['course_names']
         
-        # Get enabled printers only
+        # Enabled printers only
         enabled_printers = [p for p in self.printers if p['is_enabled']]
         
-        # Use actual media files if available, otherwise generate names
+        # Use actual media files if available
         use_real_files = len(self.media_files) > 0
         
+        # Uploaded files (saved documents)
+        bulk_uploaded_files = BulkInsertHelper("uploaded_file", [
+            "uploaded_file_id", "student_id", "file_name", "file_type", "file_size_kb", "file_url", "created_at"
+        ])
+        
         bulk_jobs = BulkInsertHelper("print_job", [
-            "job_id", "student_id", "printer_id", "file_url", "file_type",
-            "file_size_kb", "page_size_price_id", "color_mode_price_id",
+            "job_id", "student_id", "printer_id", "uploaded_file_id",
+            "page_size_price_id", "color_mode_price_id",
             "page_discount_package_id", "page_orientation", "print_side",
             "number_of_copy", "total_pages", "subtotal_before_discount",
             "discount_percentage", "discount_amount", "total_price",
@@ -2268,9 +2293,7 @@ class PrintingServiceDataGenerator:
             "page_record_id", "job_id", "page_number"
         ])
         
-        job_id_counter = 1
-        
-        # Identify test students to ensure they get guaranteed print jobs
+        # Identify hard-coded test students
         test_student_emails = [
             "student.test@edu.vn",
             "phandienmanhthienk16@siu.edu.vn",
@@ -2288,118 +2311,85 @@ class PrintingServiceDataGenerator:
                 if student:
                     test_student_ids.add(student['student_id'])
         
-        # For test accounts, ensure coverage of all functionalities
-        test_account_coverage = {}  # Track what each test account has covered
-        for student_id in test_student_ids:
-            test_account_coverage[student_id] = {
-                'statuses': set(),
-                'color_modes': set(),
-                'orientations': set(),
-                'print_sides': set(),
-                'page_sizes': set(),
-                'discount_packages': set(),
-                'copy_counts': set()
-            }
-        
+        # Generate jobs
         for student in self.students:
-            # Guarantee minimum print jobs for test accounts (at least 10-20 jobs)
             is_test_account = student['student_id'] in test_student_ids
+            # Exactly 20 jobs for test accounts, otherwise use distribution
             if is_test_account:
-                # Test accounts get 20-30 print jobs to ensure rich history and coverage
-                num_jobs = random.randint(20, 30)
-                coverage = test_account_coverage[student['student_id']]
+                num_jobs = 20
             else:
                 num_jobs = max(0, int(random.gauss(avg_jobs, variance)))
-                coverage = None
             
             for _ in range(num_jobs):
                 job_id = generate_uuid()
                 
-                # Select printer
+                # Pick printer
                 printer = random.choice(enabled_printers)
                 
-                # Generate file details - ALWAYS use real files from medias folder
+                # File info (uploaded_file)
                 file_name = None
                 file_url = None
                 file_size_kb = None
                 file_ext = None
                 
                 if use_real_files and self.media_files:
-                    # ALWAYS pick a random real file from medias folder
                     file_name = random.choice(self.media_files)
-                    # Generate full Supabase URL for print job file
                     file_url = f"{SUPABASE_BASE_URL}/{SUPABASE_BUCKET_PRINT_JOBS}/{file_name}"
-                    # Extract extension from real file
-                    file_ext = os.path.splitext(file_name)[1].lstrip('.').lower()
-                    if not file_ext:
-                        file_ext = weighted_choice(file_type_dist)
-                    
-                    # Get actual file size from real file
+                    file_ext = os.path.splitext(file_name)[1].lstrip('.').lower() or weighted_choice(file_type_dist)
                     try:
                         media_path = os.path.join(MEDIA_FOLDER, file_name)
                         if os.path.exists(media_path):
-                            file_size_kb = os.path.getsize(media_path) // 1024
-                            file_size_kb = max(1, file_size_kb)  # At least 1KB
+                            file_size_kb = max(1, os.path.getsize(media_path) // 1024)
                         else:
                             file_size_kb = random.randint(100, 10240)
-                    except:
+                    except Exception:
                         file_size_kb = random.randint(100, 10240)
                 else:
-                    # Only fallback to generated names if no media files available
                     file_ext = weighted_choice(file_type_dist)
                     file_name = generate_document_name(doc_templates, courses, f".{file_ext}")
-                    # Generate full Supabase URL for print job file
                     file_url = f"{SUPABASE_BASE_URL}/{SUPABASE_BUCKET_PRINT_JOBS}/{file_name}"
-                    # Realistic file sizes by type
                     if file_ext == 'pdf':
-                        file_size_kb = random.randint(500, 5000)  # 500KB to 5MB
+                        file_size_kb = random.randint(500, 5000)
                     elif file_ext in ['jpg', 'png', 'webp']:
-                        file_size_kb = random.randint(200, 2000)  # 200KB to 2MB
+                        file_size_kb = random.randint(200, 2000)
                     elif file_ext == 'docx':
-                        file_size_kb = random.randint(100, 1000)  # 100KB to 1MB
+                        file_size_kb = random.randint(100, 1000)
                     elif file_ext in ['xlsx', 'xls']:
-                        file_size_kb = random.randint(50, 500)   # 50KB to 500KB
+                        file_size_kb = random.randint(50, 500)
                     elif file_ext == 'pptx':
-                        file_size_kb = random.randint(1000, 10000)  # 1MB to 10MB
+                        file_size_kb = random.randint(1000, 10000)
                     else:
-                        file_size_kb = random.randint(100, 1000)  # Default
+                        file_size_kb = random.randint(100, 1000)
                 
-        # For test accounts, ensure coverage of all variations
-        # Set paper_size_name first as it's needed for page size lookup
-        if is_test_account and coverage:
-            # Ensure different page sizes are covered
-            if len(coverage['page_sizes']) < len(self.page_sizes):
-                missing_sizes = [ps['size_name'] for ps in self.page_sizes if ps['size_name'] not in coverage['page_sizes']]
-                if missing_sizes:
-                    paper_size_name = missing_sizes[0]
-                else:
-                    paper_size_name = weighted_choice(paper_size_dist)
-            else:
+                # Create uploaded_file record
+                uploaded_file_id = generate_uuid()
+                # Use "now" for uploaded file created_at; job created_at is set separately below
+                uploaded_created_at = datetime.now()
+                bulk_uploaded_files.add_row([
+                    uploaded_file_id,
+                    student['student_id'],
+                    file_name,
+                    file_ext,
+                    file_size_kb,
+                    file_url,
+                    uploaded_created_at.strftime('%Y-%m-%d %H:%M:%S')
+                ])
+                
+                # Paper size
                 paper_size_name = weighted_choice(paper_size_dist)
-        else:
-            # Regular accounts use random distributions
-            paper_size_name = weighted_choice(paper_size_dist)
-                
-                # Find matching page size with fallback to A4
-                matching_page_size = None
-                for ps in self.page_sizes:
-                    if ps["size_name"] == paper_size_name:
-                        matching_page_size = ps
-                        break
-                
+                matching_page_size = next(
+                    (ps for ps in self.page_sizes if ps["size_name"] == paper_size_name),
+                    None
+                )
                 if not matching_page_size:
-                    # Fallback to A4 if the specified size doesn't exist
                     matching_page_size = next(
                         (ps for ps in self.page_sizes if ps["size_name"] == "A4"),
                         self.page_sizes[0] if self.page_sizes else None
                     )
-                
                 if not matching_page_size:
                     raise ValueError(f"No page sizes available. Available sizes: {[ps['size_name'] for ps in self.page_sizes]}")
                 
                 paper_size_id = matching_page_size["page_size_id"]
-                
-                # Find matching page_size_price_id
                 matching_page_size_price = next(
                     (psp for psp in self.page_size_prices if psp['page_size_id'] == paper_size_id),
                     None
@@ -2408,63 +2398,14 @@ class PrintingServiceDataGenerator:
                     raise ValueError(f"No page_size_price found for page_size_id: {paper_size_id}")
                 page_size_price_id = matching_page_size_price['price_id']
                 
-                # Continue with other settings for test accounts
-                if is_test_account and coverage:
-                    # Ensure all statuses are covered
-                    if len(coverage['statuses']) < len(status_dist):
-                        missing_statuses = [s for s in status_dist.keys() if s not in coverage['statuses']]
-                        status = missing_statuses[0] if missing_statuses else weighted_choice(status_dist)
-                    else:
-                        status = weighted_choice(status_dist)
-                    
-                    # Ensure all color modes are covered
-                    if len(coverage['color_modes']) < len(color_mode_dist):
-                        missing_modes = [m for m in color_mode_dist.keys() if m not in coverage['color_modes']]
-                        color_mode_name = missing_modes[0] if missing_modes else weighted_choice(color_mode_dist)
-                    else:
-                        color_mode_name = weighted_choice(color_mode_dist)
-                    
-                    # Ensure all orientations are covered
-                    if len(coverage['orientations']) < len(orientation_dist):
-                        missing_orientations = [o for o in orientation_dist.keys() if o not in coverage['orientations']]
-                        orientation = missing_orientations[0] if missing_orientations else weighted_choice(orientation_dist)
-                    else:
-                        orientation = weighted_choice(orientation_dist)
-                    
-                    # Ensure all print sides are covered
-                    if len(coverage['print_sides']) < len(print_side_dist):
-                        missing_sides = [s for s in print_side_dist.keys() if s not in coverage['print_sides']]
-                        print_side = missing_sides[0] if missing_sides else weighted_choice(print_side_dist)
-                    else:
-                        print_side = weighted_choice(print_side_dist)
-                    
-                    # Ensure different copy counts are covered (at least 1, 2, and a higher number)
-                    if len(coverage['copy_counts']) < 3:
-                        if 1 not in coverage['copy_counts']:
-                            num_copies = 1
-                        elif 2 not in coverage['copy_counts']:
-                            num_copies = 2
-                        else:
-                            num_copies = random.choice([3, 4, 5, 10])
-                    else:
-                        num_copies = int(weighted_choice(copy_dist))
-                    
-                    # Update coverage tracking
-                    coverage['statuses'].add(status)
-                    coverage['color_modes'].add(color_mode_name)
-                    coverage['orientations'].add(orientation)
-                    coverage['print_sides'].add(print_side)
-                    coverage['copy_counts'].add(num_copies)
-                    coverage['page_sizes'].add(paper_size_name)
-                else:
-                    # Regular accounts use random distributions
-                    orientation = weighted_choice(orientation_dist)
-                    print_side = weighted_choice(print_side_dist)
-                    color_mode_name = weighted_choice(color_mode_dist)
-                    num_copies = int(weighted_choice(copy_dist))
-                    status = weighted_choice(status_dist)
+                # Other settings
+                orientation = weighted_choice(orientation_dist)
+                print_side = weighted_choice(print_side_dist)
+                color_mode_name = weighted_choice(color_mode_dist)
+                num_copies = int(weighted_choice(copy_dist))
+                status = weighted_choice(status_dist)
                 
-                # Find matching color_mode_price_id
+                # Color mode price
                 matching_color_mode_price = next(
                     (cmp for cmp in self.color_mode_prices if cmp['color_mode_name'] == color_mode_name),
                     None
@@ -2475,10 +2416,8 @@ class PrintingServiceDataGenerator:
                 
                 # Timing
                 created_at = random_datetime_with_pattern(365, hour_patterns)
-                
                 start_time = None
                 end_time = None
-                
                 if status in ['completed', 'failed']:
                     start_time = created_at + timedelta(minutes=random.randint(1, 30))
                     duration_minutes = random.randint(1, 15)
@@ -2486,73 +2425,35 @@ class PrintingServiceDataGenerator:
                 elif status == 'printing':
                     start_time = created_at + timedelta(minutes=random.randint(1, 30))
                 
-                # Generate pages
+                # Pages
                 avg_pages = self.spec['avg_pages_per_document']
                 page_variance = self.spec['pages_variance']
                 min_pages = self.spec['min_pages_per_job']
                 max_pages = self.spec['max_pages_per_job']
-                
                 num_pages = max(min_pages, min(max_pages, int(random.gauss(avg_pages, page_variance))))
-                
-                # Calculate total pages
                 total_pages = num_pages * num_copies
                 
-                # Get prices from referenced configurations
+                # Pricing
                 color_mode_price_per_page = matching_color_mode_price['price_per_page']
-                page_size_price_per_page = matching_page_size_price['page_price']
-                
-                # Calculate subtotal before discount
                 subtotal_before_discount = total_pages * color_mode_price_per_page
                 
-                # Determine page_discount_package_id based on total pages
                 page_discount_package_id = None
                 discount_percentage = None
+                for pdp in sorted(self.page_discount_packages, key=lambda x: x.get('min_pages', 0), reverse=True):
+                    if total_pages >= pdp['min_pages']:
+                        page_discount_package_id = pdp['package_id']
+                        discount_percentage = pdp['discount_percentage']
+                        break
                 
-                # For test accounts, ensure at least one job with each discount package
-                if is_test_account and coverage:
-                    # Check if we need to force a specific discount package
-                    missing_discounts = [pdp['package_id'] for pdp in self.page_discount_packages 
-                                       if pdp['package_id'] not in coverage['discount_packages']]
-                    if missing_discounts and len(coverage['discount_packages']) < len(self.page_discount_packages):
-                        # Force a job that qualifies for a missing discount package
-                        target_package = next((pdp for pdp in self.page_discount_packages 
-                                             if pdp['package_id'] == missing_discounts[0]), None)
-                        if target_package and total_pages < target_package['min_pages']:
-                            # Adjust total_pages to qualify (by adjusting num_pages or num_copies)
-                            required_pages = target_package['min_pages']
-                            if num_copies > 1:
-                                num_pages = max(1, (required_pages + num_copies - 1) // num_copies)
-                            else:
-                                num_pages = required_pages
-                            total_pages = num_pages * num_copies
-                            # Recalculate pricing
-                            subtotal_before_discount = total_pages * color_mode_price_per_page
-                    
-                    # Find the highest applicable discount package
-                    for pdp in sorted(self.page_discount_packages, key=lambda x: x.get('min_pages', 0), reverse=True):
-                        if total_pages >= pdp['min_pages']:
-                            page_discount_package_id = pdp['package_id']
-                            discount_percentage = pdp['discount_percentage']
-                            coverage['discount_packages'].add(pdp['package_id'])
-                            break
-                else:
-                    # Regular accounts: find the highest applicable discount package
-                    for pdp in sorted(self.page_discount_packages, key=lambda x: x.get('min_pages', 0), reverse=True):
-                        if total_pages >= pdp['min_pages']:
-                            page_discount_package_id = pdp['package_id']
-                            discount_percentage = pdp['discount_percentage']
-                            break
-                
-                # Calculate discount amount
                 discount_amount = subtotal_before_discount * (discount_percentage if discount_percentage else 0.0)
-                
-                # Calculate total price
                 total_price = subtotal_before_discount - discount_amount
                 
+                # Store job
                 job_data = {
                     'job_id': job_id,
                     'student_id': student['student_id'],
                     'printer_id': printer['printer_id'],
+                    'uploaded_file_id': uploaded_file_id,
                     'num_pages': num_pages,
                     'total_pages': total_pages,
                     'page_size_price_id': page_size_price_id,
@@ -2567,12 +2468,12 @@ class PrintingServiceDataGenerator:
                     'status': status,
                     'created_at': created_at
                 }
-                
                 self.print_jobs.append(job_data)
                 
+                # Add to bulk insert
                 bulk_jobs.add_row([
                     job_id, student['student_id'], printer['printer_id'],
-                    file_url, file_ext, file_size_kb,
+                    uploaded_file_id,
                     page_size_price_id, color_mode_price_id, page_discount_package_id,
                     orientation, print_side, num_copies,
                     total_pages,
@@ -2586,14 +2487,16 @@ class PrintingServiceDataGenerator:
                     created_at.strftime('%Y-%m-%d %H:%M:%S')
                 ])
                 
-                # Add pages for this job
+                # Pages for this job
                 for page_num in range(1, num_pages + 1):
                     page_record_id = generate_uuid()
                     bulk_pages.add_row([page_record_id, job_id, page_num])
         
+        # Flush SQL
+        for stmt in bulk_uploaded_files.get_statements():
+            self.add_sql(stmt)
         for stmt in bulk_jobs.get_statements():
             self.add_sql(stmt)
-        
         for stmt in bulk_pages.get_statements():
             self.add_sql(stmt)
         

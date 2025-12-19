@@ -119,30 +119,42 @@
 **Mục đích:** Quản lý các công việc in của sinh viên.
 
 **Bảng chính:**
-- `print_job`: Công việc in chính
+- `uploaded_file`: File mà sinh viên upload (lưu trữ lâu dài, có thể in nhiều lần)
+- `print_job`: Công việc in chính (tham chiếu đến `uploaded_file`)
 - `print_job_page`: Chi tiết từng trang trong công việc in
 - `student`: Sinh viên thực hiện công việc
 - `printer_physical`: Máy in được sử dụng
 - `page_size`: Kích thước giấy
 - `page_size_price`: Cấu hình giá cho kích thước giấy
 
-**Cách hoạt động:**
+**Luồng Uploaded Files vs Print Job:**
 
-**Tạo Print Job:**
-1. Sinh viên upload file và chọn cấu hình in
-2. Hệ thống tạo record trong `print_job` với:
-   - `file_url`: Link đến file trên storage
-   - `page_size_price_id`: Tham chiếu đến cấu hình giá kích thước trang
-   - `color_mode_price_id`: Tham chiếu đến cấu hình giá chế độ màu
-   - `page_discount_package_id`: Gói giảm giá khối lượng (nếu có)
-   - Các tùy chọn: `page_orientation`, `print_side`, `number_of_copy`
-3. Hệ thống đếm số trang từ file và tạo records trong `print_job_page`
-4. Hệ thống tính giá và lưu vào `print_job`:
-   - `total_pages`: Tổng số trang (từ `print_job_page` count × `number_of_copy`)
-   - `subtotal_before_discount`: Tổng tiền trước giảm giá
-   - `discount_percentage`: Phần trăm giảm giá (từ `page_discount_package`)
-   - `discount_amount`: Số tiền giảm giá
-   - `total_price`: Tổng tiền cuối cùng
+1. **Uploaded Files (Lưu file, chưa in):**
+   - Khi sinh viên upload file ở màn hình “Uploaded Files” / “My Documents”:
+     - Tạo record trong `uploaded_file`:
+       - `student_id`
+       - `file_name`, `file_type`, `file_size_kb`
+       - `file_url` (đường dẫn Supabase / storage)
+       - `created_at`
+   - Chưa tạo `print_job`, chưa trừ tiền, chưa ảnh hưởng số dư.
+
+2. **Tạo Print Job từ Uploaded File:**
+   - Sinh viên chọn một record trong `uploaded_file` và cấu hình in:
+     - Kích thước giấy (`page_size_price_id`)
+     - Chế độ màu (`color_mode_price_id`)
+     - Gói giảm giá khối lượng (nếu có) (`page_discount_package_id`)
+     - Hướng giấy (`page_orientation`), in 1 mặt / 2 mặt (`print_side`), số bản (`number_of_copy`)
+   - Hệ thống tạo record trong `print_job` với:
+     - `uploaded_file_id`: Tham chiếu tới file đã upload
+     - Các FK cấu hình giá: `page_size_price_id`, `color_mode_price_id`, `page_discount_package_id`
+     - Các tùy chọn in: `page_orientation`, `print_side`, `number_of_copy`
+   - Hệ thống đếm số trang từ file (hoặc từ metadata đã phân tích) và tạo records trong `print_job_page`
+   - Tính giá và lưu vào `print_job`:
+     - `total_pages`: Tổng số trang (từ `print_job_page` count × `number_of_copy`)
+     - `subtotal_before_discount`: Tổng tiền trước giảm giá
+     - `discount_percentage`: Phần trăm giảm giá (từ `page_discount_package`)
+     - `discount_amount`: Số tiền giảm giá
+     - `total_price`: Tổng tiền cuối cùng
 
 **Trạng thái Print Job:**
 - `queued`: Đang chờ trong hàng đợi
@@ -151,7 +163,9 @@
 - `failed`: Thất bại
 - `cancelled`: Đã hủy
 
-**Quan trọng:** Tất cả giá được lưu trong `print_job` để đảm bảo tính lịch sử. Khi giá thay đổi sau này, các công việc in cũ vẫn giữ nguyên giá đã áp dụng.
+**Quan trọng:**
+- Tất cả giá được lưu trong `print_job` để đảm bảo tính lịch sử. Khi giá thay đổi sau này, các công việc in cũ vẫn giữ nguyên giá đã áp dụng.
+- `uploaded_file` cho phép tái sử dụng cùng một file cho nhiều `print_job` (ví dụ: in lại, in cho lớp khác) mà không cần re-upload.
 
 ---
 

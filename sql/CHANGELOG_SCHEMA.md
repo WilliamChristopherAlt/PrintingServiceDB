@@ -120,9 +120,88 @@ Các trường giá đã được lưu trong `print_job`, view chỉ cần đọ
 
 ---
 
+### 6. BẢNG `refund_print_job` VÀ VIEW `student_balance_view` - CẬP NHẬT
+
+#### Thay đổi:
+- **THÊM bảng:** `refund_print_job`
+- **Các cột:**
+  - `refund_id` (UNIQUEIDENTIFIER, PK)
+  - `job_id` (UNIQUEIDENTIFIER, UNIQUE, FK → `print_job.job_id`)
+  - `pages_not_printed` (INT, NOT NULL, ≥ 0) – số trang **chưa in** tại thời điểm hủy job
+  - `created_at` (DATETIME)
+- **THÊM index:** `idx_refund_job` trên `job_id`
+
+- **CẬP NHẬT view `student_balance_view`:**
+  - Thêm một thành phần cộng vào số dư:
+    \[
+      \text{refund\_amount} = \sum\limits_{\text{refund\_print\_job}} \bigl( \text{print\_job.total\_price} \times \frac{\text{pages\_not\_printed}}{\text{total\_pages}} \bigr)
+    \]
+  - Cụ thể trong SQL:
+    ```sql
+    + COALESCE((
+        SELECT SUM(
+            pj.total_price * (CAST(r.pages_not_printed AS DECIMAL(10,4)) / NULLIF(pj.total_pages, 0))
+        )
+        FROM refund_print_job r
+        JOIN print_job pj ON r.job_id = pj.job_id
+        WHERE pj.student_id = s.student_id
+    ), 0)
+    ```
+
+#### Lý do:
+- Khi hủy một print job chưa in hết, chỉ phần trang **chưa in** mới được hoàn tiền.
+- `refund_print_job` lưu lại:
+  - Job nào đã được hoàn tiền
+  - Bao nhiêu trang chưa in tại thời điểm hủy
+- `student_balance_view` dùng `print_job.total_price` và tỷ lệ `pages_not_printed / total_pages` để tính số tiền hoàn lại, nên:
+  - Không cần trường số dư trong bảng
+  - Có thể thay đổi logic hoàn tiền trong view mà không đụng tới dữ liệu gốc
+  - Rõ ràng, kiểm tra được: nhìn vào `refund_print_job` là biết job nào đã được refund và ở mức nào
+
+---
+
+### 7. BẢNG `uploaded_file` VÀ BẢNG `print_job` - TÁCH THÔNG TIN FILE
+
+#### Thay đổi:
+- **THÊM bảng:** `uploaded_file`
+- **Các cột:**
+  - `uploaded_file_id` (UNIQUEIDENTIFIER, PK)
+  - `student_id` (UNIQUEIDENTIFIER, FK → `student.student_id`)
+  - `file_name` (VARCHAR(500)) – tên file gốc
+  - `file_type` (VARCHAR(10)) – đuôi file: pdf, docx, webp, ...
+  - `file_size_kb` (INT) – dung lượng file (KB)
+  - `file_url` (VARCHAR(500)) – URL tới file trên storage (Supabase, S3, ...)
+  - `created_at` (DATETIME)
+- **THÊM foreign key:** `FOREIGN KEY (student_id) REFERENCES student(student_id) ON DELETE CASCADE`
+
+- **CẬP NHẬT bảng `print_job`:**
+  - **XÓA cột:**
+    - `file_url` (VARCHAR(500))
+    - `file_type` (VARCHAR(10))
+    - `file_size_kb` (INT)
+  - **THÊM cột:**
+    - `uploaded_file_id` (UNIQUEIDENTIFIER, NOT NULL, FK → `uploaded_file.uploaded_file_id`)
+
+- **CẬP NHẬT view `student_printing_history`:**
+  - Thay vì lấy trực tiếp `pj.file_url`, view JOIN thêm `uploaded_file`:
+    - Chọn: `uf.file_name`, `uf.file_type`, `uf.file_url`
+  - Cập nhật phần `GROUP BY` tương ứng (dùng cột của `uploaded_file` thay cho `pj.file_url`)
+
+#### Lý do:
+- Giao diện web có hai bước rõ ràng:
+  1. **Upload / Save file** (chỉ lưu file, chưa in)
+  2. **Tạo lệnh in** từ file đã upload (tạo `print_job`)
+- Tách bảng `uploaded_file`:
+  - Cho phép sinh viên lưu trữ file như một “thư mục tài liệu” riêng
+  - Một file có thể được in nhiều lần (nhiều `print_job` cùng tham chiếu đến một `uploaded_file`)
+  - `print_job` chỉ tập trung vào cấu hình in, trạng thái in và pricing, không ôm thêm thông tin file
+
+---
+
 ## TÁC ĐỘNG ĐẾN ỨNG DỤNG
 
 ### Khi tạo print_job mới:
+- Phải cung cấp `uploaded_file_id` (thay vì truyền trực tiếp file_url / file_type / file_size_kb)
 - Phải cung cấp `page_size_price_id` và `color_mode_price_id` thay vì chỉ `paper_size_id` và `color_mode` (string)
 - Phải tính và lưu các trường: `total_pages`, `subtotal_before_discount`, `discount_percentage`, `discount_amount`, `total_price`
 - Phải xác định `page_discount_package_id` dựa trên tổng số trang

@@ -146,7 +146,7 @@ def get_predefined_modules() -> Dict[str, List[str]]:
             'brand', 'printer_model', 'printer_physical', 'page_size'
         ],
         "Quản lý Công việc In": [
-            'print_job', 'print_job_page', 'student', 'printer_physical', 'page_size', 'page_size_price', 'refund_print_job'
+            'uploaded_file', 'print_job', 'print_job_page', 'student', 'printer_physical', 'page_size', 'page_size_price', 'refund_print_job'
         ],
         "Quản lý Thanh toán & Số dư": [
             'deposit', 'deposit_bonus_package', 'payment', 'semester_bonus', 

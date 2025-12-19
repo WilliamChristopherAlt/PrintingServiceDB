@@ -36,7 +36,7 @@
                   font-family="Roboto,Segoe UI,Arial,sans-serif" 
                   font-size="40" font-weight="600"
                   fill="white" text-anchor="middle" dominant-baseline="middle">
-              Computer Lab
+              Software Lab
             </text>
 <rect x="900" y="0" width="600" height="500" 
               fill="#2196F3" stroke="none"/>
@@ -44,16 +44,21 @@
                   font-family="Roboto,Segoe UI,Arial,sans-serif" 
                   font-size="40" font-weight="600"
                   fill="white" text-anchor="middle" dominant-baseline="middle">
-              Lecture Hall
+              Auditorium
             </text>
 <rect x="1500" y="0" width="300" height="500" 
               fill="#9C27B0" stroke="none"/>
-<text x="1650.0" y="250.0" 
-                  font-family="Roboto,Segoe UI,Arial,sans-serif" 
-                  font-size="40" font-weight="600"
-                  fill="white" text-anchor="middle" dominant-baseline="middle">
-              Library
-            </text>
+<g><text x="1650.0" y="247.5" 
+                      font-family="Roboto,Segoe UI,Arial,sans-serif" 
+                      font-size="40" font-weight="600"
+                      fill="white" text-anchor="middle" dominant-baseline="middle">
+                  Reading
+                </text><text x="1650.0" y="292.5" 
+                      font-family="Roboto,Segoe UI,Arial,sans-serif" 
+                      font-size="40" font-weight="600"
+                      fill="white" text-anchor="middle" dominant-baseline="middle">
+                  Room
+                </text></g>
 <rect x="1800" y="0" width="100" height="500" 
                   fill="#E0E0E0" stroke="none"/>
 <rect x="1900" y="0" width="200" height="300" 
@@ -110,9 +115,9 @@
               fill="#F44336" stroke="none"/>
 <text x="550.0" y="900.0" 
                   font-family="Roboto,Segoe UI,Arial,sans-serif" 
-                  font-size="40" font-weight="600"
+                  font-size="36" font-weight="600"
                   fill="white" text-anchor="middle" dominant-baseline="middle">
-              Staff Office
+              Administrative Office
             </text>
 <rect x="800" y="700" width="500" height="400" 
               fill="#2196F3" stroke="none"/>
@@ -120,7 +125,7 @@
                   font-family="Roboto,Segoe UI,Arial,sans-serif" 
                   font-size="40" font-weight="600"
                   fill="white" text-anchor="middle" dominant-baseline="middle">
-              Hall
+              Auditorium
             </text>
 <rect x="1300" y="700" width="500" height="400" 
               fill="#FF9800" stroke="none"/>
@@ -128,7 +133,7 @@
                   font-family="Roboto,Segoe UI,Arial,sans-serif" 
                   font-size="40" font-weight="600"
                   fill="white" text-anchor="middle" dominant-baseline="middle">
-              Programming Lab
+              Software Lab
             </text>
 <rect x="1800" y="700" width="300" height="400" 
               fill="#757575" stroke="none"/>
@@ -157,7 +162,7 @@
                   font-family="Roboto,Segoe UI,Arial,sans-serif" 
                   font-size="40" font-weight="600"
                   fill="white" text-anchor="middle" dominant-baseline="middle">
-              Auditorium
+              Classroom
             </text>
 <rect x="900" y="1300" width="600" height="300" 
               fill="#00BCD4" stroke="none"/>
@@ -165,7 +170,7 @@
                   font-family="Roboto,Segoe UI,Arial,sans-serif" 
                   font-size="40" font-weight="600"
                   fill="#1a1a1a" text-anchor="middle" dominant-baseline="middle">
-              Student Lounge
+              Recreation Room
             </text>
 <rect x="1500" y="1300" width="600" height="300" 
               fill="#9C27B0" stroke="none"/>
