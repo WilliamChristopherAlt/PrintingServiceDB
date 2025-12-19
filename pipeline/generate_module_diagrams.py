@@ -150,7 +150,8 @@ def get_predefined_modules() -> Dict[str, List[str]]:
         ],
         "Quản lý Thanh toán & Số dư": [
             'deposit', 'deposit_bonus_package', 'payment', 'semester_bonus', 
-            'student_semester_bonus', 'student', 'print_job', 'refund_print_job'
+            'student_semester_bonus', 'student', 'print_job', 'refund_print_job',
+            'student_wallet_ledger'
         ],
         "Cấu hình Giá": [
             'color_mode', 'color_mode_price', 'page_size_price', 'page_discount_package', 'page_size', 'print_job'

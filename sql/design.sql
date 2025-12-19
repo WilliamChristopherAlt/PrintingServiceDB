@@ -596,6 +596,31 @@ CREATE INDEX idx_payment_transaction_date ON payment (transaction_date);
 CREATE INDEX idx_payment_status ON payment (payment_status);
 GO
 
+-- Student Wallet Ledger Table - Central ledger for all financial transactions
+-- ============================================
+-- This table implements a ledger pattern: every financial transaction (deposit, payment, refund, bonus)
+-- creates one or more ledger entries. This provides a complete audit trail and enables
+-- efficient balance calculation and transaction history queries.
+CREATE TABLE student_wallet_ledger (
+    ledger_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    student_id UNIQUEIDENTIFIER NOT NULL,
+    amount DECIMAL(10, 2) NOT NULL, -- Amount (positive for IN, negative for OUT)
+    direction VARCHAR(3) NOT NULL CHECK (direction IN ('IN', 'OUT')), -- Transaction direction
+    source_type VARCHAR(20) NOT NULL CHECK (source_type IN ('DEPOSIT', 'SEMESTER_BONUS', 'PAYMENT', 'REFUND')), -- Type of transaction
+    source_table VARCHAR(50) NOT NULL, -- Source table name (e.g., 'deposit', 'payment', 'refund_print_job', 'student_semester_bonus')
+    source_id UNIQUEIDENTIFIER NOT NULL, -- ID of the record in source_table
+    description NVARCHAR(255), -- Human-readable description
+    created_at DATETIME DEFAULT GETDATE(),
+    FOREIGN KEY (student_id) REFERENCES student(student_id) ON DELETE CASCADE
+);
+CREATE INDEX idx_ledger_student ON student_wallet_ledger (student_id);
+CREATE INDEX idx_ledger_student_created ON student_wallet_ledger (student_id, created_at);
+CREATE INDEX idx_ledger_source ON student_wallet_ledger (source_table, source_id);
+CREATE INDEX idx_ledger_source_type ON student_wallet_ledger (source_type);
+CREATE INDEX idx_ledger_direction ON student_wallet_ledger (direction);
+CREATE INDEX idx_ledger_created_at ON student_wallet_ledger (created_at);
+GO
+
 -- Audit and Logging Tables
 -- ============================================
 

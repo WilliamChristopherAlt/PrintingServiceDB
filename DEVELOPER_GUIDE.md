@@ -21,7 +21,7 @@
 **Bảng:** `uploaded_file`, `print_job`, `print_job_page`, `student`, `printer_physical`, `page_size`, `page_size_price`
 
 ### 6. Quản lý Thanh toán & Số dư
-**Bảng:** `deposit`, `deposit_bonus_package`, `payment`, `semester_bonus`, `student_semester_bonus`, `student`, `print_job`
+**Bảng:** `deposit`, `deposit_bonus_package`, `payment`, `semester_bonus`, `student_semester_bonus`, `student`, `print_job`, `refund_print_job`, `student_wallet_ledger`
 
 ### 7. Cấu hình Giá
 **Bảng:** `color_mode`, `color_mode_price`, `page_size_price`, `page_discount_package`, `page_size`, `print_job`
@@ -251,6 +251,65 @@ Sinh viên A:
 - KHÔNG lưu số dư trong bảng `student` (sẽ không nhất quán)
 - Khi hiển thị số dư, query từ view này
 - Khi kiểm tra đủ tiền để thanh toán, tính toán từ view hoặc tính trực tiếp từ các bảng
+
+**Kiến trúc Ledger Pattern:**
+
+Hệ thống sử dụng **kiến trúc Ledger** (sổ cái) để quản lý số dư:
+
+1. **Bảng domain (giữ nguyên):**
+   - `deposit`: Nạp tiền
+   - `payment`: Thanh toán
+   - `refund_print_job`: Hoàn tiền
+   - `student_semester_bonus`: Bonus học kỳ
+   - Các bảng này chứa ngữ nghĩa nghiệp vụ
+
+2. **Bảng trung tâm: `student_wallet_ledger`**
+   - Mỗi biến động tiền tạo 1 hoặc nhiều record trong ledger
+   - Cấu trúc:
+     - `ledger_id`: ID duy nhất
+     - `student_id`: Sinh viên
+     - `amount`: Số tiền (+ cho IN, - cho OUT)
+     - `direction`: 'IN' hoặc 'OUT'
+     - `source_type`: 'DEPOSIT', 'SEMESTER_BONUS', 'PAYMENT', 'REFUND'
+     - `source_table`: Tên bảng nguồn (ví dụ: 'deposit', 'payment')
+     - `source_id`: ID của record trong bảng nguồn
+     - `description`: Mô tả người đọc được
+     - `created_at`: Thời gian tạo
+
+3. **Cách hoạt động:**
+
+   **Khi nạp tiền:**
+   - Tạo record trong `deposit`
+   - Tạo 2 ledger entries:
+     - `+deposit_amount` (IN, DEPOSIT)
+     - `+bonus_amount` (IN, DEPOSIT) nếu có bonus
+
+   **Khi thanh toán:**
+   - Tạo record trong `payment`
+   - Tạo 1 ledger entry:
+     - `-amount_paid_from_balance` (OUT, PAYMENT) - chỉ phần trả từ số dư
+
+   **Khi refund:**
+   - Tạo record trong `refund_print_job`
+   - Tạo 1 ledger entry:
+     - `+refund_amount` (IN, REFUND)
+
+   **Khi nhận bonus học kỳ:**
+   - Tạo record trong `student_semester_bonus`
+   - Tạo 1 ledger entry:
+     - `+bonus_amount` (IN, SEMESTER_BONUS)
+
+4. **Lợi ích của Ledger Pattern:**
+   - **Audit trail hoàn chỉnh:** Mọi biến động tiền đều được ghi lại
+   - **Tính toán số dư nhanh:** `SUM(amount) WHERE student_id = X`
+   - **Lịch sử giao dịch:** Query ledger để xem lịch sử chi tiết
+   - **Dễ debug:** Dễ dàng trace lại từng giao dịch
+   - **Tương thích với hệ thống tài chính:** Pattern chuẩn trong ngân hàng, ví điện tử
+
+5. **Sử dụng Ledger:**
+   - **Tính số dư:** `SELECT SUM(amount) FROM student_wallet_ledger WHERE student_id = @student_id`
+   - **Lịch sử giao dịch:** `SELECT * FROM student_wallet_ledger WHERE student_id = @student_id ORDER BY created_at DESC`
+   - **View `student_balance_view`** vẫn hoạt động bình thường (tính từ domain tables), nhưng có thể thay thế bằng query ledger để tối ưu hiệu năng
 
 ---
 

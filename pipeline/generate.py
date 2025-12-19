@@ -241,7 +241,8 @@ class BulkInsertHelper:
                 if value is None:
                     formatted_values.append("NULL")
                 elif isinstance(value, str):
-                    formatted_values.append(f"'{sql_escape(value)}'")
+                    # Always use NVARCHAR literals for strings to preserve Unicode (Vietnamese, etc.)
+                    formatted_values.append(f"N'{sql_escape(value)}'")
                 elif isinstance(value, bool):
                     formatted_values.append("1" if value else "0")
                 elif isinstance(value, (date, datetime)):
@@ -1920,8 +1921,9 @@ class PrintingServiceDataGenerator:
                         'deposit_amount': deposit_amount,
                         'bonus_amount': bonus_amount,
                         'total_credited': total_credited,
-                        'payment_status': status
-            }
+                        'payment_status': status,
+                        'transaction_date': transaction_date
+                    }
                     self.deposits.append(deposit_data)
                     
                     # Update balance tracking for payment generation (only completed deposits)
@@ -2616,7 +2618,9 @@ class PrintingServiceDataGenerator:
                 'student_id': student_id,
                 'amount_paid_directly': amount_paid_directly,
                 'amount_paid_from_balance': amount_paid_from_balance,
-                'total_amount': total_amount
+                'total_amount': total_amount,
+                'payment_status': payment_status,
+                'transaction_date': transaction_date
             })
             
             bulk_payments.add_row([
@@ -2635,7 +2639,135 @@ class PrintingServiceDataGenerator:
         for stmt in bulk_payments.get_statements():
             self.add_sql(stmt)
         
+        # Generate ledger entries for all financial transactions
+        self.generate_wallet_ledger()
+        
         # Note: Balances are computed dynamically via student_balance_view, no UPDATE statements needed
+    
+    def generate_wallet_ledger(self):
+        """Generate ledger entries for all financial transactions (deposits, payments, refunds, semester bonuses)."""
+        self.add_sql("\n-- ============================================")
+        self.add_sql("-- STUDENT WALLET LEDGER DATA")
+        self.add_sql("-- ============================================")
+        
+        bulk_ledger = BulkInsertHelper("student_wallet_ledger", [
+            "ledger_id", "student_id", "amount", "direction", "source_type",
+            "source_table", "source_id", "description", "created_at"
+        ])
+        
+        # 1. Ledger entries for DEPOSITS (deposit_amount + bonus_amount)
+        for deposit in self.deposits:
+            if deposit.get('payment_status') != 'completed':
+                continue  # Only create ledger entries for completed deposits
+            
+            deposit_id = deposit['deposit_id']
+            student_id = deposit['student_id']
+            deposit_amount = deposit['deposit_amount']
+            bonus_amount = deposit.get('bonus_amount', 0.0)
+            total_credited = deposit.get('total_credited', deposit_amount + bonus_amount)
+            transaction_date = deposit.get('transaction_date')
+            if isinstance(transaction_date, str):
+                transaction_date = datetime.strptime(transaction_date, '%Y-%m-%d %H:%M:%S')
+            
+            # Entry for deposit amount (IN)
+            if deposit_amount > 0:
+                ledger_id = generate_uuid()
+                bulk_ledger.add_row([
+                    ledger_id,
+                    student_id,
+                    deposit_amount,
+                    'IN',
+                    'DEPOSIT',
+                    'deposit',
+                    deposit_id,
+                    f"Nạp tiền: ${deposit_amount:.2f}",
+                    transaction_date.strftime('%Y-%m-%d %H:%M:%S') if transaction_date else datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                ])
+            
+            # Entry for bonus amount (IN)
+            if bonus_amount > 0:
+                ledger_id = generate_uuid()
+                bulk_ledger.add_row([
+                    ledger_id,
+                    student_id,
+                    bonus_amount,
+                    'IN',
+                    'DEPOSIT',
+                    'deposit',
+                    deposit_id,
+                    f"Bonus nạp tiền: ${bonus_amount:.2f}",
+                    transaction_date.strftime('%Y-%m-%d %H:%M:%S') if transaction_date else datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                ])
+        
+        # 2. Ledger entries for SEMESTER BONUSES
+        for ssb in self.student_semester_bonuses:
+            if not ssb.get('received'):
+                continue  # Only create ledger entries for received bonuses
+            
+            student_bonus_id = ssb['student_bonus_id']
+            student_id = ssb['student_id']
+            semester_bonus = next((sb for sb in self.semester_bonuses if sb['bonus_id'] == ssb['semester_bonus_id']), None)
+            if not semester_bonus:
+                continue
+            
+            bonus_amount = semester_bonus['bonus_amount']
+            received_date = ssb.get('received_date')
+            if isinstance(received_date, str):
+                received_date = datetime.strptime(received_date, '%Y-%m-%d')
+            elif received_date:
+                received_date = datetime.combine(received_date, datetime.min.time())
+            else:
+                received_date = datetime.now()
+            
+            ledger_id = generate_uuid()
+            bulk_ledger.add_row([
+                ledger_id,
+                student_id,
+                bonus_amount,
+                'IN',
+                'SEMESTER_BONUS',
+                'student_semester_bonus',
+                student_bonus_id,
+                f"Bonus học kỳ: ${bonus_amount:.2f}",
+                received_date.strftime('%Y-%m-%d %H:%M:%S')
+            ])
+        
+        # 3. Ledger entries for PAYMENTS (only amount_paid_from_balance)
+        for payment in self.payments:
+            if payment.get('payment_status') != 'completed':
+                continue  # Only create ledger entries for completed payments
+            
+            payment_id = payment['payment_id']
+            student_id = payment['student_id']
+            amount_paid_from_balance = payment.get('amount_paid_from_balance', 0.0)
+            
+            if amount_paid_from_balance > 0:
+                transaction_date = payment.get('transaction_date')
+                if isinstance(transaction_date, str):
+                    transaction_date = datetime.strptime(transaction_date, '%Y-%m-%d %H:%M:%S')
+                elif not transaction_date:
+                    transaction_date = datetime.now()
+                
+                ledger_id = generate_uuid()
+                bulk_ledger.add_row([
+                    ledger_id,
+                    student_id,
+                    -amount_paid_from_balance,  # Negative for OUT
+                    'OUT',
+                    'PAYMENT',
+                    'payment',
+                    payment_id,
+                    f"Thanh toán in ấn: ${amount_paid_from_balance:.2f}",
+                    transaction_date.strftime('%Y-%m-%d %H:%M:%S')
+                ])
+        
+        # 4. Ledger entries for REFUNDS (if any exist)
+        # Note: Refunds are typically created by application logic when a print job is cancelled
+        # For data generation, we could generate some refunds, but for now we'll leave this empty
+        # The application will create ledger entries when refunds are created
+        
+        for stmt in bulk_ledger.get_statements():
+            self.add_sql(stmt)
     
     def generate_activity_logs(self):
         """Generate printer logs for the printer_log table."""

@@ -76,7 +76,7 @@
                   font-family="Roboto,Segoe UI,Arial,sans-serif" 
                   font-size="40" font-weight="600"
                   fill="white" text-anchor="middle" dominant-baseline="middle">
-              Programming Lab
+              Software Lab
             </text>
 <rect x="2000" y="0" width="200" height="300" 
               fill="#4CAF50" stroke="none"/>
@@ -126,7 +126,7 @@
                   font-family="Roboto,Segoe UI,Arial,sans-serif" 
                   font-size="40" font-weight="600"
                   fill="white" text-anchor="middle" dominant-baseline="middle">
-              Hall
+              Lecture Hall
             </text>
 <rect x="1300" y="800" width="400" height="400" 
               fill="#FF9800" stroke="none"/>
@@ -134,7 +134,7 @@
                   font-family="Roboto,Segoe UI,Arial,sans-serif" 
                   font-size="40" font-weight="600"
                   fill="white" text-anchor="middle" dominant-baseline="middle">
-              Software Lab
+              IT Lab
             </text>
 <rect x="1700" y="800" width="500" height="400" 
               fill="#00BCD4" stroke="none"/>
@@ -142,7 +142,7 @@
                   font-family="Roboto,Segoe UI,Arial,sans-serif" 
                   font-size="40" font-weight="600"
                   fill="#1a1a1a" text-anchor="middle" dominant-baseline="middle">
-              Break Room
+              Recreation Room
             </text>
 <rect x="500" y="1200" width="1700" height="300" 
               fill="#E0E0E0" stroke="none"/>
@@ -174,7 +174,7 @@
                   font-family="Roboto,Segoe UI,Arial,sans-serif" 
                   font-size="40" font-weight="600"
                   fill="white" text-anchor="middle" dominant-baseline="middle">
-              Supply Room
+              Storage Room
             </text>
   
   <!-- Printers -->
