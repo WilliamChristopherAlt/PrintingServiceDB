@@ -16,7 +16,7 @@ GO
 CREATE TABLE [user] (
     user_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     email VARCHAR(100) NOT NULL UNIQUE,
-    full_name VARCHAR(100) NOT NULL,
+    full_name NVARCHAR(100) NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     user_type VARCHAR(10) NOT NULL CHECK (user_type IN ('student', 'staff')),
     phone_number VARCHAR(15),
@@ -42,9 +42,9 @@ GO
 
 CREATE TABLE faculty (
     faculty_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    faculty_name VARCHAR(100) NOT NULL UNIQUE,
+    faculty_name NVARCHAR(100) NOT NULL UNIQUE,
     faculty_code VARCHAR(20) NOT NULL UNIQUE,
-    description TEXT,
+    description NVARCHAR(200),
     established_date DATE,
     created_at DATETIME DEFAULT GETDATE()
 );
@@ -54,9 +54,9 @@ GO
 CREATE TABLE department (
     department_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     faculty_id UNIQUEIDENTIFIER NOT NULL,
-    department_name VARCHAR(100) NOT NULL,
+    department_name NVARCHAR(100) NOT NULL,
     department_code VARCHAR(20) NOT NULL UNIQUE,
-    description TEXT,
+    description NVARCHAR(200),
     established_date DATE,
     created_at DATETIME DEFAULT GETDATE(),
     FOREIGN KEY (faculty_id) REFERENCES faculty(faculty_id),
@@ -69,11 +69,11 @@ GO
 CREATE TABLE major (
     major_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     department_id UNIQUEIDENTIFIER NOT NULL,
-    major_name VARCHAR(100) NOT NULL,
+    major_name NVARCHAR(100) NOT NULL,
     major_code VARCHAR(20) NOT NULL UNIQUE,
     degree_type VARCHAR(20) NOT NULL DEFAULT 'bachelor' CHECK (degree_type IN ('bachelor', 'master', 'doctorate')),
     duration_years INT NOT NULL DEFAULT 4,
-    description TEXT,
+    description NVARCHAR(200),
     established_date DATE,
     created_at DATETIME DEFAULT GETDATE(),
     FOREIGN KEY (department_id) REFERENCES department(department_id),
@@ -85,7 +85,7 @@ GO
 
 CREATE TABLE academic_year (
     academic_year_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    year_name VARCHAR(20) NOT NULL UNIQUE,
+    year_name NVARCHAR(20) NOT NULL UNIQUE,
     start_date DATE NOT NULL,
     end_date DATE NOT NULL,
     is_current BIT DEFAULT 0,
@@ -99,7 +99,7 @@ CREATE TABLE class (
     class_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     major_id UNIQUEIDENTIFIER NOT NULL,
     academic_year_id UNIQUEIDENTIFIER NOT NULL,
-    class_name VARCHAR(50) NOT NULL,
+    class_name NVARCHAR(50) NOT NULL,
     class_code VARCHAR(20) NOT NULL UNIQUE,
     year_level INT NOT NULL, -- 1, 2, 3, 4 for bachelor; 1, 2 for master, etc.
     max_students INT DEFAULT 40,
@@ -145,7 +145,7 @@ GO
 
 CREATE TABLE page_size (
     page_size_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    size_name VARCHAR(20) NOT NULL UNIQUE,
+    size_name NVARCHAR(20) NOT NULL UNIQUE,
     width_mm DECIMAL(6,2) NOT NULL,
     height_mm DECIMAL(6,2) NOT NULL,
     created_at DATETIME DEFAULT GETDATE()
@@ -160,7 +160,7 @@ CREATE TABLE building (
     building_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     building_code VARCHAR(20) NOT NULL UNIQUE,
     address VARCHAR(255) NOT NULL,
-    campus_name VARCHAR(100) NOT NULL,
+    campus_name NVARCHAR(100) NOT NULL,
     created_at DATETIME DEFAULT GETDATE()
 );
 CREATE INDEX idx_building_code ON building (building_code);
@@ -184,8 +184,8 @@ CREATE TABLE room (
     room_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     floor_id UNIQUEIDENTIFIER NOT NULL,
     room_code VARCHAR(20) NOT NULL,
-    room_name VARCHAR(100) NOT NULL,
-    room_type VARCHAR(50) NOT NULL,
+    room_name NVARCHAR(100) NOT NULL,
+    room_type NVARCHAR(50) NOT NULL,
     created_at DATETIME DEFAULT GETDATE(),
     FOREIGN KEY (floor_id) REFERENCES floor(floor_id),
     UNIQUE (floor_id, room_code)
@@ -200,7 +200,7 @@ GO
 
 CREATE TABLE brand (
     brand_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    brand_name VARCHAR(50) NOT NULL UNIQUE,
+    brand_name NVARCHAR(50) NOT NULL UNIQUE,
     country_of_origin VARCHAR(50),
     website VARCHAR(255),
     created_at DATETIME DEFAULT GETDATE()
@@ -210,8 +210,8 @@ GO
 CREATE TABLE printer_model (
     model_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     brand_id UNIQUEIDENTIFIER NOT NULL,
-    model_name VARCHAR(50) NOT NULL,
-    description TEXT,
+    model_name NVARCHAR(50) NOT NULL,
+    description NVARCHAR(200),
     max_paper_size_id UNIQUEIDENTIFIER NOT NULL,
     supports_color BIT DEFAULT 0,
     supports_duplex BIT DEFAULT 0,
@@ -258,7 +258,7 @@ GO
 CREATE TABLE semester (
     semester_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     academic_year_id UNIQUEIDENTIFIER NOT NULL,
-    term_name VARCHAR(10) NOT NULL CHECK (term_name IN ('fall', 'spring', 'summer')),
+    term_name NVARCHAR(10) NOT NULL CHECK (term_name IN ('fall', 'spring', 'summer')),
     start_date DATE NOT NULL,
     end_date DATE NOT NULL,
     created_at DATETIME DEFAULT GETDATE(),
@@ -283,8 +283,8 @@ CREATE TABLE deposit_bonus_package (
     package_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     amount_cap DECIMAL(10, 2) NOT NULL CHECK (amount_cap > 0), -- Minimum deposit amount to qualify
     bonus_percentage DECIMAL(5, 4) NOT NULL CHECK (bonus_percentage >= 0 AND bonus_percentage <= 1), -- Bonus percentage (0-1 range)
-    package_name VARCHAR(100),
-    description TEXT,
+    package_name NVARCHAR(100),
+    description NVARCHAR(200),
     is_active BIT DEFAULT 1,
     created_at DATETIME DEFAULT GETDATE(),
     updated_at DATETIME DEFAULT GETDATE()
@@ -319,7 +319,7 @@ CREATE TABLE semester_bonus (
     bonus_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     semester_id UNIQUEIDENTIFIER NOT NULL,
     bonus_amount DECIMAL(10, 2) NOT NULL CHECK (bonus_amount >= 0), -- Amount of in-app currency given
-    description TEXT,
+    description NVARCHAR(200),
     created_at DATETIME DEFAULT GETDATE(),
     created_by UNIQUEIDENTIFIER,
     FOREIGN KEY (semester_id) REFERENCES semester(semester_id),
@@ -360,8 +360,8 @@ GO
 -- Color mode table - defines available color modes
 CREATE TABLE color_mode (
     color_mode_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    color_mode_name VARCHAR(50) NOT NULL UNIQUE, -- e.g., 'color', 'grayscale', 'black-white'
-    description TEXT,
+    color_mode_name NVARCHAR(50) NOT NULL UNIQUE, -- e.g., 'color', 'grayscale', 'black-white'
+    description NVARCHAR(200),
     created_at DATETIME DEFAULT GETDATE()
 );
 CREATE INDEX idx_color_mode_name ON color_mode (color_mode_name);
@@ -400,8 +400,8 @@ CREATE TABLE page_discount_package (
     package_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     min_pages INT NOT NULL CHECK (min_pages > 0), -- Minimum pages to qualify
     discount_percentage DECIMAL(5, 4) NOT NULL CHECK (discount_percentage >= 0 AND discount_percentage <= 1), -- Discount (0-1 range)
-    package_name VARCHAR(100),
-    description TEXT,
+    package_name NVARCHAR(200),
+    description NVARCHAR(200),
     is_active BIT DEFAULT 1,
     created_at DATETIME DEFAULT GETDATE(),
     updated_at DATETIME DEFAULT GETDATE()
@@ -416,10 +416,10 @@ GO
 CREATE TABLE fund_source (
     fund_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     fund_source_type VARCHAR(50) NOT NULL CHECK (fund_source_type IN ('school_budget', 'donation', 'revenue', 'other')),
-    fund_source_name VARCHAR(255),
+    fund_source_name NVARCHAR(255),
     amount DECIMAL(12, 2) NOT NULL CHECK (amount > 0),
     received_date DATE NOT NULL,
-    description TEXT,
+    description NVARCHAR(200),
     created_at DATETIME DEFAULT GETDATE(),
     created_by UNIQUEIDENTIFIER,
     FOREIGN KEY (created_by) REFERENCES staff(staff_id)
@@ -430,7 +430,7 @@ GO
 
 CREATE TABLE supplier_paper_purchase (
     purchase_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    supplier_name VARCHAR(255) NOT NULL,
+    supplier_name NVARCHAR(255) NOT NULL,
     supplier_contact VARCHAR(255),
     purchase_date DATE NOT NULL,
     total_amount_paid DECIMAL(12, 2) NOT NULL CHECK (total_amount_paid >= 0),
@@ -438,7 +438,7 @@ CREATE TABLE supplier_paper_purchase (
     payment_reference VARCHAR(100),
     payment_status VARCHAR(20) NOT NULL DEFAULT 'pending' CHECK (payment_status IN ('pending', 'completed', 'failed', 'refunded')),
     invoice_number VARCHAR(100),
-    notes TEXT,
+    notes NVARCHAR(200),
     created_at DATETIME DEFAULT GETDATE(),
     created_by UNIQUEIDENTIFIER,
     FOREIGN KEY (created_by) REFERENCES staff(staff_id)
@@ -457,7 +457,7 @@ CREATE TABLE paper_purchase_item (
     total_price DECIMAL(12, 2) NOT NULL CHECK (total_price >= 0),
     received_quantity INT NULL,
     received_date DATE NULL,
-    notes TEXT,
+    notes NVARCHAR(200),
     FOREIGN KEY (purchase_id) REFERENCES supplier_paper_purchase(purchase_id) ON DELETE CASCADE,
     FOREIGN KEY (page_size_id) REFERENCES page_size(page_size_id),
     CHECK (received_quantity IS NULL OR received_quantity >= 0)
@@ -472,8 +472,8 @@ GO
 CREATE TABLE system_configuration (
     config_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     config_key VARCHAR(50) NOT NULL UNIQUE,
-    config_value TEXT NOT NULL,
-    description TEXT,
+    config_value NVARCHAR(200) NOT NULL,
+    description NVARCHAR(200),
     updated_at DATETIME DEFAULT GETDATE(),
     updated_by UNIQUEIDENTIFIER,
     FOREIGN KEY (updated_by) REFERENCES staff(staff_id)
@@ -485,7 +485,7 @@ CREATE TABLE permitted_file_type (
     file_type_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     file_extension VARCHAR(10) NOT NULL UNIQUE,
     mime_type VARCHAR(100),
-    description VARCHAR(100),
+    description NVARCHAR(100),
     is_permitted BIT DEFAULT 1,
     created_at DATETIME DEFAULT GETDATE(),
     updated_at DATETIME DEFAULT GETDATE(),
@@ -503,7 +503,7 @@ GO
 CREATE TABLE uploaded_file (
     uploaded_file_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     student_id UNIQUEIDENTIFIER NOT NULL,
-    file_name VARCHAR(500) NOT NULL,
+    file_name NVARCHAR(500) NOT NULL,
     file_type VARCHAR(10) NOT NULL,
     file_size_kb INT,
     file_url VARCHAR(500) NOT NULL,
@@ -648,7 +648,7 @@ CREATE TABLE system_audit_log (
     audit_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     user_id UNIQUEIDENTIFIER NOT NULL,
     action_type VARCHAR(50) NOT NULL,
-    table_name VARCHAR(100) NOT NULL,
+    table_name NVARCHAR(100) NOT NULL,
     record_id UNIQUEIDENTIFIER NULL,
     previous_audit_id UNIQUEIDENTIFIER NULL,
     changed_field NVARCHAR(MAX) NULL,

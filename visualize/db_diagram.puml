@@ -106,6 +106,12 @@ class refresh_token {
   created_at
   revoked
 }
+class refund_print_job {
+  refund_id
+  job_id
+  pages_not_printed
+  created_at
+}
 class student_semester_bonus {
   student_bonus_id
   student_id
@@ -152,9 +158,7 @@ class print_job {
   job_id
   student_id
   printer_id
-  file_url
-  file_type
-  file_size_kb
+  uploaded_file_id
   page_size_price_id
   color_mode_price_id
   page_discount_package_id
@@ -246,28 +250,17 @@ class semester {
   created_at
   UNIQUE
 }
-class student {
+class uploaded_file {
+  uploaded_file_id
   student_id
-  user_id
-  student_code
-  class_id
-  enrollment_date
-  graduation_date
-  status
+  file_name
+  file_type
+  file_size_kb
+  file_url
+  created_at
 }
 
 ' Level 3 tables
-class "class" {
-  class_id
-  major_id
-  academic_year_id
-  class_name
-  class_code
-  year_level
-  max_students
-  created_at
-  UNIQUE
-}
 class color_mode {
   color_mode_id
   color_mode_name
@@ -304,16 +297,17 @@ class staff {
   position
   hire_date
 }
+class student {
+  student_id
+  user_id
+  student_code
+  class_id
+  enrollment_date
+  graduation_date
+  status
+}
 
 ' Level 4 tables
-class academic_year {
-  academic_year_id
-  year_name
-  start_date
-  end_date
-  is_current
-  created_at
-}
 class brand {
   brand_id
   brand_name
@@ -321,23 +315,22 @@ class brand {
   website
   created_at
 }
+class "class" {
+  class_id
+  major_id
+  academic_year_id
+  class_name
+  class_code
+  year_level
+  max_students
+  created_at
+  UNIQUE
+}
 class floor {
   floor_id
   building_id
   floor_number
   file_url
-  created_at
-  UNIQUE
-}
-class major {
-  major_id
-  department_id
-  major_name
-  major_code
-  degree_type
-  duration_years
-  description
-  established_date
   created_at
   UNIQUE
 }
@@ -370,6 +363,14 @@ class "user" {
 }
 
 ' Level 5 tables
+class academic_year {
+  academic_year_id
+  year_name
+  start_date
+  end_date
+  is_current
+  created_at
+}
 class building {
   building_id
   building_code
@@ -377,6 +378,20 @@ class building {
   campus_name
   created_at
 }
+class major {
+  major_id
+  department_id
+  major_name
+  major_code
+  degree_type
+  duration_years
+  description
+  established_date
+  created_at
+  UNIQUE
+}
+
+' Level 6 tables
 class department {
   department_id
   faculty_id
@@ -388,7 +403,7 @@ class department {
   UNIQUE
 }
 
-' Level 6 tables
+' Level 7 tables
 class faculty {
   faculty_id
   faculty_name
@@ -429,11 +444,14 @@ supplier_paper_purchase <-- paper_purchase_item
 page_size <-- paper_purchase_item
 staff <-- system_configuration
 staff <-- permitted_file_type
+student <-- uploaded_file
 student <-- print_job
 printer_physical <-- print_job
+uploaded_file <-- print_job
 page_size_price <-- print_job
 color_mode_price <-- print_job
 page_discount_package <-- print_job
+print_job <-- refund_print_job
 print_job <-- print_job_page
 print_job <-- payment
 student <-- payment
