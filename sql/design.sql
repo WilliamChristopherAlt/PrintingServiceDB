@@ -357,18 +357,39 @@ GO
 -- Pricing Configuration Tables
 -- ============================================
 
--- Color mode price - defines price multipliers for color modes
+-- Color mode table - defines available color modes
+CREATE TABLE color_mode (
+    color_mode_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    color_mode_name VARCHAR(50) NOT NULL UNIQUE, -- e.g., 'color', 'grayscale', 'black-white'
+    description TEXT,
+    created_at DATETIME DEFAULT GETDATE()
+);
+CREATE INDEX idx_color_mode_name ON color_mode (color_mode_name);
+GO
+
+-- Color mode price table - defines color mode pricing configurations
 CREATE TABLE color_mode_price (
     setting_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    color_mode VARCHAR(20) NOT NULL UNIQUE CHECK (color_mode IN ('color', 'grayscale', 'black-white')),
-    price_multiplier DECIMAL(5, 2) NOT NULL CHECK (price_multiplier >= 0), -- Multiplier (e.g., 0.8 = 80% of base, 1.0 = base, 2.5 = 250% of base)
-    description TEXT,
+    color_mode_id UNIQUEIDENTIFIER NOT NULL,
+    price_per_page DECIMAL(10, 4) NOT NULL CHECK (price_per_page >= 0), -- Price per page in dollars for this color mode
     is_active BIT DEFAULT 1,
     created_at DATETIME DEFAULT GETDATE(),
-    updated_at DATETIME DEFAULT GETDATE()
+    updated_at DATETIME DEFAULT GETDATE(),
+    FOREIGN KEY (color_mode_id) REFERENCES color_mode(color_mode_id)
 );
-CREATE INDEX idx_color_mode_price_color_mode ON color_mode_price (color_mode);
+CREATE INDEX idx_color_mode_price_color_mode ON color_mode_price (color_mode_id);
 CREATE INDEX idx_color_mode_price_active ON color_mode_price (is_active);
+GO
+
+-- Refund table for cancelled print jobs (refund remaining pages)
+CREATE TABLE refund_print_job (
+    refund_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    job_id UNIQUEIDENTIFIER NOT NULL UNIQUE,
+    pages_not_printed INT NOT NULL CHECK (pages_not_printed >= 0),
+    created_at DATETIME DEFAULT GETDATE(),
+    FOREIGN KEY (job_id) REFERENCES print_job(job_id) ON DELETE CASCADE
+);
+CREATE INDEX idx_refund_job ON refund_print_job (job_id);
 GO
 
 -- Page size price table - defines base price per page for each paper size
@@ -496,18 +517,27 @@ CREATE TABLE print_job (
     file_url VARCHAR(500) NOT NULL,
     file_type VARCHAR(10) NOT NULL,
     file_size_kb INT,
-    paper_size_id UNIQUEIDENTIFIER NOT NULL,
+    page_size_price_id UNIQUEIDENTIFIER NOT NULL, -- References which page_size_price configuration was used (contains page_size_id)
+    color_mode_price_id UNIQUEIDENTIFIER NOT NULL, -- References which color_mode_price configuration was used
+    page_discount_package_id UNIQUEIDENTIFIER NULL, -- Which bulk discount was applied (if any)
     page_orientation VARCHAR(20) NOT NULL DEFAULT 'portrait' CHECK (page_orientation IN ('portrait', 'landscape')),
     print_side VARCHAR(20) NOT NULL DEFAULT 'one-sided' CHECK (print_side IN ('one-sided', 'double-sided')),
-    color_mode VARCHAR(20) NOT NULL DEFAULT 'black-white' CHECK (color_mode IN ('color', 'grayscale', 'black-white')),
     number_of_copy INT NOT NULL DEFAULT 1,
+    -- Pricing calculation columns (stored for historical accuracy and performance)
+    total_pages INT NOT NULL CHECK (total_pages > 0), -- Total number of pages (from print_job_page count)
+    subtotal_before_discount DECIMAL(10, 2) NOT NULL CHECK (subtotal_before_discount >= 0), -- Calculated from referenced prices
+    discount_percentage DECIMAL(5, 4) NULL CHECK (discount_percentage IS NULL OR (discount_percentage >= 0 AND discount_percentage <= 1)), -- From page_discount_package if applicable
+    discount_amount DECIMAL(10, 2) NOT NULL DEFAULT 0 CHECK (discount_amount >= 0), -- Calculated discount amount
+    total_price DECIMAL(10, 2) NOT NULL CHECK (total_price >= 0), -- Final price after discount
     print_status VARCHAR(20) NOT NULL DEFAULT 'queued' CHECK (print_status IN ('queued', 'printing', 'completed', 'failed', 'cancelled')),
     start_time DATETIME NULL,
     end_time DATETIME NULL,
     created_at DATETIME DEFAULT GETDATE(),
     FOREIGN KEY (student_id) REFERENCES student(student_id) ON DELETE CASCADE,
     FOREIGN KEY (printer_id) REFERENCES printer_physical(printer_id),
-    FOREIGN KEY (paper_size_id) REFERENCES page_size(page_size_id)
+    FOREIGN KEY (page_size_price_id) REFERENCES page_size_price(price_id),
+    FOREIGN KEY (color_mode_price_id) REFERENCES color_mode_price(setting_id),
+    FOREIGN KEY (page_discount_package_id) REFERENCES page_discount_package(package_id)
 );
 CREATE INDEX idx_student_job ON print_job (student_id);
 CREATE INDEX idx_printer_job ON print_job (printer_id);
@@ -515,7 +545,9 @@ CREATE INDEX idx_print_status ON print_job (print_status);
 CREATE INDEX idx_created_at ON print_job (created_at);
 CREATE INDEX idx_start_time ON print_job (start_time);
 CREATE INDEX idx_end_time ON print_job (end_time);
-CREATE INDEX idx_paper_size ON print_job (paper_size_id);
+CREATE INDEX idx_page_size_price ON print_job (page_size_price_id);
+CREATE INDEX idx_color_mode_price ON print_job (color_mode_price_id);
+CREATE INDEX idx_page_discount_package ON print_job (page_discount_package_id);
 GO
 
 CREATE TABLE print_job_page (
@@ -657,6 +689,14 @@ SELECT
         FROM payment p
         WHERE p.student_id = s.student_id 
         AND p.payment_status = 'completed'
+    ), 0) + COALESCE((
+        -- Refunds for cancelled jobs (remaining pages)
+        SELECT SUM(
+            pj.total_price * (CAST(r.pages_not_printed AS DECIMAL(10,4)) / NULLIF(pj.total_pages, 0))
+        )
+        FROM refund_print_job r
+        JOIN print_job pj ON r.job_id = pj.job_id
+        WHERE pj.student_id = s.student_id
     ), 0) AS balance_amount
 FROM student s
 JOIN [user] u ON s.user_id = u.user_id;
@@ -780,7 +820,7 @@ SELECT
     pj.file_url,
     ps.size_name AS paper_size,
     pj.print_side,
-    pj.color_mode,
+    cm.color_mode_name AS color_mode,
     pj.number_of_copy,
     COUNT(pjp.page_number) AS page_count,
     COUNT(pjp.page_number) * pj.number_of_copy AS total_pages,
@@ -806,13 +846,44 @@ JOIN brand b ON pm.brand_id = b.brand_id
 JOIN room r ON pp.room_id = r.room_id
 JOIN floor fl ON r.floor_id = fl.floor_id
 JOIN building bld ON fl.building_id = bld.building_id
-JOIN page_size ps ON pj.paper_size_id = ps.page_size_id
+JOIN page_size_price psp ON pj.page_size_price_id = psp.price_id
+JOIN page_size ps ON psp.page_size_id = ps.page_size_id
+JOIN color_mode_price cmp ON pj.color_mode_price_id = cmp.setting_id
+JOIN color_mode cm ON cmp.color_mode_id = cm.color_mode_id
 LEFT JOIN print_job_page pjp ON pj.job_id = pjp.job_id
 GROUP BY pj.job_id, s.student_id, s.student_code, u.full_name, 
          c.class_name, m.major_name, d.department_name, f.faculty_name, fl.floor_id,
-         pj.file_url, ps.size_name, pj.print_side, pj.color_mode, pj.number_of_copy,
+         pj.file_url, ps.size_name, pj.print_side, cm.color_mode_name, pj.number_of_copy,
          b.brand_name, pm.model_name, bld.campus_name, bld.address, 
          r.room_code, r.room_type, pj.print_status, pj.start_time, pj.end_time;
+GO
+
+-- View: Print job pricing details (reads stored pricing fields)
+CREATE VIEW print_job_pricing AS
+SELECT 
+    pj.job_id,
+    pj.student_id,
+    pj.printer_id,
+    psp.page_size_id AS paper_size_id,
+    pj.page_size_price_id,
+    pj.color_mode_price_id,
+    pj.page_discount_package_id,
+    pj.number_of_copy,
+    -- Use stored total_pages from print_job table
+    pj.total_pages,
+    -- Get prices from referenced configurations
+    psp.page_price AS base_price_per_page,
+    cmp.price_per_page AS color_mode_price_per_page,
+    -- Use stored pricing values from print_job table
+    pj.subtotal_before_discount,
+    pj.discount_percentage,
+    pj.discount_amount,
+    pj.total_price
+FROM print_job pj
+JOIN page_size_price psp ON pj.page_size_price_id = psp.price_id
+JOIN color_mode_price cmp ON pj.color_mode_price_id = cmp.setting_id
+JOIN color_mode cm ON cmp.color_mode_id = cm.color_mode_id
+LEFT JOIN page_discount_package pdp ON pj.page_discount_package_id = pdp.package_id;
 GO
 
 -- View: Active printers with full details

@@ -10,16 +10,60 @@ skinparam class {
 }
 
 ' Level 0 tables
-class page_allocation {
-  allocation_id
-  semester
-  academic_year
-  page_type_id
-  default_page_count
-  allocation_date
+class deposit {
+  deposit_id
+  student_id
+  deposit_amount
+  bonus_amount
+  total_credited
+  deposit_bonus_package_id
+  payment_method
+  payment_reference
+  payment_status
+  transaction_date
+}
+class fund_source {
+  fund_id
+  fund_source_type
+  fund_source_name
+  amount
+  received_date
+  description
   created_at
   created_by
-  UNIQUE
+}
+class paper_purchase_item {
+  purchase_item_id
+  purchase_id
+  page_size_id
+  quantity
+  unit_price
+  total_price
+  received_quantity
+  received_date
+  notes
+  CHECK
+}
+class password_reset_token {
+  token_id
+  token
+  user_id
+  expiry_date
+  used
+  created_at
+}
+class payment {
+  payment_id
+  job_id
+  student_id
+  amount_paid_directly
+  amount_paid_from_balance
+  total_amount
+  payment_method
+  payment_reference
+  payment_status
+  transaction_date
+  CHECK
 }
 class permitted_file_type {
   file_type_id
@@ -37,24 +81,40 @@ class print_job_page {
   page_number
   UNIQUE
 }
-class printer_activity_log {
+class printer_log {
   log_id
   printer_id
-  action_type
-  performed_by
-  action_detail
-  action_timestamp
+  log_type
+  severity
+  description
+  job_id
+  user_id
+  details
+  error_code
+  is_resolved
+  resolved_at
+  resolved_by
+  resolution_notes
+  ip_address
+  created_at
 }
-class student_page_purchase {
-  purchase_id
+class refresh_token {
+  token_id
+  token
+  user_id
+  expiry_date
+  created_at
+  revoked
+}
+class student_semester_bonus {
+  student_bonus_id
   student_id
-  page_size_id
-  quantity
-  amount_paid
-  payment_method
-  payment_reference
-  payment_status
-  transaction_date
+  semester_bonus_id
+  semester_id
+  received
+  received_date
+  created_at
+  UNIQUE
 }
 class system_audit_log {
   audit_id
@@ -78,38 +138,113 @@ class system_configuration {
 }
 
 ' Level 1 tables
+class deposit_bonus_package {
+  package_id
+  amount_cap
+  bonus_percentage
+  package_name
+  description
+  is_active
+  created_at
+  updated_at
+}
 class print_job {
   job_id
   student_id
   printer_id
-  file_name
+  file_url
   file_type
   file_size_kb
-  paper_size_id
+  page_size_price_id
+  color_mode_price_id
+  page_discount_package_id
   page_orientation
   print_side
-  color_mode
   number_of_copy
+  total_pages
+  subtotal_before_discount
+  discount_percentage
+  discount_amount
+  total_price
   print_status
   start_time
   end_time
   created_at
 }
+class semester_bonus {
+  bonus_id
+  semester_id
+  bonus_amount
+  description
+  created_at
+  created_by
+  UNIQUE
+}
+class supplier_paper_purchase {
+  purchase_id
+  supplier_name
+  supplier_contact
+  purchase_date
+  total_amount_paid
+  payment_method
+  payment_reference
+  payment_status
+  invoice_number
+  notes
+  created_at
+  created_by
+}
 
 ' Level 2 tables
+class color_mode_price {
+  setting_id
+  color_mode_id
+  price_per_page
+  is_active
+  created_at
+  updated_at
+}
+class page_discount_package {
+  package_id
+  min_pages
+  discount_percentage
+  package_name
+  description
+  is_active
+  created_at
+  updated_at
+}
+class page_size_price {
+  price_id
+  page_size_id
+  page_price
+  is_active
+  created_at
+  updated_at
+}
 class printer_physical {
   printer_id
   model_id
+  room_id
   serial_number
-  campus_name
-  building_name
-  room_number
+  printer_pixel_coordinate
   is_enabled
+  status
+  printing_status
   installed_date
   last_maintenance_date
   created_at
   updated_at
   created_by
+}
+class semester {
+  semester_id
+  academic_year_id
+  term_name
+  start_date
+  end_date
+  created_at
+  UNIQUE
 }
 class student {
   student_id
@@ -133,6 +268,12 @@ class "class" {
   created_at
   UNIQUE
 }
+class color_mode {
+  color_mode_id
+  color_mode_name
+  description
+  created_at
+}
 class printer_model {
   model_id
   brand_id
@@ -141,6 +282,18 @@ class printer_model {
   max_paper_size_id
   supports_color
   supports_duplex
+  pages_per_second
+  image_2d_url
+  image_3d_url
+  created_at
+  UNIQUE
+}
+class room {
+  room_id
+  floor_id
+  room_code
+  room_name
+  room_type
   created_at
   UNIQUE
 }
@@ -168,6 +321,14 @@ class brand {
   website
   created_at
 }
+class floor {
+  floor_id
+  building_id
+  floor_number
+  file_url
+  created_at
+  UNIQUE
+}
 class major {
   major_id
   department_id
@@ -192,15 +353,30 @@ class "user" {
   email
   full_name
   password_hash
-  password_salt
   user_type
   phone_number
+  date_of_birth
+  gender
+  citizen_id
+  address
+  profile_picture
+  email_verified
+  email_verification_code
+  account_status
   created_at
   updated_at
+  last_login_at
   is_active
 }
 
 ' Level 5 tables
+class building {
+  building_id
+  building_code
+  address
+  campus_name
+  created_at
+}
 class department {
   department_id
   faculty_id
@@ -230,21 +406,41 @@ academic_year <-- "class"
 "user" <-- student
 "class" <-- student
 "user" <-- staff
+building <-- floor
+floor <-- room
 brand <-- printer_model
 page_size <-- printer_model
 printer_model <-- printer_physical
+room <-- printer_physical
 staff <-- printer_physical
-staff <-- page_allocation
-page_size <-- page_allocation
-student <-- student_page_purchase
-page_size <-- student_page_purchase
+academic_year <-- semester
+student <-- deposit
+deposit_bonus_package <-- deposit
+semester <-- semester_bonus
+staff <-- semester_bonus
+student <-- student_semester_bonus
+semester_bonus <-- student_semester_bonus
+semester <-- student_semester_bonus
+color_mode <-- color_mode_price
+page_size <-- page_size_price
+staff <-- fund_source
+staff <-- supplier_paper_purchase
+supplier_paper_purchase <-- paper_purchase_item
+page_size <-- paper_purchase_item
 staff <-- system_configuration
 staff <-- permitted_file_type
 student <-- print_job
 printer_physical <-- print_job
-page_size <-- print_job
+page_size_price <-- print_job
+color_mode_price <-- print_job
+page_discount_package <-- print_job
 print_job <-- print_job_page
-printer_physical <-- printer_activity_log
-staff <-- printer_activity_log
+print_job <-- payment
+student <-- payment
+printer_physical <-- printer_log
+print_job <-- printer_log
+"user" <-- printer_log
 "user" <-- system_audit_log
+"user" <-- refresh_token
+"user" <-- password_reset_token
 @enduml
