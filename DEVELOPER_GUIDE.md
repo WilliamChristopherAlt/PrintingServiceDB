@@ -18,7 +18,7 @@
 **Bảng:** `brand`, `printer_model`, `printer_physical`, `page_size`
 
 ### 5. Quản lý Công việc In
-**Bảng:** `print_job`, `print_job_page`, `student`, `printer_physical`, `page_size`, `page_size_price`
+**Bảng:** `uploaded_file`, `print_job`, `print_job_page`, `student`, `printer_physical`, `page_size`, `page_size_price`
 
 ### 6. Quản lý Thanh toán & Số dư
 **Bảng:** `deposit`, `deposit_bonus_package`, `payment`, `semester_bonus`, `student_semester_bonus`, `student`, `print_job`
@@ -479,13 +479,13 @@ SET @total_price = @subtotal - @discount_amount;
 **Bước 4: Tạo print_job record**
 ```sql
 INSERT INTO print_job (
-    job_id, student_id, printer_id, file_url, file_type, file_size_kb,
+    job_id, student_id, printer_id, uploaded_file_id,
     page_size_price_id, color_mode_price_id, page_discount_package_id,
     page_orientation, print_side, number_of_copy,
     total_pages, subtotal_before_discount, discount_percentage, 
     discount_amount, total_price, print_status, created_at
 ) VALUES (
-    @job_id, @student_id, @printer_id, @file_url, @file_type, @file_size_kb,
+    @job_id, @student_id, @printer_id, @uploaded_file_id,
     @page_size_price_id, @color_mode_price_id, @page_discount_package_id,
     @page_orientation, @print_side, @number_of_copy,
     @total_pages, @subtotal, @discount_percentage,
