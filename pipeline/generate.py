@@ -1606,14 +1606,15 @@ class PrintingServiceDataGenerator:
         # Generate color mode prices
         self.add_sql("\n-- Color Mode Prices")
         bulk_print_prices = BulkInsertHelper("color_mode_price", [
-            "setting_id", "color_mode_id", "price_per_page", "is_active", "created_at", "updated_at"
+            "setting_id", "color_mode_id", "price_multiplier", "is_active", "created_at", "updated_at"
         ])
         
-        # Color mode prices per page (absolute prices in dollars)
+        # Color mode price multipliers (applied to base page_size_price)
+        # black-white: 0.5x (cheaper), grayscale: 0.75x, color: 1.5x (more expensive)
         color_price_settings = [
-            {"mode": "black-white", "price": 0.10},
-            {"mode": "grayscale", "price": 0.15},
-            {"mode": "color", "price": 0.30}
+            {"mode": "black-white", "multiplier": 0.5},
+            {"mode": "grayscale", "multiplier": 0.75},
+            {"mode": "color", "multiplier": 1.5}
         ]
         
         for price_setting in color_price_settings:
@@ -1631,14 +1632,14 @@ class PrintingServiceDataGenerator:
                 'setting_id': setting_id,
                 'color_mode_id': matching_color_mode['color_mode_id'],
                 'color_mode_name': matching_color_mode['color_mode_name'],  # Keep for lookup
-                'price_per_page': price_setting["price"],
+                'price_multiplier': price_setting["multiplier"],
                 'is_active': True
                 })
                 
             bulk_print_prices.add_row([
                 setting_id,
                 matching_color_mode['color_mode_id'],
-                price_setting["price"],
+                price_setting["multiplier"],
                 1,  # is_active
                 created_at.strftime('%Y-%m-%d %H:%M:%S'),
                 created_at.strftime('%Y-%m-%d %H:%M:%S')
@@ -1694,7 +1695,7 @@ class PrintingServiceDataGenerator:
         # 1. Generate deposit bonus packages
         self.add_sql("\n-- Deposit Bonus Packages")
         bulk_bonus_packages = BulkInsertHelper("deposit_bonus_package", [
-            "package_id", "code", "amount_cap", "bonus_percentage", "package_name", "description", "is_active", "created_at", "updated_at"
+            "package_id", "code", "amount_cap", "bonus_percentage", "package_name", "description", "is_active", "is_event", "created_at", "updated_at"
         ])
         
         # Deposit bonus packages (VND-based), stored as amount_cap (min deposit) and bonus_percentage (0-1 range)
@@ -1705,28 +1706,32 @@ class PrintingServiceDataGenerator:
                 "amount_cap": 50000.00,
                 "bonus_percentage": 0.00,
                 "name": "Basic Package",
-                "desc": "BASIC - Deposit 50,000₫, bonus 0₫ (0%), total receive 50,000₫."
+                "desc": "BASIC - Deposit 50,000₫, bonus 0₫ (0%), total receive 50,000₫.",
+                "is_event": False
             },
             {
                 "code": "SAVE_10",
                 "amount_cap": 100000.00,
                 "bonus_percentage": 0.10,
                 "name": "Save Package",
-                "desc": "SAVE_10 - Deposit 100,000₫, bonus 10,000₫ (10%), total receive 110,000₫."
+                "desc": "SAVE_10 - Deposit 100,000₫, bonus 10,000₫ (10%), total receive 110,000₫.",
+                "is_event": False
             },
             {
                 "code": "XMAS_25",
                 "amount_cap": 200000.00,
                 "bonus_percentage": 0.25,
                 "name": "Christmas Package",
-                "desc": "XMAS_25 - Deposit 200,000₫, bonus 50,000₫ (25%), total receive 250,000₫."
+                "desc": "XMAS_25 - Deposit 200,000₫, bonus 50,000₫ (25%), total receive 250,000₫.",
+                "is_event": True
             },
             {
                 "code": "SAVE_30",
                 "amount_cap": 500000.00,
                 "bonus_percentage": 0.30,
                 "name": "Super Save Package",
-                "desc": "SAVE_30 - Deposit 500,000₫, bonus 150,000₫ (30%), total receive 650,000₫."
+                "desc": "SAVE_30 - Deposit 500,000₫, bonus 150,000₫ (30%), total receive 650,000₫.",
+                "is_event": False
             },
         ]
         
@@ -1751,6 +1756,7 @@ class PrintingServiceDataGenerator:
                 pkg['name'],
                 pkg['desc'],
                 1,  # is_active
+                1 if pkg.get('is_event', False) else 0,  # is_event
                 created_at.strftime('%Y-%m-%d %H:%M:%S'),
                 created_at.strftime('%Y-%m-%d %H:%M:%S')
             ])
@@ -2313,8 +2319,11 @@ class PrintingServiceDataGenerator:
             file_type_id = generate_uuid()
             created_at = random_date_in_range(365, 30)
             
+            # Remove dot prefix from extension (e.g., ".pdf" -> "pdf")
+            extension = file_type['extension'].lstrip('.').lower()
+            
             bulk_filetypes.add_row([
-                file_type_id, file_type['extension'], file_type['mime_type'],
+                file_type_id, extension, file_type['mime_type'],
                 file_type['description'], True,
                 created_at.strftime('%Y-%m-%d %H:%M:%S'),
                 created_at.strftime('%Y-%m-%d %H:%M:%S'),
@@ -2527,9 +2536,11 @@ class PrintingServiceDataGenerator:
                 num_pages = max(min_pages, min(max_pages, int(random.gauss(avg_pages, page_variance))))
                 total_pages = num_pages * num_copies
                 
-                # Pricing
-                color_mode_price_per_page = matching_color_mode_price['price_per_page']
-                subtotal_before_discount = total_pages * color_mode_price_per_page
+                # Pricing: base_price * color_multiplier * total_pages
+                base_page_price = matching_page_size_price['page_price']
+                color_multiplier = matching_color_mode_price['price_multiplier']
+                price_per_page = base_page_price * color_multiplier
+                subtotal_before_discount = total_pages * price_per_page
                 
                 page_discount_package_id = None
                 discount_percentage = None
@@ -2623,10 +2634,10 @@ class PrintingServiceDataGenerator:
             if psp.get('is_active', True):
                 page_size_price_map[psp['price_id']] = psp['page_price']
         
-        color_mode_price_map = {}  # setting_id -> price_per_page
+        color_mode_price_map = {}  # setting_id -> price_multiplier
         for cmp in self.color_mode_prices:
             if cmp.get('is_active', True):
-                color_mode_price_map[cmp['setting_id']] = cmp['price_per_page']
+                color_mode_price_map[cmp['setting_id']] = cmp['price_multiplier']
         
         page_discount_map = {}  # package_id -> discount_percentage
         for pdp in self.page_discount_packages:

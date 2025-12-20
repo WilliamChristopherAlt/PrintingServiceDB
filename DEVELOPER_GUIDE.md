@@ -319,21 +319,22 @@ Hệ thống sử dụng **kiến trúc Ledger** (sổ cái) để quản lý s�
 
 **Bảng chính:**
 - `color_mode`: Định nghĩa chế độ màu (color, grayscale, black-white)
-- `color_mode_price`: Giá cho mỗi chế độ màu (price_per_page)
+- `color_mode_price`: Hệ số nhân giá cho mỗi chế độ màu (price_multiplier)
 - `page_size`: Kích thước giấy (A3, A4, A5)
-- `page_size_price`: Giá cho mỗi kích thước giấy (page_price)
+- `page_size_price`: Giá cơ bản cho mỗi kích thước giấy (page_price)
 - `page_discount_package`: Gói giảm giá khối lượng (ví dụ: 100 trang giảm 10%)
 - `print_job`: Công việc in tham chiếu đến các cấu hình giá
 
 **CÁCH TÍNH GIÁ CHO PRINT JOB:**
 
-**Bước 1: Xác định giá cơ bản**
-- Lấy `color_mode_price.price_per_page` từ `color_mode_price_id` trong `print_job`
-- Đây là giá mỗi trang cho chế độ màu được chọn
+**Bước 1: Xác định giá cơ bản và hệ số màu**
+- Lấy `page_size_price.page_price` từ `page_size_price_id` trong `print_job` (giá cơ bản theo kích thước)
+- Lấy `color_mode_price.price_multiplier` từ `color_mode_price_id` trong `print_job` (hệ số nhân)
+- Tính giá mỗi trang: `price_per_page = page_size_price.page_price × color_mode_price.price_multiplier`
 
 **Bước 2: Tính tổng tiền trước giảm giá**
 ```
-subtotal_before_discount = total_pages × color_mode_price_per_page
+subtotal_before_discount = total_pages × page_size_price.page_price × color_mode_price.price_multiplier
 ```
 Trong đó:
 - `total_pages` = số trang từ `print_job_page` × `number_of_copy`
@@ -507,19 +508,25 @@ WHERE color_mode_id = @selected_color_mode_id
 **Bước 3: Tính giá**
 ```sql
 DECLARE @total_pages INT = (SELECT COUNT(*) FROM print_job_page WHERE job_id = @job_id) * @number_of_copy;
-DECLARE @color_mode_price_per_page DECIMAL(10,4);
+DECLARE @base_page_price DECIMAL(10,4);
+DECLARE @color_multiplier DECIMAL(5,4);
+DECLARE @price_per_page DECIMAL(10,4);
 DECLARE @subtotal DECIMAL(10,2);
 DECLARE @discount_percentage DECIMAL(5,4);
 DECLARE @discount_amount DECIMAL(10,2);
 DECLARE @total_price DECIMAL(10,2);
 
--- Lấy giá chế độ màu
-SELECT @color_mode_price_per_page = price_per_page 
-FROM color_mode_price 
-WHERE setting_id = @color_mode_price_id;
+-- Lấy giá cơ bản và hệ số màu
+SELECT @base_page_price = psp.page_price,
+       @color_multiplier = cmp.price_multiplier
+FROM print_job pj
+JOIN page_size_price psp ON pj.page_size_price_id = psp.price_id
+JOIN color_mode_price cmp ON pj.color_mode_price_id = cmp.setting_id
+WHERE pj.job_id = @job_id;
 
--- Tính subtotal
-SET @subtotal = @total_pages * @color_mode_price_per_page;
+-- Tính giá mỗi trang và subtotal
+SET @price_per_page = @base_page_price * @color_multiplier;
+SET @subtotal = @total_pages * @price_per_page;
 
 -- Tìm gói giảm giá phù hợp
 SELECT TOP 1 
@@ -623,9 +630,9 @@ INSERT INTO payment (
 ```sql
 -- Ví dụ: Tăng giá color mode
 INSERT INTO color_mode_price (
-    setting_id, color_mode_id, price_per_page, is_active, created_at, updated_at
+    setting_id, color_mode_id, price_multiplier, is_active, created_at, updated_at
 ) VALUES (
-    NEWID(), @color_mode_id, 0.35, 1, GETDATE(), GETDATE()
+    NEWID(), @color_mode_id, 1.5, 1, GETDATE(), GETDATE()  -- 1.5x multiplier for color mode
 );
 
 -- Đánh dấu cấu hình cũ là không active
@@ -665,7 +672,7 @@ SELECT
     job_id,
     paper_size_id,
     base_price_per_page,
-    color_mode_price_per_page,
+    color_mode_price_multiplier,
     total_pages,
     subtotal_before_discount,
     discount_percentage,

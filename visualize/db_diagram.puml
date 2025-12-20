@@ -203,7 +203,7 @@ class supplier_paper_purchase {
 class color_mode_price {
   setting_id
   color_mode_id
-  price_per_page
+  price_multiplier
   is_active
   created_at
   updated_at

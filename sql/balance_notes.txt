@@ -33,10 +33,10 @@ Trong đó:
   + Nếu print_side = 'double-sided': total_pages = COUNT(print_job_page) × number_of_copy × 2
   + Nếu print_side = 'one-sided': total_pages = COUNT(print_job_page) × number_of_copy × 1
 - base_price_per_page = giá cơ bản từ `page_size_price.page_price` (theo `print_job.paper_size_id`)
-- color_multiplier = hệ số từ `color_mode_price.price_multiplier` (theo `print_job.color_mode`)
-  + 'black-white': 0.8 (80% giá cơ bản)
-  + 'grayscale': 1.0 (100% giá cơ bản)
-  + 'color': 2.5 (250% giá cơ bản)
+- color_multiplier = hệ số từ `color_mode_price.price_multiplier` (theo `print_job.color_mode_price_id`)
+  + 'black-white': 0.5 (50% giá cơ bản - rẻ nhất)
+  + 'grayscale': 0.75 (75% giá cơ bản)
+  + 'color': 1.5 (150% giá cơ bản - đắt nhất)
 - discount_percentage = giảm giá từ `page_discount_package.discount_percentage` (nếu tổng số trang in vượt ngưỡng min_pages)
 
 Chi tiết:
@@ -45,8 +45,8 @@ Chi tiết:
    - Nếu print_side = 'double-sided': physical_pages = file_pages × 2
    - Nếu print_side = 'one-sided': physical_pages = file_pages × 1
 3. Tính total_pages = physical_pages × print_job.number_of_copy
-4. Lấy base_price từ `page_size_price` WHERE page_size_id = print_job.paper_size_id
-5. Lấy color_multiplier từ `color_mode_price` WHERE color_mode = print_job.color_mode
+4. Lấy base_price từ `page_size_price` WHERE price_id = print_job.page_size_price_id
+5. Lấy color_multiplier từ `color_mode_price` WHERE setting_id = print_job.color_mode_price_id
 6. Tính base_amount = total_pages × base_price × color_multiplier
 7. Tìm discount package phù hợp từ `page_discount_package` WHERE min_pages <= total_pages (lấy package có min_pages lớn nhất)
 8. Tính final_price = base_amount × (1 - discount_percentage)

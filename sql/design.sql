@@ -287,6 +287,7 @@ CREATE TABLE deposit_bonus_package (
     package_name NVARCHAR(100),
     description NVARCHAR(200),
     is_active BIT DEFAULT 1,
+    is_event BIT DEFAULT 0,
     created_at DATETIME DEFAULT GETDATE(),
     updated_at DATETIME DEFAULT GETDATE()
 );
@@ -379,7 +380,7 @@ GO
 CREATE TABLE color_mode_price (
     setting_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     color_mode_id UNIQUEIDENTIFIER NOT NULL,
-    price_per_page DECIMAL(10, 4) NOT NULL CHECK (price_per_page >= 0), -- Price per page in dollars for this color mode
+    price_multiplier DECIMAL(5, 4) NOT NULL CHECK (price_multiplier >= 0), -- Multiplier applied to base page_size_price (e.g., 0.5 for black-white, 1.5 for color)
     is_active BIT DEFAULT 1,
     created_at DATETIME DEFAULT GETDATE(),
     updated_at DATETIME DEFAULT GETDATE(),
@@ -971,7 +972,7 @@ SELECT
     pj.total_pages,
     -- Get prices from referenced configurations
     psp.page_price AS base_price_per_page,
-    cmp.price_per_page AS color_mode_price_per_page,
+    cmp.price_multiplier AS color_mode_price_multiplier,
     -- Use stored pricing values from print_job table
     pj.subtotal_before_discount,
     pj.discount_percentage,
