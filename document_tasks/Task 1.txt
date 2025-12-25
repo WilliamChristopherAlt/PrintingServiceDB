@@ -1,0 +1,180 @@
+    TASK 1.1: MÔ TẢ BỐI CẢNH MIỀN VÀ CÁC BÊN LIÊN QUAN
+
+1. BỐI CẢNH MIỀN (Domain Context)
+
+Hệ thống Dịch vụ In thông minh cho Sinh viên HCMSIU (HCMSIU-SSPS) được phát triển để giải quyết nhu cầu in ấn tài liệu học tập của sinh viên tại các cơ sở của trường Đại học Quốc tế Sài Gòn (HCMSIU). Trong môi trường giáo dục đại học hiện đại, sinh viên thường xuyên cần in các tài liệu như bài tập, báo cáo, luận văn, tài liệu tham khảo và các tài liệu học tập khác. Hệ thống này được thiết kế để quản lý một mạng lưới máy in được phân bố tại nhiều tòa nhà và phòng học khác nhau trong khuôn viên trường, cho phép sinh viên truy cập và sử dụng dịch vụ in ấn một cách thuận tiện thông qua ứng dụng web và di động. Hệ thống tích hợp với dịch vụ xác thực SSO của HCMSIU để đảm bảo bảo mật và quản lý người dùng hiệu quả, đồng thời cung cấp các tính năng quản lý tài chính như nạp tiền, thanh toán và theo dõi số dư tài khoản của sinh viên.
+
+2. CÁC BÊN LIÊN QUAN VÀ NHU CẦU CỦA HỌ (Stakeholders and Their Needs)
+
+Hệ thống HCMSIU-SSPS phục vụ nhiều nhóm người dùng với các nhu cầu khác nhau. Nhóm đầu tiên là sinh viên - những người sử dụng chính của hệ thống. Sinh viên cần một cách dễ dàng để tải lên tài liệu, chọn máy in gần nhất, cấu hình các tùy chọn in (kích thước giấy, số trang, một mặt/hai mặt, số bản sao), và thanh toán cho dịch vụ in. Họ cũng cần xem lịch sử in của mình, theo dõi số dư tài khoản, và nhận các trang in miễn phí mỗi học kỳ. Nhóm thứ hai là Nhân viên Dịch vụ In Sinh viên (SPSO) - những người quản lý hệ thống. SPSO cần quản lý máy in (thêm, kích hoạt, vô hiệu hóa), cấu hình hệ thống (số trang mặc định, loại tệp được phép, giá cả), xem báo cáo sử dụng và lịch sử in của tất cả sinh viên. Nhóm thứ ba là Ban Giám hiệu và Quản trị viên của trường, những người cần các báo cáo tự động về việc sử dụng hệ thống, doanh thu, và hiệu quả hoạt động để đưa ra quyết định quản lý. Cuối cùng, hệ thống cần tích hợp với dịch vụ xác thực HCMSIU_SSO để đảm bảo bảo mật và quản lý người dùng tập trung.
+
+3. LỢI ÍCH CỦA HCMSIU-SSPS CHO TỪNG BÊN LIÊN QUAN (Benefits for Each Stakeholder)
+
+Đối với sinh viên, HCMSIU-SSPS mang lại nhiều lợi ích thiết thực. Hệ thống cho phép sinh viên in tài liệu mọi lúc, mọi nơi trong khuôn viên trường thông qua ứng dụng di động và web, tiết kiệm thời gian di chuyển và chờ đợi. Sinh viên có thể xem trước chi phí trước khi in, quản lý số dư tài khoản dễ dàng, và nhận các trang in miễn phí mỗi học kỳ. Hệ thống cũng cung cấp lịch sử in chi tiết giúp sinh viên theo dõi việc sử dụng và chi phí của mình. Đối với SPSO, hệ thống tự động hóa phần lớn công việc quản lý, từ việc theo dõi trạng thái máy in, quản lý cấu hình hệ thống, đến việc tạo báo cáo tự động. Điều này giúp giảm thiểu công việc thủ công và tăng hiệu quả quản lý. Đối với Ban Giám hiệu và Quản trị viên, hệ thống cung cấp các báo cáo chi tiết về việc sử dụng dịch vụ in, doanh thu, và hiệu quả hoạt động của từng máy in, giúp họ đưa ra các quyết định quản lý dựa trên dữ liệu. Hệ thống cũng giúp tối ưu hóa việc sử dụng tài nguyên (giấy, mực in) và giảm chi phí vận hành thông qua việc quản lý tập trung và tự động hóa. Cuối cùng, việc tích hợp với hệ thống xác thực SSO của trường đảm bảo bảo mật thông tin và quản lý người dùng hiệu quả, tuân thủ các tiêu chuẩn bảo mật của tổ chức giáo dục.
+
+
+TASK 1.2: CÁC YÊU CẦU CHỨC NĂNG VÀ PHI CHỨC NĂNG
+
+1. YÊU CẦU CHỨC NĂNG (Functional Requirements)
+
+1.1. Yêu cầu chức năng cho Sinh viên (Student)
+
+FR-S1: Hệ thống phải cho phép sinh viên đăng nhập vào hệ thống thông qua dịch vụ xác thực HCMSIU_SSO.
+
+FR-S2: Hệ thống phải cho phép sinh viên tải lên tài liệu (file) lên hệ thống với các định dạng được phép (pdf, docx, pptx, jpg, png) do SPSO cấu hình.
+
+FR-S3: Hệ thống phải cho phép sinh viên chọn một máy in từ danh sách các máy in có sẵn trong khuôn viên trường.
+
+FR-S4: Hệ thống phải cho phép sinh viên cấu hình các thuộc tính in bao gồm kích thước giấy (A4, A3, v.v.), số trang cần in, một mặt hoặc hai mặt, số bản sao, và chế độ màu (đen trắng, xám, màu).
+
+FR-S5: Hệ thống phải hiển thị chi phí dự kiến trước khi sinh viên xác nhận lệnh in dựa trên số trang, kích thước giấy, chế độ màu, và các gói giảm giá khối lượng (nếu có).
+
+FR-S6: Hệ thống phải cho phép sinh viên xác nhận và gửi lệnh in chỉ khi số dư tài khoản (tính bằng tiền) đủ để thanh toán chi phí in.
+
+FR-S7: Hệ thống phải tự động trừ số dư tài khoản của sinh viên (từ số dư hoặc thanh toán trực tiếp) sau khi lệnh in được hoàn thành thành công.
+
+FR-S8: Hệ thống phải cho phép sinh viên xem lịch sử in của mình trong một khoảng thời gian cụ thể (từ ngày đến ngày) bao gồm thông tin về máy in, tên file, thời gian bắt đầu và kết thúc, số trang in, và chi phí thanh toán.
+
+FR-S9: Hệ thống phải cho phép sinh viên xem tóm tắt số trang đã in, số lượng công việc in, và tổng số tiền đã chi tiêu trong lịch sử in của mình.
+
+FR-S10: Hệ thống phải tự động cấp cho mỗi sinh viên một khoản tiền thưởng học kỳ (semester bonus) mỗi học kỳ theo cấu hình của SPSO, được cộng vào số dư tài khoản.
+
+FR-S11: Hệ thống phải cho phép sinh viên nạp tiền vào tài khoản (deposit) thông qua hệ thống thanh toán trực tuyến SIUPay của trường, với các gói khuyến mãi bonus tùy theo số tiền nạp.
+
+FR-S12: Hệ thống phải cho phép sinh viên xem số dư tài khoản hiện tại của mình (tính bằng tiền) được tính toán tự động từ các giao dịch nạp tiền, thưởng học kỳ, thanh toán in, và hoàn tiền.
+
+FR-S13: Hệ thống phải cho phép sinh viên hủy lệnh in đang chờ xử lý hoặc đang in và tự động hoàn tiền cho các trang chưa được in thông qua bảng refund_print_job, với số tiền hoàn lại được tính toán dựa trên số trang chưa in và cập nhật vào số dư tài khoản.
+
+1.2. Yêu cầu chức năng cho SPSO (Student Printing Service Officer)
+
+FR-O1: Hệ thống phải cho phép SPSO đăng nhập vào hệ thống thông qua dịch vụ xác thực HCMSIU_SSO.
+
+FR-O2: Hệ thống phải cho phép SPSO thêm một máy in mới vào hệ thống với thông tin bao gồm ID, tên thương hiệu/nhà sản xuất, model máy in, mô tả ngắn, và vị trí (tên cơ sở, tên tòa nhà, số phòng).
+
+FR-O3: Hệ thống phải cho phép SPSO kích hoạt hoặc vô hiệu hóa một máy in trong hệ thống.
+
+FR-O4: Hệ thống phải cho phép SPSO xem danh sách tất cả các máy in trong hệ thống cùng với trạng thái hiện tại của chúng (đang hoạt động, bảo trì, lỗi, v.v.).
+
+FR-O5: Hệ thống phải cho phép SPSO xem lịch sử in của tất cả sinh viên hoặc của một sinh viên cụ thể trong một khoảng thời gian (từ ngày đến ngày) và cho tất cả hoặc một số máy in cụ thể.
+
+FR-O6: Hệ thống phải cho phép SPSO quản lý thưởng học kỳ (semester bonus) bao gồm tạo, sửa, và xóa các khoản thưởng học kỳ với số tiền cụ thể cho mỗi học kỳ.
+
+FR-O7: Hệ thống phải cho phép SPSO quản lý các gói khuyến mãi nạp tiền (deposit bonus packages) bao gồm tạo, sửa, kích hoạt/vô hiệu hóa các gói với mức bonus và điều kiện nạp tiền tối thiểu.
+
+FR-O8: Hệ thống phải cho phép SPSO quản lý các loại file được phép tải lên hệ thống (thêm, xóa, sửa các định dạng file được phép).
+
+FR-O9: Hệ thống phải tự động tạo và lưu trữ báo cáo sử dụng hệ thống in vào cuối mỗi tháng và cuối mỗi năm.
+
+FR-O10: Hệ thống phải cho phép SPSO xem các báo cáo đã được tạo tự động bất cứ lúc nào.
+
+FR-O11: Hệ thống phải cho phép SPSO xem thống kê chi tiết về việc sử dụng từng máy in bao gồm số lượng công việc in, số trang đã in, số sinh viên sử dụng, và thời gian in cuối cùng thông qua view printer_usage_statistic.
+
+FR-O12: Hệ thống phải ghi nhận tất cả các hành động in của sinh viên trong bảng print_job bao gồm ID sinh viên, ID máy in, ID file đã tải lên, thời gian bắt đầu và kết thúc in, số trang, và chi phí thanh toán.
+
+FR-O13: Hệ thống phải cho phép SPSO quản lý cấu hình giá cả cho các kích thước giấy khác nhau (page_size_price) và các chế độ màu khác nhau (color_mode_price với hệ số nhân giá), cũng như các gói giảm giá khối lượng (page_discount_package).
+
+1.3. Yêu cầu chức năng cho Hệ thống (System - Automated Processes)
+
+FR-SYS1: Hệ thống phải tự động xác thực người dùng thông qua dịch vụ HCMSIU_SSO trước khi cho phép truy cập vào bất kỳ chức năng nào.
+
+FR-SYS2: Hệ thống phải tự động kiểm tra số dư tài khoản của sinh viên trước khi cho phép thực hiện lệnh in.
+
+FR-SYS3: Hệ thống phải tự động tính toán chi phí in dựa trên số trang, kích thước giấy, chế độ màu, và áp dụng các gói giảm giá khối lượng nếu có.
+
+FR-SYS4: Hệ thống phải tự động tính toán số dư tài khoản của sinh viên thông qua view student_balance_view dựa trên các giao dịch nạp tiền (deposit), thưởng học kỳ (semester_bonus), thanh toán (payment), và hoàn tiền (refund_print_job).
+
+FR-SYS5: Hệ thống phải tự động tạo báo cáo sử dụng hệ thống thông qua các view monthly_report và yearly_report vào cuối mỗi tháng và cuối mỗi năm với thông tin về số công việc in, số sinh viên sử dụng, số máy in sử dụng, số trang đã in, và doanh thu.
+
+FR-SYS6: Hệ thống phải tự động ghi nhận tất cả các hành động in trong bảng print_job và print_job_page bao gồm ID sinh viên, ID máy in, ID file đã tải lên, thời gian bắt đầu và kết thúc, tổng số trang, và chi phí.
+
+FR-SYS7: Hệ thống phải tự động cập nhật trạng thái của lệnh in (queued, printing, completed, failed, cancelled) trong bảng print_job.
+
+FR-SYS8: Hệ thống phải tự động tính toán chi phí in dựa trên số trang, giá cơ bản của kích thước giấy (page_size_price), hệ số nhân của chế độ màu (color_mode_price), và áp dụng giảm giá khối lượng (page_discount_package) nếu có, với quy tắc một trang A3 có giá gấp đôi trang A4.
+
+FR-SYS9: Hệ thống phải tự động xử lý thanh toán qua hệ thống SIUPay khi sinh viên nạp tiền, ghi nhận trong bảng deposit với trạng thái thanh toán (pending, completed, failed, refunded, expired, cancelled) và tích hợp với payment_webhook_log để xử lý webhook từ cổng thanh toán.
+
+FR-SYS10: Hệ thống phải tự động hoàn tiền cho sinh viên khi lệnh in bị hủy thông qua bảng refund_print_job, tính toán dựa trên số trang chưa được in và cập nhật vào student_wallet_ledger để theo dõi giao dịch.
+
+1.4. Yêu cầu chức năng cho Dịch vụ Xác thực (HCMSIU_SSO)
+
+FR-AUTH1: Hệ thống phải tích hợp với dịch vụ xác thực HCMSIU_SSO để xác thực danh tính người dùng.
+
+FR-AUTH2: Hệ thống phải nhận thông tin người dùng từ HCMSIU_SSO sau khi xác thực thành công bao gồm ID người dùng, email, và loại người dùng (sinh viên hoặc nhân viên).
+
+FR-AUTH3: Hệ thống phải yêu cầu tất cả người dùng đăng nhập qua HCMSIU_SSO trước khi sử dụng bất kỳ chức năng nào của hệ thống.
+
+2. YÊU CẦU PHI CHỨC NĂNG (Non-Functional Requirements)
+
+NFR-1: Hệ thống phải có khả năng mở rộng để hỗ trợ ít nhất 10.000 sinh viên đồng thời sử dụng dịch vụ in.
+
+NFR-2: Hệ thống phải có thời gian phản hồi dưới 3 giây cho các thao tác xem và truy vấn dữ liệu.
+
+NFR-3: Hệ thống phải có thời gian phản hồi dưới 5 giây cho các thao tác tải lên file và gửi lệnh in.
+
+NFR-4: Hệ thống phải đảm bảo tính khả dụng 99.5% trong giờ làm việc (từ 7:00 đến 22:00 hàng ngày).
+
+NFR-5: Hệ thống phải bảo mật thông tin người dùng và dữ liệu giao dịch thông qua mã hóa và xác thực an toàn.
+
+NFR-6: Hệ thống phải tuân thủ các tiêu chuẩn bảo mật của tổ chức giáo dục và quy định bảo vệ dữ liệu cá nhân.
+
+NFR-7: Hệ thống phải có giao diện người dùng thân thiện, dễ sử dụng cho cả ứng dụng web và ứng dụng di động.
+
+NFR-8: Hệ thống phải hỗ trợ đa ngôn ngữ (tiếng Việt và tiếng Anh) cho giao diện người dùng.
+
+NFR-9: Hệ thống phải có khả năng sao lưu dữ liệu tự động hàng ngày để đảm bảo không mất dữ liệu.
+
+NFR-10: Hệ thống phải có khả năng khôi phục dữ liệu từ bản sao lưu trong trường hợp sự cố xảy ra.
+
+NFR-11: Hệ thống phải có khả năng xử lý ít nhất 1000 lệnh in đồng thời mà không bị quá tải.
+
+NFR-12: Hệ thống phải có khả năng lưu trữ ít nhất 5 năm dữ liệu lịch sử in và báo cáo.
+
+NFR-13: Hệ thống phải tương thích với các trình duyệt web phổ biến (Chrome, Firefox, Edge, Safari) và các hệ điều hành di động (iOS, Android).
+
+NFR-14: Hệ thống phải có khả năng tích hợp với các hệ thống thanh toán trực tuyến khác ngoài SIUPay trong tương lai.
+
+NFR-15: Hệ thống phải có tài liệu kỹ thuật đầy đủ và dễ hiểu cho các nhà phát triển và quản trị viên hệ thống.
+
+3. LƯU Ý VỀ BIỂU ĐỒ USE CASE (Use Case Diagram)
+
+Biểu đồ Use Case cho hệ thống HCMSIU-SSPS cần bao gồm:
+
+- Các tác nhân (Actors): Sinh viên (Student), SPSO (Student Printing Service Officer), Hệ thống (System), HCMSIU_SSO
+
+- Các Use Case chính cho Sinh viên:
+  * Đăng nhập (Login via SSO)
+  * Tải lên tài liệu (Upload Document)
+  * Chọn máy in (Select Printer)
+  * Cấu hình thuộc tính in (Configure Print Properties)
+  * Xem chi phí dự kiến (View Estimated Cost)
+  * Gửi lệnh in (Submit Print Job)
+  * Xem lịch sử in (View Print History)
+  * Xem số dư tài khoản (View Account Balance)
+  * Nạp tiền vào tài khoản (Deposit Money)
+  * Xem lịch sử giao dịch (View Transaction History)
+  * Hủy lệnh in (Cancel Print Job)
+
+- Các Use Case chính cho SPSO:
+  * Đăng nhập (Login via SSO)
+  * Quản lý máy in (Manage Printers - Add/Enable/Disable)
+  * Xem lịch sử in (View Print History)
+  * Cấu hình hệ thống (Configure System Settings)
+  * Quản lý loại file được phép (Manage Permitted File Types)
+  * Quản lý thưởng học kỳ (Manage Semester Bonuses)
+  * Quản lý gói khuyến mãi nạp tiền (Manage Deposit Bonus Packages)
+  * Quản lý cấu hình giá (Manage Pricing Configuration)
+  * Xem báo cáo (View Reports - Monthly/Yearly)
+  * Xem thống kê máy in (View Printer Statistics)
+  * Xem nhật ký máy in (View Printer Logs)
+
+- Các Use Case tự động của Hệ thống:
+  * Tính toán số dư tài khoản (Calculate Account Balance)
+  * Xử lý thanh toán nạp tiền (Process Deposit Payment)
+  * Xử lý webhook thanh toán (Process Payment Webhook)
+  * Tự động tạo báo cáo (Auto Generate Reports)
+  * Ghi nhận hành động in (Log Print Actions)
+  * Ghi nhận nhật ký hệ thống (Log System Actions)
+  * Hoàn tiền khi hủy in (Process Refund)
+
+- Mối quan hệ: Sử dụng mối quan hệ <<include>> và <<extend>> giữa các Use Case khi cần thiết.
+

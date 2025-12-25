@@ -1,0 +1,1565 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pricing Configuration - Staff Dashboard</title>
+  <style>
+    :root {
+      --bg: #f7f7fb;
+      --card: #ffffff;
+      --border: #e5e7eb;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --accent: #2563eb;
+      --accent-2: #10b981;
+      --danger: #dc2626;
+      --warn: #f59e0b;
+      --shadow: 0 12px 30px -18px rgba(15, 23, 42, 0.4);
+      font-family: "Inter", system-ui, -apple-system, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      display: grid;
+      grid-template-rows: 72px 1fr;
+      grid-template-columns: 260px 1fr;
+      grid-template-areas:
+        "sidebar header"
+        "sidebar main";
+      min-height: 100vh;
+    }
+    header {
+      grid-area: header;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      z-index: 10;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 18px; }
+    .brand span { color: var(--muted); font-weight: 500; }
+    .actions { display: flex; align-items: center; gap: 12px; }
+    .icon-btn {
+      width: 40px; height: 40px; display: grid; place-items: center;
+      border-radius: 10px; border: 1px solid var(--border); background: var(--card);
+      cursor: pointer; transition: 0.2s ease;
+    }
+    .icon-btn:hover { border-color: var(--accent); }
+    aside {
+      grid-area: sidebar;
+      background: #0f172a;
+      color: #e2e8f0;
+      display: flex;
+      flex-direction: column;
+      padding: 20px 16px;
+      gap: 16px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+    }
+    nav { display: flex; flex-direction: column; gap: 6px; }
+    .nav-item {
+      padding: 12px 14px; border-radius: 10px; color: inherit; text-decoration: none;
+      display: flex; align-items: center; gap: 10px; transition: 0.2s ease;
+    }
+    .nav-item:hover, .nav-item.active { background: rgba(59, 130, 246, 0.15); color: #fff; }
+    .sidebar-footer {
+      margin-top: auto; padding: 12px 14px; border-radius: 10px;
+      background: rgba(226, 232, 240, 0.05); color: #cbd5e1; font-size: 13px; line-height: 1.5;
+    }
+    main { grid-area: main; padding: 28px 28px 40px; display: flex; flex-direction: column; gap: 20px; }
+    .page-title { font-size: 28px; font-weight: 700; margin: 0; }
+    .sub { color: var(--muted); margin-top: 6px; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: var(--shadow);
+    }
+    
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 8px;
+      border-bottom: 2px solid var(--border);
+      margin-bottom: 24px;
+      overflow-x: auto;
+    }
+    .tab {
+      padding: 12px 20px;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      transition: 0.2s ease;
+      white-space: nowrap;
+    }
+    .tab:hover { color: var(--accent); }
+    .tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    
+    /* Table Styles */
+    .table-card { padding: 0; }
+    .table-header {
+      padding: 18px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .table-header .title { font-weight: 700; font-size: 16px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { text-align: left; padding: 14px 16px; }
+    th {
+      color: var(--muted);
+      font-size: 13px;
+      letter-spacing: 0.3px;
+      border-bottom: 1px solid var(--border);
+      font-weight: 600;
+    }
+    tr:hover td { background: #f9fafb; }
+    td { border-bottom: 1px solid var(--border); font-size: 14px; }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 12px;
+    }
+    .badge.active { background: #ecfdf3; color: #166534; }
+    .badge.inactive { background: #fee2e2; color: #b91c1c; }
+    .badge.event { background: #fef3c7; color: #92400e; }
+    .muted { color: var(--muted); }
+    .actions-col { display: flex; gap: 6px; flex-wrap: wrap; }
+    .pill-btn {
+      border: 1px solid var(--border);
+      background: #fff;
+      padding: 6px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: 0.2s ease;
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+    }
+    .pill-btn svg { width: 16px; height: 16px; }
+    .pill-btn.view { color: #2563eb; border-color: #bfdbfe; }
+    .pill-btn.update { color: #7c3aed; border-color: #ddd6fe; }
+    .pill-btn:hover { box-shadow: 0 6px 12px -10px rgba(0,0,0,0.25); }
+    .btn {
+      border: 1px solid var(--border);
+      background: var(--card);
+      padding: 8px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--text);
+      transition: 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .btn-secondary { background: #eef2ff; color: #1e3a8a; border-color: #c7d2fe; }
+    .btn-danger { background: #fee2e2; color: #b91c1c; border-color: #fecdd3; }
+    .btn-sm { padding: 6px 10px; font-size: 12px; }
+    .btn:hover { box-shadow: 0 6px 18px -12px rgba(37, 99, 235, 0.8); }
+    
+    /* Toggle Switch */
+    .toggle {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+    }
+    .toggle input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #cbd5e1;
+      transition: 0.3s;
+      border-radius: 24px;
+    }
+    .toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: 0.3s;
+      border-radius: 50%;
+    }
+    .toggle input:checked + .toggle-slider {
+      background-color: var(--accent-2);
+    }
+    .toggle input:checked + .toggle-slider:before {
+      transform: translateX(20px);
+    }
+    
+    /* Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.45);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 16px;
+    }
+    .modal-backdrop.active { display: flex; }
+    .modal {
+      background: #fff;
+      border-radius: 14px;
+      padding: 24px;
+      width: min(600px, 90vw);
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: var(--shadow);
+    }
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 2px solid var(--border);
+    }
+    .modal-header h3 { margin: 0; font-size: 20px; }
+    .modal-close {
+      width: 32px;
+      height: 32px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      border-radius: 8px;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      font-size: 18px;
+      color: var(--muted);
+      transition: 0.2s ease;
+    }
+    .modal-close:hover { border-color: var(--text); color: var(--text); }
+    .form-group {
+      margin-bottom: 16px;
+    }
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 14px;
+      background: #fff;
+      font-family: inherit;
+    }
+    .form-group textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+    .form-group small {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 4px;
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 2px solid var(--border);
+    }
+    
+    /* Info Box */
+    .info-box {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+    .info-box-title {
+      font-weight: 600;
+      color: #1e40af;
+      margin-bottom: 8px;
+    }
+    .info-box-text {
+      font-size: 13px;
+      color: #1e3a8a;
+      line-height: 1.5;
+    }
+    .info-box-text strong {
+      color: #dc2626;
+      font-weight: 700;
+    }
+    .info-box-warning {
+      background: #fef3c7;
+      border: 1px solid #fcd34d;
+      border-left: 4px solid #f59e0b;
+      border-radius: 8px;
+      padding: 12px;
+      margin-top: 12px;
+      font-size: 12px;
+      color: #92400e;
+    }
+    
+    /* Price Display */
+    .price-display {
+      font-weight: 500;
+      color: var(--text);
+      font-size: 14px;
+    }
+    .percentage-display {
+      font-weight: 600;
+      color: var(--accent-2);
+    }
+    
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--muted);
+    }
+    .empty-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.3; }
+    .empty-title { font-size: 18px; font-weight: 600; margin-bottom: 8px; color: var(--text); }
+    .empty-text { font-size: 14px; }
+    .pagination {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 20px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 16px;
+    }
+    .pagination-info {
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .pagination-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .pagination-btn {
+      padding: 6px 12px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--card);
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+      transition: 0.2s ease;
+    }
+    .pagination-btn:hover:not(:disabled) {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .pagination-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .pagination-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+    .page-size-select {
+      padding: 6px 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <aside>
+    <div class="brand" style="color:#fff;">Smart Print <span>Dashboard</span></div>
+    <nav>
+      <a class="nav-item" href="#">🏠 Dashboard</a>
+      <a class="nav-item" href="#">🖨️ Printers</a>
+      <a class="nav-item" href="#">📄 Jobs</a>
+      <a class="nav-item" href="#">📦 Paper Purchases</a>
+      <a class="nav-item active" href="#">💰 Pricing Config</a>
+      <a class="nav-item" href="#">🧾 Reports</a>
+    </nav>
+    <div class="sidebar-footer">
+      Configure pricing for print jobs, discounts, and deposit bonuses.
+    </div>
+  </aside>
+  
+  <header>
+    <div class="brand">Pricing Configuration <span>Manage all pricing settings</span></div>
+    <div class="actions">
+      <div class="icon-btn">🔔</div>
+      <div class="icon-btn">☰</div>
+    </div>
+  </header>
+  
+  <main>
+    <div>
+      <h1 class="page-title">Pricing Configuration</h1>
+      <div class="sub">Configure page prices, color mode multipliers, bulk discounts, and deposit bonuses</div>
+    </div>
+
+    <div class="card">
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab('page-sizes')">Page Size Prices</button>
+        <button class="tab" onclick="switchTab('color-modes')">Color Mode Multipliers</button>
+        <button class="tab" onclick="switchTab('bulk-discounts')">Bulk Discount Packages</button>
+        <button class="tab" onclick="switchTab('deposit-bonuses')">Deposit Bonus Packages</button>
+      </div>
+
+      <!-- Page Size Prices Tab -->
+      <div id="page-sizes" class="tab-content active">
+        <div class="info-box">
+          <div class="info-box-title">Page Size Base Prices</div>
+          <div class="info-box-text">
+            Set the base price per page for each paper size. These prices are multiplied by color mode multipliers and may be discounted by bulk discount packages.
+            Note: A3 pages are equivalent to 2 A4 pages in the system.
+            <div class="info-box-warning">
+              <strong>⚠️ Important:</strong> When you update a price, the previous price settings are preserved in the system for historical records. Existing print jobs will continue to use their original pricing.
+            </div>
+          </div>
+        </div>
+        <div class="table-header">
+          <div class="title">Page Size Prices</div>
+          <button class="btn btn-primary" onclick="openModal('create-page-size-modal')">+ Add Page Size Price</button>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Page Size</th>
+              <th>Base Price (per page)</th>
+              <th>Status</th>
+              <th>Last Updated</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="page-size-tbody">
+            <tr>
+              <td><strong>A4</strong></td>
+              <td class="price-display">$0.05</td>
+              <td><span class="badge active">Active</span></td>
+              <td class="muted">2024-12-01</td>
+              <td>
+                <div class="actions-col">
+                  <button class="pill-btn view" onclick="showPageSizeDetail('a4')" aria-label="View details">
+                    <svg fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M12 5c-5 0-9.27 3.11-10.5 7 1.23 3.89 5.5 7 10.5 7s9.27-3.11 10.5-7C21.27 8.11 17 5 12 5Zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10Zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z"/>
+                    </svg>
+                  </button>
+                  <button class="pill-btn update" onclick="updatePageSize('a4')" aria-label="Update">
+                    <svg fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M4 17.25V20h2.75L17.81 8.94l-2.75-2.75L4 17.25ZM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83Z"/>
+                    </svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>A3</strong></td>
+              <td class="price-display">$0.10</td>
+              <td><span class="badge active">Active</span></td>
+              <td class="muted">2024-12-01</td>
+              <td>
+                <div class="actions-col">
+                  <button class="pill-btn view" onclick="showPageSizeDetail('a3')" aria-label="View details">
+                    <svg fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M12 5c-5 0-9.27 3.11-10.5 7 1.23 3.89 5.5 7 10.5 7s9.27-3.11 10.5-7C21.27 8.11 17 5 12 5Zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10Zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z"/>
+                    </svg>
+                  </button>
+                  <button class="pill-btn update" onclick="updatePageSize('a3')" aria-label="Update">
+                    <svg fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M4 17.25V20h2.75L17.81 8.94l-2.75-2.75L4 17.25ZM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83Z"/>
+                    </svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>A5</strong></td>
+              <td class="price-display">$0.03</td>
+              <td><span class="badge active">Active</span></td>
+              <td class="muted">2024-12-01</td>
+              <td>
+                <div class="actions-col">
+                  <button class="pill-btn view" onclick="showPageSizeDetail('a5')" aria-label="View details">
+                    <svg fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M12 5c-5 0-9.27 3.11-10.5 7 1.23 3.89 5.5 7 10.5 7s9.27-3.11 10.5-7C21.27 8.11 17 5 12 5Zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10Zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z"/>
+                    </svg>
+                  </button>
+                  <button class="pill-btn update" onclick="updatePageSize('a5')" aria-label="Update">
+                    <svg fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M4 17.25V20h2.75L17.81 8.94l-2.75-2.75L4 17.25ZM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83Z"/>
+                    </svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Color Mode Multipliers Tab -->
+      <div id="color-modes" class="tab-content">
+        <div class="info-box">
+          <div class="info-box-title">Color Mode Price Multipliers</div>
+          <div class="info-box-text">
+            Configure price multipliers for different color modes. These multipliers are applied to the base page size price.
+            Example: If base price is $0.05 and color multiplier is 1.5, the final price per page is $0.075.
+            <div class="info-box-warning">
+              <strong>⚠️ Important:</strong> When you update a multiplier, the previous multiplier settings are preserved in the system for historical records. Existing print jobs will continue to use their original pricing.
+            </div>
+          </div>
+        </div>
+        <div class="table-header">
+          <div class="title">Color Mode Prices</div>
+          <button class="btn btn-primary" onclick="openModal('create-color-mode-modal')">+ Add Color Mode Price</button>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Color Mode</th>
+              <th>Price Multiplier</th>
+              <th>Example (A4 @ $0.05)</th>
+              <th>Status</th>
+              <th>Last Updated</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="color-mode-tbody">
+            <tr>
+              <td><strong>Black & White</strong></td>
+              <td class="percentage-display">0.5x</td>
+              <td class="muted">$0.025/page</td>
+              <td><span class="badge active">Active</span></td>
+              <td class="muted">2024-12-01</td>
+              <td>
+                <div class="actions-col">
+                  <button class="pill-btn view" onclick="showColorModeDetail('black-white')" aria-label="View details">
+                    <svg fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M12 5c-5 0-9.27 3.11-10.5 7 1.23 3.89 5.5 7 10.5 7s9.27-3.11 10.5-7C21.27 8.11 17 5 12 5Zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10Zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z"/>
+                    </svg>
+                  </button>
+                  <button class="pill-btn update" onclick="updateColorMode('black-white')" aria-label="Update">
+                    <svg fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M4 17.25V20h2.75L17.81 8.94l-2.75-2.75L4 17.25ZM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83Z"/>
+                    </svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Grayscale</strong></td>
+              <td class="percentage-display">1.0x</td>
+              <td class="muted">$0.05/page</td>
+              <td><span class="badge active">Active</span></td>
+              <td class="muted">2024-12-01</td>
+              <td>
+                <div class="actions-col">
+                  <button class="pill-btn view" onclick="showColorModeDetail('grayscale')" aria-label="View details">
+                    <svg fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M12 5c-5 0-9.27 3.11-10.5 7 1.23 3.89 5.5 7 10.5 7s9.27-3.11 10.5-7C21.27 8.11 17 5 12 5Zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10Zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z"/>
+                    </svg>
+                  </button>
+                  <button class="pill-btn update" onclick="updateColorMode('grayscale')" aria-label="Update">
+                    <svg fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M4 17.25V20h2.75L17.81 8.94l-2.75-2.75L4 17.25ZM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83Z"/>
+                    </svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Color</strong></td>
+              <td class="percentage-display">1.5x</td>
+              <td class="muted">$0.075/page</td>
+              <td><span class="badge active">Active</span></td>
+              <td class="muted">2024-12-01</td>
+              <td>
+                <div class="actions-col">
+                  <button class="pill-btn view" onclick="showColorModeDetail('color')" aria-label="View details">
+                    <svg fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M12 5c-5 0-9.27 3.11-10.5 7 1.23 3.89 5.5 7 10.5 7s9.27-3.11 10.5-7C21.27 8.11 17 5 12 5Zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10Zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z"/>
+                    </svg>
+                  </button>
+                  <button class="pill-btn update" onclick="updateColorMode('color')" aria-label="Update">
+                    <svg fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M4 17.25V20h2.75L17.81 8.94l-2.75-2.75L4 17.25ZM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83Z"/>
+                    </svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Bulk Discount Packages Tab -->
+      <div id="bulk-discounts" class="tab-content">
+        <div class="info-box">
+          <div class="info-box-title">Bulk Discount Packages</div>
+          <div class="info-box-text">
+            Create discount packages based on the number of pages printed. Students automatically receive the best applicable discount.
+            Discounts are applied to the subtotal (after color mode multiplier).
+            <div class="info-box-warning">
+              <strong>⚠️ Important:</strong> When you update a discount package, the previous discount settings are preserved in the system for historical records. Existing print jobs will continue to use their original discount rates.
+            </div>
+          </div>
+        </div>
+        <div class="table-header">
+          <div class="title">Bulk Discount Packages</div>
+          <button class="btn btn-primary" onclick="openModal('create-bulk-discount-modal')">+ Add Discount Package</button>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Package Name</th>
+              <th>Minimum Pages</th>
+              <th>Discount</th>
+              <th>Status</th>
+              <th>Description</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="bulk-discount-tbody">
+            <tr>
+              <td><strong>Small Volume</strong></td>
+              <td>10 pages</td>
+              <td class="percentage-display">5%</td>
+              <td><span class="badge active">Active</span></td>
+              <td class="muted">Discount for 10+ pages</td>
+              <td>
+                <div class="actions-col">
+                  <button class="pill-btn update" onclick="updateBulkDiscount('small')" aria-label="Update">
+                    <svg fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M4 17.25V20h2.75L17.81 8.94l-2.75-2.75L4 17.25ZM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83Z"/>
+                    </svg>
+                  </button>
+                  <label class="toggle">
+                    <input type="checkbox" checked onchange="toggleBulkDiscount('small', this.checked)">
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Medium Volume</strong></td>
+              <td>50 pages</td>
+              <td class="percentage-display">10%</td>
+              <td><span class="badge active">Active</span></td>
+              <td class="muted">Discount for 50+ pages</td>
+              <td>
+                <div class="actions-col">
+                  <button class="pill-btn update" onclick="updateBulkDiscount('medium')" aria-label="Update">
+                    <svg fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M4 17.25V20h2.75L17.81 8.94l-2.75-2.75L4 17.25ZM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83Z"/>
+                    </svg>
+                  </button>
+                  <label class="toggle">
+                    <input type="checkbox" checked onchange="toggleBulkDiscount('medium', this.checked)">
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Large Volume</strong></td>
+              <td>100 pages</td>
+              <td class="percentage-display">15%</td>
+              <td><span class="badge active">Active</span></td>
+              <td class="muted">Discount for 100+ pages</td>
+              <td>
+                <div class="actions-col">
+                  <button class="pill-btn update" onclick="updateBulkDiscount('large')" aria-label="Update">
+                    <svg fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M4 17.25V20h2.75L17.81 8.94l-2.75-2.75L4 17.25ZM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83Z"/>
+                    </svg>
+                  </button>
+                  <label class="toggle">
+                    <input type="checkbox" checked onchange="toggleBulkDiscount('large', this.checked)">
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="pagination">
+          <div class="pagination-info">Showing 1-3 of 3 entries</div>
+          <div class="pagination-controls">
+            <select class="page-size-select">
+              <option value="10" selected>10 per page</option>
+              <option value="25">25 per page</option>
+              <option value="50">50 per page</option>
+            </select>
+            <button class="pagination-btn" disabled>◀ Previous</button>
+            <button class="pagination-btn active">1</button>
+            <button class="pagination-btn" disabled>Next ▶</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Deposit Bonus Packages Tab -->
+      <div id="deposit-bonuses" class="tab-content">
+        <div class="info-box">
+          <div class="info-box-title">Deposit Bonus Packages</div>
+          <div class="info-box-text">
+            Create bonus packages for deposits. Students receive bonus credits when they deposit above the minimum amount.
+            Example: Deposit $10, get 10% bonus = $11 total credited.
+            <div class="info-box-warning">
+              <strong>⚠️ Important:</strong> When you update a bonus package, the previous bonus settings are preserved in the system for historical records. Existing deposits will continue to use their original bonus rates.
+            </div>
+          </div>
+        </div>
+        <div class="table-header">
+          <div class="title">Deposit Bonus Packages</div>
+          <button class="btn btn-primary" onclick="openModal('create-deposit-bonus-modal')">+ Add Bonus Package</button>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Package Code</th>
+              <th>Package Name</th>
+              <th>Minimum Deposit</th>
+              <th>Bonus %</th>
+              <th>Type</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="deposit-bonus-tbody">
+            <tr>
+              <td><strong>BASIC</strong></td>
+              <td>Basic Bonus</td>
+              <td>$5.00</td>
+              <td class="percentage-display">5%</td>
+              <td><span class="badge">Standard</span></td>
+              <td><span class="badge active">Active</span></td>
+              <td>
+                <div class="actions-col">
+                  <button class="pill-btn update" onclick="updateDepositBonus('basic')" aria-label="Update">
+                    <svg fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M4 17.25V20h2.75L17.81 8.94l-2.75-2.75L4 17.25ZM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83Z"/>
+                    </svg>
+                  </button>
+                  <label class="toggle">
+                    <input type="checkbox" checked onchange="toggleDepositBonus('basic', this.checked)">
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>SAVE_10</strong></td>
+              <td>Save 10%</td>
+              <td>$10.00</td>
+              <td class="percentage-display">10%</td>
+              <td><span class="badge">Standard</span></td>
+              <td><span class="badge active">Active</span></td>
+              <td>
+                <div class="actions-col">
+                  <button class="pill-btn update" onclick="updateDepositBonus('save10')" aria-label="Update">
+                    <svg fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M4 17.25V20h2.75L17.81 8.94l-2.75-2.75L4 17.25ZM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83Z"/>
+                    </svg>
+                  </button>
+                  <label class="toggle">
+                    <input type="checkbox" checked onchange="toggleDepositBonus('save10', this.checked)">
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>XMAS_25</strong></td>
+              <td>Christmas Special</td>
+              <td>$20.00</td>
+              <td class="percentage-display">25%</td>
+              <td><span class="badge event">Event</span></td>
+              <td><span class="badge active">Active</span></td>
+              <td>
+                <div class="actions-col">
+                  <button class="pill-btn update" onclick="updateDepositBonus('xmas')" aria-label="Update">
+                    <svg fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M4 17.25V20h2.75L17.81 8.94l-2.75-2.75L4 17.25ZM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83Z"/>
+                    </svg>
+                  </button>
+                  <label class="toggle">
+                    <input type="checkbox" checked onchange="toggleDepositBonus('xmas', this.checked)">
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="pagination">
+          <div class="pagination-info">Showing 1-3 of 3 entries</div>
+          <div class="pagination-controls">
+            <select class="page-size-select">
+              <option value="10" selected>10 per page</option>
+              <option value="25">25 per page</option>
+              <option value="50">50 per page</option>
+            </select>
+            <button class="pagination-btn" disabled>◀ Previous</button>
+            <button class="pagination-btn active">1</button>
+            <button class="pagination-btn" disabled>Next ▶</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Modals for Page Size Prices -->
+  <div class="modal-backdrop" id="create-page-size-modal" onclick="closeModal('create-page-size-modal')">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Add Page Size Price</h3>
+        <button class="modal-close" onclick="closeModal('create-page-size-modal')">×</button>
+      </div>
+      <form id="create-page-size-form">
+        <div class="form-group">
+          <label>Page Size <span style="color:var(--danger)">*</span></label>
+          <select required>
+            <option value="">Select page size</option>
+            <option value="A4">A4</option>
+            <option value="A3">A3</option>
+            <option value="A5">A5</option>
+            <option value="Letter">Letter</option>
+            <option value="Legal">Legal</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Base Price (per page) <span style="color:var(--danger)">*</span></label>
+          <input type="number" step="0.0001" min="0" placeholder="0.05" required>
+          <small>Enter price in dollars (e.g., 0.05 for $0.05 per page)</small>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn" onclick="closeModal('create-page-size-modal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modals for Color Mode Prices -->
+  <div class="modal-backdrop" id="create-color-mode-modal" onclick="closeModal('create-color-mode-modal')">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Add Color Mode Price</h3>
+        <button class="modal-close" onclick="closeModal('create-color-mode-modal')">×</button>
+      </div>
+      <form id="create-color-mode-form">
+        <div class="form-group">
+          <label>Color Mode <span style="color:var(--danger)">*</span></label>
+          <select required>
+            <option value="">Select color mode</option>
+            <option value="black-white">Black & White</option>
+            <option value="grayscale">Grayscale</option>
+            <option value="color">Color</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Price Multiplier <span style="color:var(--danger)">*</span></label>
+          <input type="number" step="0.0001" min="0" max="10" placeholder="1.0" required>
+          <small>Multiplier applied to base page price (e.g., 0.5 for 50%, 1.5 for 150%)</small>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn" onclick="closeModal('create-color-mode-modal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modals for Bulk Discount Packages -->
+  <div class="modal-backdrop" id="create-bulk-discount-modal" onclick="closeModal('create-bulk-discount-modal')">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Add Bulk Discount Package</h3>
+        <button class="modal-close" onclick="closeModal('create-bulk-discount-modal')">×</button>
+      </div>
+      <form id="create-bulk-discount-form">
+        <div class="form-group">
+          <label>Package Name <span style="color:var(--danger)">*</span></label>
+          <input type="text" placeholder="e.g., Large Volume Discount" required>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Minimum Pages <span style="color:var(--danger)">*</span></label>
+            <input type="number" min="1" placeholder="100" required>
+            <small>Minimum pages to qualify</small>
+          </div>
+          <div class="form-group">
+            <label>Discount Percentage <span style="color:var(--danger)">*</span></label>
+            <input type="number" step="0.01" min="0" max="100" placeholder="15" required>
+            <small>Enter as percentage (e.g., 15 for 15%)</small>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea placeholder="Optional description of this discount package"></textarea>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn" onclick="closeModal('create-bulk-discount-modal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modals for Deposit Bonus Packages -->
+  <div class="modal-backdrop" id="create-deposit-bonus-modal" onclick="closeModal('create-deposit-bonus-modal')">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Add Deposit Bonus Package</h3>
+        <button class="modal-close" onclick="closeModal('create-deposit-bonus-modal')">×</button>
+      </div>
+      <form id="create-deposit-bonus-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Package Code <span style="color:var(--danger)">*</span></label>
+            <input type="text" placeholder="e.g., SAVE_30" required style="text-transform:uppercase;">
+            <small>Unique code (uppercase, alphanumeric)</small>
+          </div>
+          <div class="form-group">
+            <label>Package Name</label>
+            <input type="text" placeholder="e.g., Save 30%">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Minimum Deposit Amount <span style="color:var(--danger)">*</span></label>
+            <input type="number" step="0.01" min="0" placeholder="20.00" required>
+            <small>Minimum deposit to qualify (in dollars)</small>
+          </div>
+          <div class="form-group">
+            <label>Bonus Percentage <span style="color:var(--danger)">*</span></label>
+            <input type="number" step="0.01" min="0" max="100" placeholder="30" required>
+            <small>Enter as percentage (e.g., 30 for 30%)</small>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea placeholder="Optional description"></textarea>
+        </div>
+        <div class="form-group">
+          <label>
+            <input type="checkbox" style="width:auto; margin-right:8px;">
+            Event Package (temporary promotional package)
+          </label>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn" onclick="closeModal('create-deposit-bonus-modal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Update Modals for Page Size Prices -->
+  <div class="modal-backdrop" id="update-page-size-modal" onclick="closeModal('update-page-size-modal')">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Update Page Size Price</h3>
+        <button class="modal-close" onclick="closeModal('update-page-size-modal')">×</button>
+      </div>
+      <div class="info-box-warning" style="margin-bottom: 20px;">
+        <strong>⚠️ Important:</strong> Updating this price will create a new price setting. Previous price settings are preserved for historical records. Existing print jobs will continue to use their original pricing.
+      </div>
+      <form id="update-page-size-form">
+        <input type="hidden" id="update-page-size-id">
+        <div class="form-group">
+          <label>Page Size <span style="color:var(--danger)">*</span></label>
+          <select id="update-page-size-select" required disabled>
+            <option value="">Select page size</option>
+            <option value="A4">A4</option>
+            <option value="A3">A3</option>
+            <option value="A5">A5</option>
+            <option value="Letter">Letter</option>
+            <option value="Legal">Legal</option>
+          </select>
+          <small>Page size cannot be changed</small>
+        </div>
+        <div class="form-group">
+          <label>Current Base Price</label>
+          <input type="text" id="update-page-size-current" readonly style="background: #f3f4f6;">
+          <small>This is the current active price</small>
+        </div>
+        <div class="form-group">
+          <label>New Base Price (per page) <span style="color:var(--danger)">*</span></label>
+          <input type="number" id="update-page-size-price" step="0.0001" min="0" placeholder="0.05" required>
+          <small>Enter new price in dollars (e.g., 0.05 for $0.05 per page)</small>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn" onclick="closeModal('update-page-size-modal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Update Price</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Update Modals for Color Mode Prices -->
+  <div class="modal-backdrop" id="update-color-mode-modal" onclick="closeModal('update-color-mode-modal')">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Update Color Mode Price</h3>
+        <button class="modal-close" onclick="closeModal('update-color-mode-modal')">×</button>
+      </div>
+      <div class="info-box-warning" style="margin-bottom: 20px;">
+        <strong>⚠️ Important:</strong> Updating this multiplier will create a new price setting. Previous multiplier settings are preserved for historical records. Existing print jobs will continue to use their original pricing.
+      </div>
+      <form id="update-color-mode-form">
+        <input type="hidden" id="update-color-mode-id">
+        <div class="form-group">
+          <label>Color Mode <span style="color:var(--danger)">*</span></label>
+          <select id="update-color-mode-select" required disabled>
+            <option value="">Select color mode</option>
+            <option value="black-white">Black & White</option>
+            <option value="grayscale">Grayscale</option>
+            <option value="color">Color</option>
+          </select>
+          <small>Color mode cannot be changed</small>
+        </div>
+        <div class="form-group">
+          <label>Current Price Multiplier</label>
+          <input type="text" id="update-color-mode-current" readonly style="background: #f3f4f6;">
+          <small>This is the current active multiplier</small>
+        </div>
+        <div class="form-group">
+          <label>New Price Multiplier <span style="color:var(--danger)">*</span></label>
+          <input type="number" id="update-color-mode-multiplier" step="0.0001" min="0" max="10" placeholder="1.0" required>
+          <small>Multiplier applied to base page price (e.g., 0.5 for 50%, 1.5 for 150%)</small>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn" onclick="closeModal('update-color-mode-modal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Update Multiplier</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Update Modals for Bulk Discount Packages -->
+  <div class="modal-backdrop" id="update-bulk-discount-modal" onclick="closeModal('update-bulk-discount-modal')">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Update Bulk Discount Package</h3>
+        <button class="modal-close" onclick="closeModal('update-bulk-discount-modal')">×</button>
+      </div>
+      <div class="info-box-warning" style="margin-bottom: 20px;">
+        <strong>⚠️ Important:</strong> Updating this discount package will create a new discount setting. Previous discount settings are preserved for historical records. Existing print jobs will continue to use their original discount rates.
+      </div>
+      <form id="update-bulk-discount-form">
+        <input type="hidden" id="update-bulk-discount-id">
+        <div class="form-group">
+          <label>Package Name <span style="color:var(--danger)">*</span></label>
+          <input type="text" id="update-bulk-discount-name" placeholder="e.g., Large Volume Discount" required>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Current Minimum Pages</label>
+            <input type="text" id="update-bulk-discount-current-min" readonly style="background: #f3f4f6;">
+          </div>
+          <div class="form-group">
+            <label>Current Discount</label>
+            <input type="text" id="update-bulk-discount-current-discount" readonly style="background: #f3f4f6;">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>New Minimum Pages <span style="color:var(--danger)">*</span></label>
+            <input type="number" id="update-bulk-discount-min-pages" min="1" placeholder="100" required>
+            <small>Minimum pages to qualify</small>
+          </div>
+          <div class="form-group">
+            <label>New Discount Percentage <span style="color:var(--danger)">*</span></label>
+            <input type="number" id="update-bulk-discount-percentage" step="0.01" min="0" max="100" placeholder="15" required>
+            <small>Enter as percentage (e.g., 15 for 15%)</small>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea id="update-bulk-discount-description" placeholder="Optional description of this discount package"></textarea>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn" onclick="closeModal('update-bulk-discount-modal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Update Package</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Update Modals for Deposit Bonus Packages -->
+  <div class="modal-backdrop" id="update-deposit-bonus-modal" onclick="closeModal('update-deposit-bonus-modal')">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Update Deposit Bonus Package</h3>
+        <button class="modal-close" onclick="closeModal('update-deposit-bonus-modal')">×</button>
+      </div>
+      <div class="info-box-warning" style="margin-bottom: 20px;">
+        <strong>⚠️ Important:</strong> Updating this bonus package will create a new bonus setting. Previous bonus settings are preserved for historical records. Existing deposits will continue to use their original bonus rates.
+      </div>
+      <form id="update-deposit-bonus-form">
+        <input type="hidden" id="update-deposit-bonus-id">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Package Code <span style="color:var(--danger)">*</span></label>
+            <input type="text" id="update-deposit-bonus-code" placeholder="e.g., SAVE_30" required style="text-transform:uppercase;" readonly>
+            <small>Package code cannot be changed</small>
+          </div>
+          <div class="form-group">
+            <label>Package Name</label>
+            <input type="text" id="update-deposit-bonus-name" placeholder="e.g., Save 30%">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Current Minimum Deposit</label>
+            <input type="text" id="update-deposit-bonus-current-amount" readonly style="background: #f3f4f6;">
+          </div>
+          <div class="form-group">
+            <label>Current Bonus</label>
+            <input type="text" id="update-deposit-bonus-current-bonus" readonly style="background: #f3f4f6;">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>New Minimum Deposit Amount <span style="color:var(--danger)">*</span></label>
+            <input type="number" id="update-deposit-bonus-amount" step="0.01" min="0" placeholder="20.00" required>
+            <small>Minimum deposit to qualify (in dollars)</small>
+          </div>
+          <div class="form-group">
+            <label>New Bonus Percentage <span style="color:var(--danger)">*</span></label>
+            <input type="number" id="update-deposit-bonus-percentage" step="0.01" min="0" max="100" placeholder="30" required>
+            <small>Enter as percentage (e.g., 30 for 30%)</small>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea id="update-deposit-bonus-description" placeholder="Optional description"></textarea>
+        </div>
+        <div class="form-group">
+          <label>
+            <input type="checkbox" id="update-deposit-bonus-event" style="width:auto; margin-right:8px;">
+            Event Package (temporary promotional package)
+          </label>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn" onclick="closeModal('update-deposit-bonus-modal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Update Package</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Detail Modal for Page Size -->
+  <div class="modal-backdrop" id="detail-page-size-modal" onclick="closeModal('detail-page-size-modal')">
+    <div class="modal" onclick="event.stopPropagation()" style="width: min(800px, 90vw);">
+      <div class="modal-header">
+        <h3>Page Size Price History</h3>
+        <button class="modal-close" onclick="closeModal('detail-page-size-modal')">×</button>
+      </div>
+      <div class="form-group">
+        <label>Page Size</label>
+        <input type="text" id="detail-page-size-name" readonly style="background: #f3f4f6; font-weight: 600;">
+      </div>
+      <div style="margin-top: 24px;">
+        <h4 style="margin: 0 0 16px 0; font-size: 16px; font-weight: 600;">Price History</h4>
+        <table style="width: 100%; border-collapse: collapse;">
+          <thead>
+            <tr style="background: #f8fafc;">
+              <th style="padding: 12px; text-align: left; font-size: 12px; font-weight: 600; color: var(--muted); border-bottom: 2px solid var(--border);">Price</th>
+              <th style="padding: 12px; text-align: left; font-size: 12px; font-weight: 600; color: var(--muted); border-bottom: 2px solid var(--border);">Status</th>
+              <th style="padding: 12px; text-align: left; font-size: 12px; font-weight: 600; color: var(--muted); border-bottom: 2px solid var(--border);">Created At</th>
+              <th style="padding: 12px; text-align: left; font-size: 12px; font-weight: 600; color: var(--muted); border-bottom: 2px solid var(--border);">Updated At</th>
+            </tr>
+          </thead>
+          <tbody id="detail-page-size-history">
+            <!-- History will be populated here -->
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn" onclick="closeModal('detail-page-size-modal')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detail Modal for Color Mode -->
+  <div class="modal-backdrop" id="detail-color-mode-modal" onclick="closeModal('detail-color-mode-modal')">
+    <div class="modal" onclick="event.stopPropagation()" style="width: min(800px, 90vw);">
+      <div class="modal-header">
+        <h3>Color Mode Price History</h3>
+        <button class="modal-close" onclick="closeModal('detail-color-mode-modal')">×</button>
+      </div>
+      <div class="form-group">
+        <label>Color Mode</label>
+        <input type="text" id="detail-color-mode-name" readonly style="background: #f3f4f6; font-weight: 600;">
+      </div>
+      <div style="margin-top: 24px;">
+        <h4 style="margin: 0 0 16px 0; font-size: 16px; font-weight: 600;">Multiplier History</h4>
+        <table style="width: 100%; border-collapse: collapse;">
+          <thead>
+            <tr style="background: #f8fafc;">
+              <th style="padding: 12px; text-align: left; font-size: 12px; font-weight: 600; color: var(--muted); border-bottom: 2px solid var(--border);">Multiplier</th>
+              <th style="padding: 12px; text-align: left; font-size: 12px; font-weight: 600; color: var(--muted); border-bottom: 2px solid var(--border);">Status</th>
+              <th style="padding: 12px; text-align: left; font-size: 12px; font-weight: 600; color: var(--muted); border-bottom: 2px solid var(--border);">Created At</th>
+              <th style="padding: 12px; text-align: left; font-size: 12px; font-weight: 600; color: var(--muted); border-bottom: 2px solid var(--border);">Updated At</th>
+            </tr>
+          </thead>
+          <tbody id="detail-color-mode-history">
+            <!-- History will be populated here -->
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn" onclick="closeModal('detail-color-mode-modal')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Tab switching
+    function switchTab(tabId) {
+      // Hide all tabs
+      document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      document.querySelectorAll('.tab').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      
+      // Show selected tab
+      document.getElementById(tabId).classList.add('active');
+      event.target.classList.add('active');
+    }
+
+    // Modal functions
+    function openModal(modalId) {
+      document.getElementById(modalId).classList.add('active');
+    }
+
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.remove('active');
+    }
+
+    // Page Size functions
+    function updatePageSize(size) {
+      // Mock data - in real app, fetch from API
+      const data = {
+        'a4': { id: 'a4-id', size: 'A4', currentPrice: '0.05' },
+        'a3': { id: 'a3-id', size: 'A3', currentPrice: '0.10' },
+        'a5': { id: 'a5-id', size: 'A5', currentPrice: '0.03' }
+      };
+      
+      const item = data[size.toLowerCase()];
+      if (!item) return;
+      
+      document.getElementById('update-page-size-id').value = item.id;
+      document.getElementById('update-page-size-select').value = item.size;
+      document.getElementById('update-page-size-current').value = `$${item.currentPrice}`;
+      document.getElementById('update-page-size-price').value = item.currentPrice;
+      
+      openModal('update-page-size-modal');
+    }
+
+    function showPageSizeDetail(size) {
+      // Mock data - in real app, fetch from API
+      const data = {
+        'a4': { 
+          name: 'A4',
+          history: [
+            { price: '$0.05', status: 'Active', created_at: '2024-12-01 10:30:00', updated_at: '2024-12-01 10:30:00' },
+            { price: '$0.04', status: 'Inactive', created_at: '2024-11-15 09:20:00', updated_at: '2024-12-01 10:30:00' },
+            { price: '$0.06', status: 'Inactive', created_at: '2024-10-01 14:15:00', updated_at: '2024-11-15 09:20:00' }
+          ]
+        },
+        'a3': { 
+          name: 'A3',
+          history: [
+            { price: '$0.10', status: 'Active', created_at: '2024-12-01 10:30:00', updated_at: '2024-12-01 10:30:00' },
+            { price: '$0.09', status: 'Inactive', created_at: '2024-11-15 09:20:00', updated_at: '2024-12-01 10:30:00' }
+          ]
+        },
+        'a5': { 
+          name: 'A5',
+          history: [
+            { price: '$0.03', status: 'Active', created_at: '2024-12-01 10:30:00', updated_at: '2024-12-01 10:30:00' },
+            { price: '$0.025', status: 'Inactive', created_at: '2024-11-01 08:00:00', updated_at: '2024-12-01 10:30:00' }
+          ]
+        }
+      };
+      
+      const item = data[size.toLowerCase()];
+      if (!item) return;
+      
+      document.getElementById('detail-page-size-name').value = item.name;
+      const historyBody = document.getElementById('detail-page-size-history');
+      historyBody.innerHTML = item.history.map(h => `
+        <tr>
+          <td style="padding: 12px; border-bottom: 1px solid var(--border);"><strong>${h.price}</strong></td>
+          <td style="padding: 12px; border-bottom: 1px solid var(--border);">
+            <span class="badge ${h.status === 'Active' ? 'active' : 'inactive'}">${h.status}</span>
+          </td>
+          <td style="padding: 12px; border-bottom: 1px solid var(--border); color: var(--muted);">${h.created_at}</td>
+          <td style="padding: 12px; border-bottom: 1px solid var(--border); color: var(--muted);">${h.updated_at}</td>
+        </tr>
+      `).join('');
+      
+      openModal('detail-page-size-modal');
+    }
+
+    // Color Mode functions
+    function updateColorMode(mode) {
+      // Mock data - in real app, fetch from API
+      const data = {
+        'black-white': { id: 'bw-id', mode: 'black-white', currentMultiplier: '0.5' },
+        'grayscale': { id: 'gray-id', mode: 'grayscale', currentMultiplier: '1.0' },
+        'color': { id: 'color-id', mode: 'color', currentMultiplier: '1.5' }
+      };
+      
+      const item = data[mode];
+      if (!item) return;
+      
+      document.getElementById('update-color-mode-id').value = item.id;
+      document.getElementById('update-color-mode-select').value = item.mode;
+      document.getElementById('update-color-mode-current').value = `${item.currentMultiplier}x`;
+      document.getElementById('update-color-mode-multiplier').value = item.currentMultiplier;
+      
+      openModal('update-color-mode-modal');
+    }
+
+    function showColorModeDetail(mode) {
+      // Mock data - in real app, fetch from API
+      const data = {
+        'black-white': { 
+          name: 'Black & White',
+          history: [
+            { multiplier: '0.5x', status: 'Active', created_at: '2024-12-01 10:30:00', updated_at: '2024-12-01 10:30:00' },
+            { multiplier: '0.4x', status: 'Inactive', created_at: '2024-11-15 09:20:00', updated_at: '2024-12-01 10:30:00' },
+            { multiplier: '0.6x', status: 'Inactive', created_at: '2024-10-01 14:15:00', updated_at: '2024-11-15 09:20:00' }
+          ]
+        },
+        'grayscale': { 
+          name: 'Grayscale',
+          history: [
+            { multiplier: '1.0x', status: 'Active', created_at: '2024-12-01 10:30:00', updated_at: '2024-12-01 10:30:00' },
+            { multiplier: '0.9x', status: 'Inactive', created_at: '2024-11-01 08:00:00', updated_at: '2024-12-01 10:30:00' }
+          ]
+        },
+        'color': { 
+          name: 'Color',
+          history: [
+            { multiplier: '1.5x', status: 'Active', created_at: '2024-12-01 10:30:00', updated_at: '2024-12-01 10:30:00' },
+            { multiplier: '1.4x', status: 'Inactive', created_at: '2024-11-15 09:20:00', updated_at: '2024-12-01 10:30:00' },
+            { multiplier: '1.6x', status: 'Inactive', created_at: '2024-10-01 14:15:00', updated_at: '2024-11-15 09:20:00' }
+          ]
+        }
+      };
+      
+      const item = data[mode];
+      if (!item) return;
+      
+      document.getElementById('detail-color-mode-name').value = item.name;
+      const historyBody = document.getElementById('detail-color-mode-history');
+      historyBody.innerHTML = item.history.map(h => `
+        <tr>
+          <td style="padding: 12px; border-bottom: 1px solid var(--border);"><strong>${h.multiplier}</strong></td>
+          <td style="padding: 12px; border-bottom: 1px solid var(--border);">
+            <span class="badge ${h.status === 'Active' ? 'active' : 'inactive'}">${h.status}</span>
+          </td>
+          <td style="padding: 12px; border-bottom: 1px solid var(--border); color: var(--muted);">${h.created_at}</td>
+          <td style="padding: 12px; border-bottom: 1px solid var(--border); color: var(--muted);">${h.updated_at}</td>
+        </tr>
+      `).join('');
+      
+      openModal('detail-color-mode-modal');
+    }
+
+    // Bulk Discount functions
+    function updateBulkDiscount(id) {
+      // Mock data - in real app, fetch from API
+      const data = {
+        'small': { id: 'small-id', name: 'Small Volume', minPages: 10, discount: 5, description: 'Discount for 10+ pages' },
+        'medium': { id: 'medium-id', name: 'Medium Volume', minPages: 50, discount: 10, description: 'Discount for 50+ pages' },
+        'large': { id: 'large-id', name: 'Large Volume', minPages: 100, discount: 15, description: 'Discount for 100+ pages' }
+      };
+      
+      const item = data[id];
+      if (!item) return;
+      
+      document.getElementById('update-bulk-discount-id').value = item.id;
+      document.getElementById('update-bulk-discount-name').value = item.name;
+      document.getElementById('update-bulk-discount-current-min').value = `${item.minPages} pages`;
+      document.getElementById('update-bulk-discount-current-discount').value = `${item.discount}%`;
+      document.getElementById('update-bulk-discount-min-pages').value = item.minPages;
+      document.getElementById('update-bulk-discount-percentage').value = item.discount;
+      document.getElementById('update-bulk-discount-description').value = item.description || '';
+      
+      openModal('update-bulk-discount-modal');
+    }
+
+
+    function toggleBulkDiscount(id, isActive) {
+      // TODO: API call to toggle status
+      console.log(`Toggle bulk discount ${id} to ${isActive ? 'active' : 'inactive'}`);
+    }
+
+    // Deposit Bonus functions
+    function updateDepositBonus(id) {
+      // Mock data - in real app, fetch from API
+      const data = {
+        'basic': { id: 'basic-id', code: 'BASIC', name: 'Basic Bonus', amount: 5.00, bonus: 5, description: '', isEvent: false },
+        'save10': { id: 'save10-id', code: 'SAVE_10', name: 'Save 10%', amount: 10.00, bonus: 10, description: '', isEvent: false },
+        'xmas': { id: 'xmas-id', code: 'XMAS_25', name: 'Christmas Special', amount: 20.00, bonus: 25, description: '', isEvent: true }
+      };
+      
+      const item = data[id];
+      if (!item) return;
+      
+      document.getElementById('update-deposit-bonus-id').value = item.id;
+      document.getElementById('update-deposit-bonus-code').value = item.code;
+      document.getElementById('update-deposit-bonus-name').value = item.name;
+      document.getElementById('update-deposit-bonus-current-amount').value = `$${item.amount.toFixed(2)}`;
+      document.getElementById('update-deposit-bonus-current-bonus').value = `${item.bonus}%`;
+      document.getElementById('update-deposit-bonus-amount').value = item.amount;
+      document.getElementById('update-deposit-bonus-percentage').value = item.bonus;
+      document.getElementById('update-deposit-bonus-description').value = item.description || '';
+      document.getElementById('update-deposit-bonus-event').checked = item.isEvent;
+      
+      openModal('update-deposit-bonus-modal');
+    }
+
+
+    function toggleDepositBonus(id, isActive) {
+      // TODO: API call to toggle status
+      console.log(`Toggle deposit bonus ${id} to ${isActive ? 'active' : 'inactive'}`);
+    }
+
+    // Form submissions
+    document.getElementById('create-page-size-form')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      // TODO: API call to create
+      alert('Page size price created successfully!');
+      closeModal('create-page-size-modal');
+    });
+
+    document.getElementById('create-color-mode-form')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      // TODO: API call to create
+      alert('Color mode price created successfully!');
+      closeModal('create-color-mode-modal');
+    });
+
+    document.getElementById('create-bulk-discount-form')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      // TODO: API call to create
+      alert('Bulk discount package created successfully!');
+      closeModal('create-bulk-discount-modal');
+    });
+
+    document.getElementById('create-deposit-bonus-form')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      // TODO: API call to create
+      alert('Deposit bonus package created successfully!');
+      closeModal('create-deposit-bonus-modal');
+    });
+
+    // Update form submissions
+    document.getElementById('update-page-size-form')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      // TODO: API call to update
+      alert('Page size price updated successfully!');
+      closeModal('update-page-size-modal');
+      // TODO: Refresh table data
+    });
+
+    document.getElementById('update-color-mode-form')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      // TODO: API call to update
+      alert('Color mode price updated successfully!');
+      closeModal('update-color-mode-modal');
+      // TODO: Refresh table data
+    });
+
+    document.getElementById('update-bulk-discount-form')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      // TODO: API call to update
+      alert('Bulk discount package updated successfully!');
+      closeModal('update-bulk-discount-modal');
+      // TODO: Refresh table data
+    });
+
+    document.getElementById('update-deposit-bonus-form')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      // TODO: API call to update
+      alert('Deposit bonus package updated successfully!');
+      closeModal('update-deposit-bonus-modal');
+      // TODO: Refresh table data
+    });
+
+    // Close modals on escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.modal-backdrop.active').forEach(modal => {
+          modal.classList.remove('active');
+        });
+      }
+    });
+  </script>
+</body>
+</html>
+

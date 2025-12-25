@@ -515,6 +515,7 @@ CREATE TABLE uploaded_file (
     file_name NVARCHAR(500) NOT NULL,
     file_type VARCHAR(10) NOT NULL,
     file_size_kb INT,
+    page_count INT,
     file_url VARCHAR(500) NOT NULL,
     created_at DATETIME DEFAULT GETDATE(),
     FOREIGN KEY (student_id) REFERENCES student(student_id) ON DELETE CASCADE
@@ -577,10 +578,13 @@ CREATE TABLE print_job_page (
     page_record_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     job_id UNIQUEIDENTIFIER NOT NULL,
     page_number INT NOT NULL,
+    is_printed BIT DEFAULT 0 NOT NULL,
+    printed_at DATETIME2 NULL,
     FOREIGN KEY (job_id) REFERENCES print_job(job_id) ON DELETE CASCADE,
     UNIQUE (job_id, page_number)
 );
 CREATE INDEX idx_job_id ON print_job_page (job_id);
+CREATE INDEX idx_print_job_page_job_printed ON print_job_page(job_id, is_printed);
 GO
 
 -- Payment table - tracks payments for print jobs
@@ -752,6 +756,8 @@ GO
 CREATE INDEX idx_print_job_student_date ON print_job(student_id, created_at);
 CREATE INDEX idx_print_job_printer_date ON print_job(printer_id, created_at);
 CREATE INDEX idx_print_job_status_date ON print_job(print_status, created_at);
+CREATE INDEX idx_print_job_printer_status_created ON print_job(printer_id, print_status, created_at);
+CREATE INDEX idx_print_job_status_start_time ON print_job(print_status, start_time);
 GO
 
 -- ============================================

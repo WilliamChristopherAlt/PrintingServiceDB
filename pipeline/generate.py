@@ -2380,7 +2380,7 @@ class PrintingServiceDataGenerator:
         
         # Uploaded files (saved documents)
         bulk_uploaded_files = BulkInsertHelper("uploaded_file", [
-            "uploaded_file_id", "student_id", "file_name", "file_type", "file_size_kb", "file_url", "created_at"
+            "uploaded_file_id", "student_id", "file_name", "file_type", "file_size_kb", "page_count", "file_url", "created_at"
         ])
         
         bulk_jobs = BulkInsertHelper("print_job", [
@@ -2393,7 +2393,7 @@ class PrintingServiceDataGenerator:
         ])
         
         bulk_pages = BulkInsertHelper("print_job_page", [
-            "page_record_id", "job_id", "page_number"
+            "page_record_id", "job_id", "page_number", "is_printed", "printed_at"
         ])
         
         # Identify hard-coded test students
@@ -2464,16 +2464,25 @@ class PrintingServiceDataGenerator:
                     else:
                         file_size_kb = random.randint(100, 1000)
                 
+                # Calculate number of pages for this document (needed for both uploaded_file and print_job)
+                avg_pages = self.spec['avg_pages_per_document']
+                page_variance = self.spec['pages_variance']
+                min_pages = self.spec['min_pages_per_job']
+                max_pages = self.spec['max_pages_per_job']
+                num_pages = max(min_pages, min(max_pages, int(random.gauss(avg_pages, page_variance))))
+                
                 # Create uploaded_file record
                 uploaded_file_id = generate_uuid()
                 # Use "now" for uploaded file created_at; job created_at is set separately below
                 uploaded_created_at = datetime.now()
+                
                 bulk_uploaded_files.add_row([
                     uploaded_file_id,
                     student['student_id'],
                     file_name,
                     file_ext,
                     file_size_kb,
+                    num_pages,  # page_count
                     file_url,
                     uploaded_created_at.strftime('%Y-%m-%d %H:%M:%S')
                 ])
@@ -2528,12 +2537,7 @@ class PrintingServiceDataGenerator:
                 elif status == 'printing':
                     start_time = created_at + timedelta(minutes=random.randint(1, 30))
                 
-                # Pages
-                avg_pages = self.spec['avg_pages_per_document']
-                page_variance = self.spec['pages_variance']
-                min_pages = self.spec['min_pages_per_job']
-                max_pages = self.spec['max_pages_per_job']
-                num_pages = max(min_pages, min(max_pages, int(random.gauss(avg_pages, page_variance))))
+                # Pages - num_pages was already calculated above for uploaded_file
                 total_pages = num_pages * num_copies
                 
                 # Pricing: base_price * color_multiplier * total_pages
@@ -2593,9 +2597,38 @@ class PrintingServiceDataGenerator:
                 ])
                 
                 # Pages for this job
+                # Determine which pages are printed based on job status
+                pages_printed = 0
+                if status == 'completed':
+                    pages_printed = num_pages  # All pages printed
+                elif status == 'printing':
+                    # Some pages printed (random between 1 and num_pages-1)
+                    pages_printed = random.randint(1, max(1, num_pages - 1)) if num_pages > 1 else 0
+                # For 'queued', 'failed', 'cancelled': pages_printed = 0
+                
                 for page_num in range(1, num_pages + 1):
                     page_record_id = generate_uuid()
-                    bulk_pages.add_row([page_record_id, job_id, page_num])
+                    is_printed = 1 if page_num <= pages_printed else 0
+                    # printed_at is set if page is printed and we have end_time or start_time
+                    printed_at = None
+                    if is_printed:
+                        if end_time:
+                            # Distribute printed_at times between start_time and end_time
+                            if pages_printed > 0:
+                                time_per_page = (end_time - start_time).total_seconds() / pages_printed if start_time and end_time else 0
+                                printed_at = start_time + timedelta(seconds=time_per_page * (page_num - 1)) if start_time else None
+                            else:
+                                printed_at = end_time
+                        elif start_time:
+                            printed_at = start_time
+                    
+                    bulk_pages.add_row([
+                        page_record_id, 
+                        job_id, 
+                        page_num,
+                        1 if is_printed else 0,  # is_printed
+                        printed_at.strftime('%Y-%m-%d %H:%M:%S') if printed_at else None  # printed_at
+                    ])
         
         # Flush SQL
         for stmt in bulk_uploaded_files.get_statements():
