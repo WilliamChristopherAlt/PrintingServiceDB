@@ -1335,8 +1335,12 @@ class PrintingServiceDataGenerator:
             "created_at", "created_by"
         ])
         
-        # Get a random staff member as creator
-        creator_staff = random.choice(self.staff) if self.staff else None
+        # Use only test staff for printer creation
+        # Find test staff user first, then find corresponding staff record
+        test_staff_user = next((u for u in self.users if u.get('email') == 'staff.test@edu.vn'), None)
+        creator_staff = None
+        if test_staff_user and self.staff:
+            creator_staff = next((s for s in self.staff if s.get('user_id') == test_staff_user['user_id']), None)
         
         # Map room template IDs to database room IDs for printer assignment
         room_template_to_db = {}  # Maps template room ID -> database room data
@@ -1537,13 +1541,13 @@ class PrintingServiceDataGenerator:
             "price_id", "page_size_id", "page_price", "is_active", "created_at", "updated_at"
         ])
         
-        # Base prices: A4 = $0.20, A3 = $0.40 (2x A4), A5 = $0.10 (0.5x A4)
+        # Base prices: A4 = 1000 VND, A3 = 2000 VND (2x A4), A5 = 500 VND (0.5x A4)
         # Note: A4=0.5*A3, A3=2*A5 conversion is data only, prices are independent
-        base_price_a4 = 0.20
+        base_price_a4 = 1000
         page_prices = {
             "A4": base_price_a4,
-            "A3": base_price_a4 * 2.0,  # $0.40
-            "A5": base_price_a4 * 0.5   # $0.10
+            "A3": base_price_a4 * 2,  # 2000 VND
+            "A5": base_price_a4 // 2   # 500 VND
         }
         
         created_at = random_date_in_range(365, 30)
@@ -1610,11 +1614,11 @@ class PrintingServiceDataGenerator:
         ])
         
         # Color mode price multipliers (applied to base page_size_price)
-        # black-white: 0.5x (cheaper), grayscale: 0.75x, color: 1.5x (more expensive)
+        # black-white: 1.0x, grayscale: 1.2x, color: 2.2x (more expensive)
         color_price_settings = [
-            {"mode": "black-white", "multiplier": 0.5},
-            {"mode": "grayscale", "multiplier": 0.75},
-            {"mode": "color", "multiplier": 1.5}
+            {"mode": "black-white", "multiplier": 1.0},
+            {"mode": "grayscale", "multiplier": 1.2},
+            {"mode": "color", "multiplier": 2.2}
         ]
         
         for price_setting in color_price_settings:
@@ -1695,43 +1699,34 @@ class PrintingServiceDataGenerator:
         # 1. Generate deposit bonus packages
         self.add_sql("\n-- Deposit Bonus Packages")
         bulk_bonus_packages = BulkInsertHelper("deposit_bonus_package", [
-            "package_id", "code", "amount_cap", "bonus_percentage", "package_name", "description", "is_active", "is_event", "created_at", "updated_at"
+            "package_id", "amount_cap", "bonus_percentage", "package_name", "description", "is_active", "created_at", "updated_at"
         ])
         
         # Deposit bonus packages (VND-based), stored as amount_cap (min deposit) and bonus_percentage (0-1 range)
-        # These match the business spec and are emitted verbatim into insert.sql
         bonus_packages = [
             {
-                "code": "BASIC",
-                "amount_cap": 50000.00,
+                "amount_cap": 50000,
                 "bonus_percentage": 0.00,
                 "name": "Basic Package",
-                "desc": "BASIC - Deposit 50,000₫, bonus 0₫ (0%), total receive 50,000₫.",
-                "is_event": False
+                "desc": "Deposit 50,000₫, bonus 0₫ (0%), total receive 50,000₫."
             },
             {
-                "code": "SAVE_10",
-                "amount_cap": 100000.00,
+                "amount_cap": 100000,
                 "bonus_percentage": 0.10,
                 "name": "Save Package",
-                "desc": "SAVE_10 - Deposit 100,000₫, bonus 10,000₫ (10%), total receive 110,000₫.",
-                "is_event": False
+                "desc": "Deposit 100,000₫, bonus 10,000₫ (10%), total receive 110,000₫."
             },
             {
-                "code": "XMAS_25",
-                "amount_cap": 200000.00,
+                "amount_cap": 200000,
                 "bonus_percentage": 0.25,
                 "name": "Christmas Package",
-                "desc": "XMAS_25 - Deposit 200,000₫, bonus 50,000₫ (25%), total receive 250,000₫.",
-                "is_event": True
+                "desc": "Deposit 200,000₫, bonus 50,000₫ (25%), total receive 250,000₫."
             },
             {
-                "code": "SAVE_30",
-                "amount_cap": 500000.00,
+                "amount_cap": 500000,
                 "bonus_percentage": 0.30,
                 "name": "Super Save Package",
-                "desc": "SAVE_30 - Deposit 500,000₫, bonus 150,000₫ (30%), total receive 650,000₫.",
-                "is_event": False
+                "desc": "Deposit 500,000₫, bonus 150,000₫ (30%), total receive 650,000₫."
             },
         ]
         
@@ -1741,7 +1736,6 @@ class PrintingServiceDataGenerator:
             
             self.deposit_bonus_packages.append({
                 'package_id': package_id,
-                'code': pkg['code'],
                 'amount_cap': pkg['amount_cap'],
                 'bonus_percentage': pkg['bonus_percentage'],
                 'package_name': pkg['name'],  # Store for translation generation
@@ -1750,13 +1744,11 @@ class PrintingServiceDataGenerator:
             
             bulk_bonus_packages.add_row([
                 package_id,
-                pkg['code'],
                 pkg['amount_cap'],
                 pkg['bonus_percentage'],
                 pkg['name'],
                 pkg['desc'],
                 1,  # is_active
-                1 if pkg.get('is_event', False) else 0,  # is_event
                 created_at.strftime('%Y-%m-%d %H:%M:%S'),
                 created_at.strftime('%Y-%m-%d %H:%M:%S')
             ])
@@ -1772,7 +1764,7 @@ class PrintingServiceDataGenerator:
         ])
         
         creator_staff = random.choice(self.staff) if self.staff else None
-        default_semester_bonus = 5.00  # $5 per semester
+        default_semester_bonus = 125000  # 125,000 VND per semester
         
         for semester in self.semesters:
             bonus_id = generate_uuid()
@@ -1876,13 +1868,10 @@ class PrintingServiceDataGenerator:
         # 5. Generate deposits (students depositing money)
         self.add_sql("\n-- Deposits")
         bulk_deposits = BulkInsertHelper("deposit", [
-            "deposit_id", "student_id", "deposit_code", "deposit_amount", "bonus_amount", "total_credited",
+            "deposit_id", "deposit_code", "student_id", "deposit_amount", "bonus_amount", "total_credited",
             "deposit_bonus_package_id", "payment_method", "payment_reference", "payment_status", 
-            "cancellation_reason", "expired_at", "transaction_date"
+            "transaction_date", "expired_at", "cancellation_reason"
         ])
-        
-        # Track generated deposit codes to ensure uniqueness
-        generated_deposit_codes = set()
         
         # Get payment methods - ensure it's a list
         payment_methods_raw = self.spec.get('payment_methods', ['credit_card', 'debit_card', 'bank_transfer', 'e_wallet'])
@@ -1892,13 +1881,11 @@ class PrintingServiceDataGenerator:
             payment_methods = payment_methods_raw
         else:
             payment_methods = ['credit_card', 'debit_card', 'bank_transfer', 'e_wallet']
-        deposit_rate = 0.3  # 30% of students make deposits
-        
         # Track balances for payment logic (will be computed after deposits are generated)
         # Note: This is only for payment generation logic, actual balance is computed via view
         student_balance_map = {}
         
-        # Identify test students to ensure they get guaranteed deposits
+        # Identify test students - ONLY generate deposits for hard-coded test accounts
         # NOTE: leanhtuank16@siu.edu.vn is excluded from deposits/payments
         test_student_emails = [
             "student.test@edu.vn",
@@ -1925,99 +1912,95 @@ class PrintingServiceDataGenerator:
             if leanhtuan_student:
                 leanhtuan_student_id = leanhtuan_student['student_id']
         
+        # Track used deposit codes to ensure uniqueness
+        used_deposit_codes = set()
+        
         for student in self.students:
             # Skip leanhtuank16 account - no deposits/payments for this account
             if student['student_id'] == leanhtuan_student_id:
                 continue
             
             is_test_account = student['student_id'] in test_student_ids
-            # Test accounts always get deposits, regular students have 30% chance
-            should_generate_deposit = True if is_test_account else (random.random() < deposit_rate)
+            # ONLY generate deposits for hard-coded test accounts
+            if not is_test_account:
+                continue
             
-            if should_generate_deposit:
-                # Test accounts get exactly 20 deposits, regular students get 1-3
-                num_deposits = 20 if is_test_account else random.randint(1, 3)
-                
-                for _ in range(num_deposits):
+            # Test accounts get 5-9 deposits each
+            num_deposits = random.randint(5, 9)
+            
+            for _ in range(num_deposits):
                     deposit_id = generate_uuid()
                     
-                    # Generate unique deposit_code (8 alphanumeric characters)
+                    # Generate unique deposit code
                     deposit_code = generate_deposit_code()
-                    retry_count = 0
-                    while deposit_code in generated_deposit_codes and retry_count < 10:
+                    while deposit_code in used_deposit_codes:
                         deposit_code = generate_deposit_code()
-                        retry_count += 1
-                    generated_deposit_codes.add(deposit_code)
+                    used_deposit_codes.add(deposit_code)
                     
-                    # Deposit amounts: $5-$100, weighted towards lower amounts
-                    deposit_amount = round(random.choices(
-                        [5, 10, 15, 20, 25, 30, 50, 75, 100],
+                    # Deposit amounts: 125,000 - 2,500,000 VND, weighted towards lower amounts
+                    deposit_amount = random.choices(
+                        [125000, 250000, 375000, 500000, 625000, 750000, 1250000, 1875000, 2500000],
                         weights=[30, 25, 15, 10, 8, 5, 4, 2, 1],
                         k=1
-                    )[0] + random.uniform(0, 0.99), 2)
+                    )[0]
                     
                     # Find applicable bonus package
                     applicable_package = None
-                    bonus_amount = 0.00
+                    bonus_amount = 0
                     for pkg in sorted(self.deposit_bonus_packages, key=lambda x: x['amount_cap'], reverse=True):
                         if deposit_amount >= pkg['amount_cap']:
                             applicable_package = pkg
-                            bonus_amount = round(deposit_amount * pkg['bonus_percentage'], 2)
+                            bonus_amount = int(deposit_amount * pkg['bonus_percentage'])
                             break
                     
                     total_credited = deposit_amount + bonus_amount
                     method = random.choice(payment_methods)
                     reference = f"DEP-{random.randint(100000, 999999)}"
                     
-                    # Payment status distribution: completed (85%), pending (8%), expired (4%), cancelled (2%), failed (1%)
-                    if is_test_account:
-                        status = 'completed'  # Test accounts always completed
+                    # Payment status distribution: completed (90%), pending (5%), failed (3%), expired (1%), cancelled (1%)
+                    rand = random.random()
+                    if rand < 0.90:
+                        status = 'completed'
+                    elif rand < 0.95:
+                        status = 'pending'
+                    elif rand < 0.98:
+                        status = 'failed'
+                    elif rand < 0.99:
+                        status = 'expired'
                     else:
-                        rand = random.random()
-                        if rand < 0.85:
-                            status = 'completed'
-                        elif rand < 0.93:
-                            status = 'pending'
-                        elif rand < 0.97:
-                            status = 'expired'
-                        elif rand < 0.99:
-                            status = 'cancelled'
-                        else:
-                            status = 'failed'
+                        status = 'cancelled'
                     
-                    # Transaction date: within last 6 months
+                    # Transaction date: scattered randomly in the past (last 6 months)
                     transaction_date = random_date_in_range(180, 0)
                     
-                    # Set expired_at for pending deposits (expires after 24-72 hours)
+                    # Expired_at: 10 minutes after transaction_date if status is expired or pending
                     expired_at = None
-                    if status == 'pending':
-                        hours_until_expiry = random.randint(24, 72)
-                        expired_at = transaction_date + timedelta(hours=hours_until_expiry)
-                    elif status == 'expired':
-                        # Expired deposits: expired_at is in the past
-                        hours_ago = random.randint(1, 48)
-                        expired_at = datetime.now() - timedelta(hours=hours_ago)
+                    if status in ['expired', 'pending']:
+                        expired_at = transaction_date + timedelta(minutes=10)
                     
-                    # Set cancellation_reason for cancelled deposits
+                    # Cancellation reason: only if cancelled
                     cancellation_reason = None
                     if status == 'cancelled':
                         reasons = [
-                            "Người dùng hủy đơn",
-                            "Hết thời gian chờ thanh toán",
+                            "Người dùng hủy giao dịch",
                             "Lỗi hệ thống",
-                            "Yêu cầu hủy từ ngân hàng"
+                            "Thông tin thanh toán không hợp lệ",
+                            "Hết thời gian chờ thanh toán"
                         ]
                         cancellation_reason = random.choice(reasons)
                     
                     # Store deposit data
                     deposit_data = {
                         'deposit_id': deposit_id,
+                        'deposit_code': deposit_code,
                         'student_id': student['student_id'],
                         'deposit_amount': deposit_amount,
                         'bonus_amount': bonus_amount,
                         'total_credited': total_credited,
                         'payment_status': status,
-                        'transaction_date': transaction_date
+                        'transaction_date': transaction_date,
+                        'expired_at': expired_at,
+                        'cancellation_reason': cancellation_reason
                     }
                     self.deposits.append(deposit_data)
                     
@@ -2025,13 +2008,13 @@ class PrintingServiceDataGenerator:
                     if status == 'completed':
                         student_id = student['student_id']
                         if student_id not in student_balance_map:
-                            student_balance_map[student_id] = 0.0
+                            student_balance_map[student_id] = 0
                         student_balance_map[student_id] += total_credited
                     
                     bulk_deposits.add_row([
                         deposit_id,
-                        student['student_id'],
                         deposit_code,
+                        student['student_id'],
                         deposit_amount,
                         bonus_amount,
                         total_credited,
@@ -2039,9 +2022,9 @@ class PrintingServiceDataGenerator:
                         method,
                         reference,
                         status,
-                        cancellation_reason,
+                        transaction_date.strftime('%Y-%m-%d %H:%M:%S'),
                         expired_at.strftime('%Y-%m-%d %H:%M:%S') if expired_at else None,
-                        transaction_date.strftime('%Y-%m-%d %H:%M:%S')
+                        cancellation_reason
                     ])
         
         for stmt in bulk_deposits.get_statements():
@@ -2414,14 +2397,15 @@ class PrintingServiceDataGenerator:
                 if student:
                     test_student_ids.add(student['student_id'])
         
-        # Generate jobs
+        # ONLY generate jobs for hard-coded test accounts
         for student in self.students:
             is_test_account = student['student_id'] in test_student_ids
-            # Exactly 20 jobs for test accounts, otherwise use distribution
-            if is_test_account:
-                num_jobs = 20
-            else:
-                num_jobs = max(0, int(random.gauss(avg_jobs, variance)))
+            # Skip non-test accounts
+            if not is_test_account:
+                continue
+            
+            # Test accounts get 5-15 jobs each
+            num_jobs = random.randint(5, 15)
             
             for _ in range(num_jobs):
                 job_id = generate_uuid()
@@ -2473,8 +2457,8 @@ class PrintingServiceDataGenerator:
                 
                 # Create uploaded_file record
                 uploaded_file_id = generate_uuid()
-                # Use "now" for uploaded file created_at; job created_at is set separately below
-                uploaded_created_at = datetime.now()
+                # Uploaded file created_at: scattered randomly in the past (last 6 months)
+                uploaded_created_at = random_date_in_range(180, 0)
                 
                 bulk_uploaded_files.add_row([
                     uploaded_file_id,
@@ -2515,7 +2499,22 @@ class PrintingServiceDataGenerator:
                 print_side = weighted_choice(print_side_dist)
                 color_mode_name = weighted_choice(color_mode_dist)
                 num_copies = int(weighted_choice(copy_dist))
-                status = weighted_choice(status_dist)
+                
+                # Status: 90% completed, 10% other statuses
+                # Allowed values: 'queued', 'printing', 'completed', 'failed', 'cancelled', 'pending_payment'
+                rand_status = random.random()
+                if rand_status < 0.90:
+                    status = 'completed'
+                elif rand_status < 0.92:
+                    status = 'queued'
+                elif rand_status < 0.94:
+                    status = 'printing'
+                elif rand_status < 0.96:
+                    status = 'failed'
+                elif rand_status < 0.98:
+                    status = 'cancelled'
+                else:
+                    status = 'pending_payment'
                 
                 # Color mode price
                 matching_color_mode_price = next(
@@ -2526,8 +2525,8 @@ class PrintingServiceDataGenerator:
                     raise ValueError(f"No color_mode_price found for color_mode: {color_mode_name}")
                 color_mode_price_id = matching_color_mode_price['setting_id']
                 
-                # Timing
-                created_at = random_datetime_with_pattern(365, hour_patterns)
+                # Timing: scattered randomly in the past (last 6 months)
+                created_at = random_datetime_with_pattern(180, hour_patterns)
                 start_time = None
                 end_time = None
                 if status in ['completed', 'failed']:
@@ -2586,10 +2585,10 @@ class PrintingServiceDataGenerator:
                     page_size_price_id, color_mode_price_id, page_discount_package_id,
                     orientation, print_side, num_copies,
                     total_pages,
-                    round(subtotal_before_discount, 2),
+                    int(subtotal_before_discount),
                     discount_percentage if discount_percentage is not None else None,
-                    round(discount_amount, 2),
-                    round(total_price, 2),
+                    int(discount_amount),
+                    int(total_price),
                     status,
                     start_time.strftime('%Y-%m-%d %H:%M:%S') if start_time else None,
                     end_time.strftime('%Y-%m-%d %H:%M:%S') if end_time else None,

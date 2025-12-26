@@ -281,53 +281,48 @@ GO
 -- Deposit bonus package table - defines bonus tiers for deposits
 CREATE TABLE deposit_bonus_package (
     package_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    code VARCHAR(20) NOT NULL UNIQUE, -- Package code: BASIC, SAVE_10, XMAS_25, SAVE_30, etc.
-    amount_cap DECIMAL(10, 2) NOT NULL CHECK (amount_cap > 0), -- Minimum deposit amount to qualify
+    amount_cap DECIMAL(15, 0) NOT NULL CHECK (amount_cap > 0), -- Minimum deposit amount to qualify (in VND)
     bonus_percentage DECIMAL(5, 4) NOT NULL CHECK (bonus_percentage >= 0 AND bonus_percentage <= 1), -- Bonus percentage (0-1 range)
     package_name NVARCHAR(100),
     description NVARCHAR(200),
     is_active BIT DEFAULT 1,
-    is_event BIT DEFAULT 0,
     created_at DATETIME DEFAULT GETDATE(),
     updated_at DATETIME DEFAULT GETDATE()
 );
-CREATE INDEX idx_deposit_bonus_package_code ON deposit_bonus_package (code);
 CREATE INDEX idx_deposit_bonus_package_amount ON deposit_bonus_package (amount_cap);
 CREATE INDEX idx_deposit_bonus_package_active ON deposit_bonus_package (is_active);
 GO
 
--- Deposit table - tracks each deposit/recharge transaction (real dollars to in-app currency)
+-- Deposit table - tracks each deposit/recharge transaction (real VND to in-app currency)
 CREATE TABLE deposit (
     deposit_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    deposit_code VARCHAR(8) NOT NULL UNIQUE, -- Mã ngắn gọn 8 ký tự để hiển thị trong nội dung chuyển khoản
     student_id UNIQUEIDENTIFIER NOT NULL,
-    deposit_code VARCHAR(8) NOT NULL UNIQUE, -- Short alphanumeric code (8 characters) for deposit reference
-    deposit_amount DECIMAL(10, 2) NOT NULL CHECK (deposit_amount > 0), -- Real dollars deposited
-    bonus_amount DECIMAL(10, 2) NOT NULL DEFAULT 0 CHECK (bonus_amount >= 0), -- Bonus received
-    total_credited DECIMAL(10, 2) NOT NULL CHECK (total_credited > 0), -- deposit_amount + bonus_amount
+    deposit_amount DECIMAL(15, 0) NOT NULL CHECK (deposit_amount > 0), -- Real VND deposited
+    bonus_amount DECIMAL(15, 0) NOT NULL DEFAULT 0 CHECK (bonus_amount >= 0), -- Bonus received (in VND)
+    total_credited DECIMAL(15, 0) NOT NULL CHECK (total_credited > 0), -- deposit_amount + bonus_amount (in VND)
     deposit_bonus_package_id UNIQUEIDENTIFIER NULL, -- Link to bonus package if applicable
     payment_method VARCHAR(50) NOT NULL,
     payment_reference VARCHAR(100),
     payment_status VARCHAR(20) NOT NULL DEFAULT 'pending' CHECK (payment_status IN ('pending', 'completed', 'failed', 'refunded', 'expired', 'cancelled')),
-    cancellation_reason NVARCHAR(500) NULL, -- Reason for cancellation if payment_status = 'cancelled'
-    expired_at DATETIME NULL, -- Expiration time for pending deposits
     transaction_date DATETIME DEFAULT GETDATE(),
+    expired_at DATETIME NULL, -- Thời gian hết hạn của mã QR (10 phút sau khi tạo)
+    cancellation_reason NVARCHAR(500) NULL, -- Lý do hủy đơn (nếu có)
     FOREIGN KEY (student_id) REFERENCES student(student_id) ON DELETE CASCADE,
     FOREIGN KEY (deposit_bonus_package_id) REFERENCES deposit_bonus_package(package_id)
 );
 CREATE INDEX idx_deposit_student ON deposit (student_id);
-CREATE INDEX idx_deposit_code ON deposit (deposit_code);
 CREATE INDEX idx_deposit_transaction_date ON deposit (transaction_date);
 CREATE INDEX idx_deposit_payment_status ON deposit (payment_status);
 CREATE INDEX idx_deposit_bonus_package ON deposit (deposit_bonus_package_id);
-CREATE INDEX idx_deposit_expired_at ON deposit (expired_at);
-CREATE INDEX idx_deposit_student_status_expired ON deposit (student_id, payment_status, expired_at);
+CREATE INDEX idx_deposit_code ON deposit (deposit_code);
 GO
 
 -- Semester bonus table - defines how much money is given per semester
 CREATE TABLE semester_bonus (
     bonus_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     semester_id UNIQUEIDENTIFIER NOT NULL,
-    bonus_amount DECIMAL(10, 2) NOT NULL CHECK (bonus_amount >= 0), -- Amount of in-app currency given
+    bonus_amount DECIMAL(15, 0) NOT NULL CHECK (bonus_amount >= 0), -- Amount of in-app currency given (in VND)
     description NVARCHAR(200),
     created_at DATETIME DEFAULT GETDATE(),
     created_by UNIQUEIDENTIFIER,
@@ -380,7 +375,7 @@ GO
 CREATE TABLE color_mode_price (
     setting_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     color_mode_id UNIQUEIDENTIFIER NOT NULL,
-    price_multiplier DECIMAL(5, 4) NOT NULL CHECK (price_multiplier >= 0), -- Multiplier applied to base page_size_price (e.g., 0.5 for black-white, 1.5 for color)
+    price_multiplier DECIMAL(5, 4) NOT NULL CHECK (price_multiplier >= 0), -- Multiplier applied to base page_size_price (e.g., 1.0 for black-white, 1.2 for grayscale, 2.2 for color)
     is_active BIT DEFAULT 1,
     created_at DATETIME DEFAULT GETDATE(),
     updated_at DATETIME DEFAULT GETDATE(),
@@ -394,7 +389,7 @@ GO
 CREATE TABLE page_size_price (
     price_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     page_size_id UNIQUEIDENTIFIER NOT NULL UNIQUE,
-    page_price DECIMAL(10, 4) NOT NULL CHECK (page_price >= 0), -- Price per page in dollars
+    page_price DECIMAL(15, 0) NOT NULL CHECK (page_price >= 0), -- Price per page in VND
     is_active BIT DEFAULT 1,
     created_at DATETIME DEFAULT GETDATE(),
     updated_at DATETIME DEFAULT GETDATE(),
@@ -426,7 +421,7 @@ CREATE TABLE fund_source (
     fund_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     fund_source_type VARCHAR(50) NOT NULL CHECK (fund_source_type IN ('school_budget', 'donation', 'revenue', 'other')),
     fund_source_name NVARCHAR(255),
-    amount DECIMAL(12, 2) NOT NULL CHECK (amount > 0),
+    amount DECIMAL(18, 0) NOT NULL CHECK (amount > 0), -- Amount in VND
     received_date DATE NOT NULL,
     description NVARCHAR(200),
     created_at DATETIME DEFAULT GETDATE(),
@@ -442,7 +437,7 @@ CREATE TABLE supplier_paper_purchase (
     supplier_name NVARCHAR(255) NOT NULL,
     supplier_contact VARCHAR(255),
     purchase_date DATE NOT NULL,
-    total_amount_paid DECIMAL(12, 2) NOT NULL CHECK (total_amount_paid >= 0),
+    total_amount_paid DECIMAL(18, 0) NOT NULL CHECK (total_amount_paid >= 0), -- Amount in VND
     payment_method VARCHAR(50) NOT NULL,
     payment_reference VARCHAR(100),
     payment_status VARCHAR(20) NOT NULL DEFAULT 'pending' CHECK (payment_status IN ('pending', 'completed', 'failed', 'refunded')),
@@ -462,8 +457,8 @@ CREATE TABLE paper_purchase_item (
     purchase_id UNIQUEIDENTIFIER NOT NULL,
     page_size_id UNIQUEIDENTIFIER NOT NULL,
     quantity INT NOT NULL CHECK (quantity > 0),
-    unit_price DECIMAL(10, 4) NOT NULL CHECK (unit_price >= 0),
-    total_price DECIMAL(12, 2) NOT NULL CHECK (total_price >= 0),
+    unit_price DECIMAL(15, 0) NOT NULL CHECK (unit_price >= 0), -- Price per unit in VND
+    total_price DECIMAL(18, 0) NOT NULL CHECK (total_price >= 0), -- Total price in VND
     received_quantity INT NULL,
     received_date DATE NULL,
     notes NVARCHAR(200),
@@ -515,13 +510,14 @@ CREATE TABLE uploaded_file (
     file_name NVARCHAR(500) NOT NULL,
     file_type VARCHAR(10) NOT NULL,
     file_size_kb INT,
-    page_count INT,
+    page_count INT NULL, -- Số trang của file (tính khi upload: PDFBox cho PDF, ConvertAPI + PDFBox cho DOCX/DOC, POI cho Office files)
     file_url VARCHAR(500) NOT NULL,
     created_at DATETIME DEFAULT GETDATE(),
     FOREIGN KEY (student_id) REFERENCES student(student_id) ON DELETE CASCADE
 );
 CREATE INDEX idx_uploaded_file_student ON uploaded_file (student_id);
 CREATE INDEX idx_uploaded_file_created_at ON uploaded_file (created_at);
+CREATE INDEX idx_uploaded_file_page_count ON uploaded_file (page_count);
 GO
 
 CREATE TABLE print_job (
@@ -537,11 +533,12 @@ CREATE TABLE print_job (
     number_of_copy INT NOT NULL DEFAULT 1,
     -- Pricing calculation columns (stored for historical accuracy and performance)
     total_pages INT NOT NULL CHECK (total_pages > 0), -- Total number of pages (from print_job_page count)
-    subtotal_before_discount DECIMAL(10, 2) NOT NULL CHECK (subtotal_before_discount >= 0), -- Calculated from referenced prices
+    subtotal_before_discount DECIMAL(15, 0) NOT NULL CHECK (subtotal_before_discount >= 0), -- Calculated from referenced prices (in VND)
     discount_percentage DECIMAL(5, 4) NULL CHECK (discount_percentage IS NULL OR (discount_percentage >= 0 AND discount_percentage <= 1)), -- From page_discount_package if applicable
-    discount_amount DECIMAL(10, 2) NOT NULL DEFAULT 0 CHECK (discount_amount >= 0), -- Calculated discount amount
-    total_price DECIMAL(10, 2) NOT NULL CHECK (total_price >= 0), -- Final price after discount
-    print_status VARCHAR(20) NOT NULL DEFAULT 'queued' CHECK (print_status IN ('queued', 'printing', 'completed', 'failed', 'cancelled')),
+    discount_amount DECIMAL(15, 0) NOT NULL DEFAULT 0 CHECK (discount_amount >= 0), -- Calculated discount amount (in VND)
+    total_price DECIMAL(15, 0) NOT NULL CHECK (total_price >= 0), -- Final price after discount (in VND)
+    payment_method VARCHAR(50) NULL, -- Payment method selected when creating job: 'balance' or 'qr' (SePay)
+    print_status VARCHAR(20) NOT NULL DEFAULT 'queued' CHECK (print_status IN ('queued', 'printing', 'completed', 'failed', 'cancelled', 'pending_payment')),
     start_time DATETIME NULL,
     end_time DATETIME NULL,
     created_at DATETIME DEFAULT GETDATE(),
@@ -561,6 +558,10 @@ CREATE INDEX idx_end_time ON print_job (end_time);
 CREATE INDEX idx_page_size_price ON print_job (page_size_price_id);
 CREATE INDEX idx_color_mode_price ON print_job (color_mode_price_id);
 CREATE INDEX idx_page_discount_package ON print_job (page_discount_package_id);
+-- Composite index for queue queries (optimize finding queued/printing jobs by printer)
+CREATE INDEX idx_print_job_printer_status_created ON print_job(printer_id, print_status, created_at);
+-- Index for progress queries (optimize finding printing jobs)
+CREATE INDEX idx_print_job_status_start_time ON print_job(print_status, start_time);
 GO
 
 -- Refund table for cancelled print jobs (refund remaining pages)
@@ -578,13 +579,13 @@ CREATE TABLE print_job_page (
     page_record_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     job_id UNIQUEIDENTIFIER NOT NULL,
     page_number INT NOT NULL,
-    is_printed BIT DEFAULT 0 NOT NULL,
-    printed_at DATETIME2 NULL,
+    is_printed BIT DEFAULT 0 NOT NULL,  -- Track if page has been printed (for progress calculation)
+    printed_at DATETIME2 NULL,          -- Timestamp when page was printed
     FOREIGN KEY (job_id) REFERENCES print_job(job_id) ON DELETE CASCADE,
     UNIQUE (job_id, page_number)
 );
 CREATE INDEX idx_job_id ON print_job_page (job_id);
-CREATE INDEX idx_print_job_page_job_printed ON print_job_page(job_id, is_printed);
+CREATE INDEX idx_print_job_page_job_printed ON print_job_page(job_id, is_printed);  -- Index for counting printed pages
 GO
 
 -- Payment table - tracks payments for print jobs
@@ -592,12 +593,14 @@ CREATE TABLE payment (
     payment_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     job_id UNIQUEIDENTIFIER NOT NULL UNIQUE, -- One payment per print job
     student_id UNIQUEIDENTIFIER NOT NULL,
-    amount_paid_directly DECIMAL(10, 2) NOT NULL DEFAULT 0 CHECK (amount_paid_directly >= 0), -- Paid with real money/card
-    amount_paid_from_balance DECIMAL(10, 2) NOT NULL DEFAULT 0 CHECK (amount_paid_from_balance >= 0), -- Paid from in-app balance
-    total_amount DECIMAL(10, 2) NOT NULL CHECK (total_amount > 0), -- Total payment amount
+    amount_paid_directly DECIMAL(15, 0) NOT NULL DEFAULT 0 CHECK (amount_paid_directly >= 0), -- Paid with real money/card (in VND)
+    amount_paid_from_balance DECIMAL(15, 0) NOT NULL DEFAULT 0 CHECK (amount_paid_from_balance >= 0), -- Paid from in-app balance (in VND)
+    total_amount DECIMAL(15, 0) NOT NULL CHECK (total_amount > 0), -- Total payment amount (in VND)
     payment_method VARCHAR(50) NOT NULL,
     payment_reference VARCHAR(100),
-    payment_status VARCHAR(20) NOT NULL DEFAULT 'pending' CHECK (payment_status IN ('pending', 'completed', 'failed', 'refunded')),
+    payment_code VARCHAR(20) NULL, -- Payment code for QR code (format: SIUJOB + 8 chars)
+    payment_status VARCHAR(20) NOT NULL DEFAULT 'pending' CHECK (payment_status IN ('pending', 'completed', 'failed', 'refunded', 'expired')),
+    expired_at DATETIME NULL, -- Expiration time for QR payment
     transaction_date DATETIME DEFAULT GETDATE(),
     FOREIGN KEY (job_id) REFERENCES print_job(job_id) ON DELETE CASCADE,
     FOREIGN KEY (student_id) REFERENCES student(student_id) ON DELETE NO ACTION,
@@ -607,6 +610,8 @@ CREATE INDEX idx_payment_job ON payment (job_id);
 CREATE INDEX idx_payment_student ON payment (student_id);
 CREATE INDEX idx_payment_transaction_date ON payment (transaction_date);
 CREATE INDEX idx_payment_status ON payment (payment_status);
+CREATE INDEX idx_payment_code ON payment (payment_code);
+CREATE INDEX idx_payment_expired_at ON payment (expired_at);
 GO
 
 -- Payment Webhook Log table - logs all webhook requests from payment gateway (SePay)
@@ -632,7 +637,7 @@ GO
 CREATE TABLE student_wallet_ledger (
     ledger_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     student_id UNIQUEIDENTIFIER NOT NULL,
-    amount DECIMAL(10, 2) NOT NULL, -- Amount (positive for IN, negative for OUT)
+    amount DECIMAL(15, 0) NOT NULL, -- Amount (positive for IN, negative for OUT) in VND
     direction VARCHAR(3) NOT NULL CHECK (direction IN ('IN', 'OUT')), -- Transaction direction
     source_type VARCHAR(20) NOT NULL CHECK (source_type IN ('DEPOSIT', 'SEMESTER_BONUS', 'PAYMENT', 'REFUND')), -- Type of transaction
     source_table VARCHAR(50) NOT NULL, -- Source table name (e.g., 'deposit', 'payment', 'refund_print_job', 'student_semester_bonus')
@@ -647,6 +652,21 @@ CREATE INDEX idx_ledger_source ON student_wallet_ledger (source_table, source_id
 CREATE INDEX idx_ledger_source_type ON student_wallet_ledger (source_type);
 CREATE INDEX idx_ledger_direction ON student_wallet_ledger (direction);
 CREATE INDEX idx_ledger_created_at ON student_wallet_ledger (created_at);
+GO
+
+-- Notification table - per-student notifications (topup success, print job status, etc.)
+CREATE TABLE notification (
+    notification_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    student_id UNIQUEIDENTIFIER NOT NULL,
+    notification_type VARCHAR(50) NOT NULL, -- e.g. 'DEPOSIT_COMPLETED', 'PRINT_JOB_COMPLETED', 'PRINT_JOB_FAILED'
+    title NVARCHAR(200) NOT NULL,
+    message NVARCHAR(1000) NOT NULL,
+    is_read BIT NOT NULL DEFAULT 0,
+    created_at DATETIME NOT NULL DEFAULT GETDATE(),
+    FOREIGN KEY (student_id) REFERENCES student(student_id) ON DELETE CASCADE
+);
+CREATE INDEX idx_notification_student ON notification (student_id, created_at);
+CREATE INDEX idx_notification_unread ON notification (student_id, is_read, created_at);
 GO
 
 -- Audit and Logging Tables
@@ -756,48 +776,27 @@ GO
 CREATE INDEX idx_print_job_student_date ON print_job(student_id, created_at);
 CREATE INDEX idx_print_job_printer_date ON print_job(printer_id, created_at);
 CREATE INDEX idx_print_job_status_date ON print_job(print_status, created_at);
-CREATE INDEX idx_print_job_printer_status_created ON print_job(printer_id, print_status, created_at);
-CREATE INDEX idx_print_job_status_start_time ON print_job(print_status, start_time);
+-- Note: idx_print_job_printer_status_created and idx_print_job_status_start_time 
+-- are already defined above after the print_job table definition
 GO
 
 -- ============================================
 -- Views for Common Queries and Reports
 -- ============================================
 
--- View: Student balance (computed from transactions)
+-- View: Student balance (computed from student_wallet_ledger - single source of truth)
 CREATE VIEW student_balance_view AS
 SELECT 
     s.student_id,
     s.student_code,
     u.full_name,
     u.email,
+    -- Calculate balance from student_wallet_ledger (single source of truth)
+    -- This ensures all ledger entries (including manual adjustments) are included
     COALESCE((
-        -- Credits from completed deposits
-        SELECT SUM(d.total_credited)
-        FROM deposit d
-        WHERE d.student_id = s.student_id 
-        AND d.payment_status = 'completed'
-    ), 0) + COALESCE((
-        -- Credits from received semester bonuses
-        SELECT SUM(sb.bonus_amount)
-        FROM student_semester_bonus ssb
-        JOIN semester_bonus sb ON ssb.semester_bonus_id = sb.bonus_id
-        WHERE ssb.student_id = s.student_id 
-        AND ssb.received = 1
-    ), 0) - COALESCE((
-        -- Debits from completed payments using balance
-        SELECT SUM(p.amount_paid_from_balance)
-        FROM payment p
-        WHERE p.student_id = s.student_id 
-        AND p.payment_status = 'completed'
-    ), 0) + COALESCE((
-        -- Refunds for cancelled jobs (remaining pages)
-        SELECT SUM(
-            pj.total_price * (CAST(r.pages_not_printed AS DECIMAL(10,4)) / NULLIF(pj.total_pages, 0))
-        )
-        FROM refund_print_job r
-        JOIN print_job pj ON r.job_id = pj.job_id
-        WHERE pj.student_id = s.student_id
+        SELECT SUM(swl.amount)
+        FROM student_wallet_ledger swl
+        WHERE swl.student_id = s.student_id
     ), 0) AS balance_amount
 FROM student s
 JOIN [user] u ON s.user_id = u.user_id;
