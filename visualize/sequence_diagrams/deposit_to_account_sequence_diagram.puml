@@ -1,0 +1,39 @@
+@startuml Deposit to Account Use Case - Sequence Diagram
+
+actor User
+participant "Web UI" as UI
+participant "Backend API" as API
+participant "Payment Gateway" as Payment
+
+User -> UI: Select deposit amount
+UI -> API: Get bonus info
+API --> UI: Bonus + total
+UI --> User: Show preview
+
+User -> UI: Confirm deposit
+UI -> API: Create deposit
+
+alt Payment: Bank transfer
+  API -> Payment: Generate payment
+  Payment --> API: Payment details
+  API --> UI: Payment instructions
+  UI --> User: Show instructions
+  
+  User -> Payment: Transfer money
+  Payment -> API: Payment confirmed
+  API -> API: Credit balance
+  API --> User: Deposit success
+  
+else Payment: QR Code
+  API -> Payment: Generate QR
+  Payment --> API: QR code
+  API --> UI: QR payment info
+  UI --> User: Show QR code
+  
+  User -> Payment: Scan QR and pay
+  Payment -> API: Payment confirmed
+  API -> API: Credit balance
+  API --> User: Deposit success
+end
+
+@enduml

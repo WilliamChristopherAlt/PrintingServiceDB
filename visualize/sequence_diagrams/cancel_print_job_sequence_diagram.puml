@@ -1,0 +1,32 @@
+@startuml Cancel Print Job Use Case - Sequence Diagram
+
+actor User
+participant "Web UI" as UI
+participant "Backend API" as API
+participant "Printer" as Printer
+
+User -> UI: Cancel print job
+UI -> API: Cancel request
+
+alt Job status: printing
+  API -> Printer: Stop printing
+  Printer --> API: Stopped
+  API -> API: Calculate refund
+  API -> API: Process refund
+  API --> UI: Cancellation confirmed
+  UI --> User: Show cancellation + refund
+  
+else Job status: queued
+  API -> API: Cancel job
+  API -> API: Refund full amount
+  API --> UI: Cancellation confirmed
+  UI --> User: Show cancellation + refund
+  
+else Job status: pending_payment
+  API -> API: Cancel payment
+  API -> API: Cancel job
+  API --> UI: Cancellation confirmed
+  UI --> User: Show cancellation
+end
+
+@enduml

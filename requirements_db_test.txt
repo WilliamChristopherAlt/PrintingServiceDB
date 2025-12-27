@@ -1,0 +1,10 @@
+# Requirements for database connection test script
+# Install with: pip install pyodbc
+
+pyodbc>=4.0.39
+
+# Note: You also need to install ODBC Driver 18 for SQL Server
+# Windows: Download from Microsoft website
+# Linux: sudo apt-get install unixodbc-dev (then install Microsoft ODBC driver)
+# macOS: brew install unixodbc (then install Microsoft ODBC driver)
+

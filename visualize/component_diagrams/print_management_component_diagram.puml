@@ -1,0 +1,71 @@
+@startuml Print Management Module - Component Diagram
+
+!theme plain
+skinparam componentStyle rectangle
+skinparam linetype ortho
+top to bottom direction
+
+package "Frontend Layer" {
+  component [Web UI] <<component>> as WebUI
+}
+
+package "API Gateway Layer" {
+  component [Backend API] <<component>> as BackendAPI
+}
+
+package "Business Logic Layer" {
+  component [Print Service] <<component>> as PrintService
+  component [Pricing Service] <<component>> as PricingService
+  component [Payment Service] <<component>> as PaymentService
+  component [Refund Service] <<component>> as RefundService
+  component [Deposit Service] <<component>> as DepositService
+  component [Bonus Service] <<component>> as BonusService
+  component [Ledger Service] <<component>> as LedgerService
+}
+
+package "Infrastructure Layer" {
+  component [Printer Controller] <<component>> as PrinterController
+  component [File Storage] <<component>> as FileStorage
+  component [Payment Gateway] <<component>> as PaymentGateway
+  component [Database] <<component>> as Database
+}
+
+' Frontend to API Gateway
+WebUI --> BackendAPI : REST API / WebSocket
+
+' API Gateway to Business Services
+BackendAPI --> PrintService : delegates
+BackendAPI --> PricingService : delegates
+BackendAPI --> PaymentService : delegates
+BackendAPI --> RefundService : delegates
+BackendAPI --> DepositService : delegates
+BackendAPI --> BonusService : delegates
+BackendAPI --> LedgerService : delegates
+
+' Business Services dependencies
+PrintService --> PricingService : uses
+PrintService --> PaymentService : uses
+PrintService --> PrinterController : controls
+PrintService --> FileStorage : accesses
+PrintService --> Database : queries
+
+PricingService --> Database : queries
+
+PaymentService --> LedgerService : uses
+PaymentService --> PaymentGateway : integrates
+PaymentService --> Database : queries
+
+RefundService --> PaymentService : uses
+RefundService --> LedgerService : uses
+RefundService --> Database : queries
+
+DepositService --> BonusService : uses
+DepositService --> PaymentGateway : integrates
+DepositService --> LedgerService : uses
+DepositService --> Database : queries
+
+BonusService --> Database : queries
+
+LedgerService --> Database : queries
+
+@enduml

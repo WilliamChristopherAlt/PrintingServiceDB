@@ -1,0 +1,64 @@
+@startuml Deposit to Account Use Case - Class Diagram
+
+!theme plain
+top to bottom direction
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+
+skinparam class {
+  BackgroundColor LightBlue
+  BorderColor Blue
+}
+
+' Level 0: Independent classes
+class Student {
+  - student_id
+  - student_code
+  - status
+  + getBalance()
+}
+
+class DepositBonusPackage {
+  - package_id
+  - amount_cap
+  - bonus_percentage
+  - package_name
+  - is_active
+}
+
+' Level 1: Depends on Level 0
+class Deposit {
+  - deposit_id
+  - deposit_code
+  - deposit_amount
+  - bonus_amount
+  - total_credited
+  - payment_method
+  - payment_reference
+  - payment_status
+  - transaction_date
+}
+
+' Level 2: Depends on Level 1
+class StudentWalletLedger {
+  - ledger_id
+  - amount
+  - direction
+  - source_type
+  - source_table
+  - source_id
+  - description
+  - created_at
+}
+
+' Relationships
+' Associations
+Student "1" --> "*" Deposit : makes
+DepositBonusPackage "1" --> "0..*" Deposit : applies to
+Deposit "1" --> "*" StudentWalletLedger : creates
+
+' Dependency: Deposit references bonus package
+Deposit ..> DepositBonusPackage : references
+
+@enduml
+

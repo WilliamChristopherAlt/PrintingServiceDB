@@ -1,0 +1,61 @@
+@startuml Deposit to Account Use Case - Activity Diagram
+
+|User|
+start
+:Select deposit amount;
+
+|System|
+:Check bonus packages;
+:Calculate bonus;
+note right
+  Apply deposit_bonus_package
+  if amount qualifies
+end note
+:Show total credited;
+note right
+  deposit_amount + bonus_amount
+end note
+
+|User|
+:Confirm deposit;
+
+|System|
+:Create deposit record;
+:Generate payment request;
+
+|User|
+if (Payment method?) then (Bank transfer)
+  :Transfer money;
+else (QR Code)
+  :Scan QR code;
+  :Complete payment;
+endif
+
+|System|
+:Wait for payment confirmation;
+
+if (Payment received?) then (Yes)
+  |System|
+  :Confirm deposit;
+  :Credit to balance;
+  note right
+    Add to student_wallet_ledger
+    (IN, DEPOSIT)
+  end note
+  :Send confirmation notification;
+  
+  |User|
+  :Receive deposit confirmation;
+else (No)
+  |System|
+  :Mark payment failed;
+  :Notify user;
+  
+  |User|
+  :Receive failure notification;
+endif
+
+stop
+
+@enduml
+

@@ -1,0 +1,85 @@
+@startuml Print Document Use Case - Activity Diagram
+
+|User|
+start
+:Upload document;
+
+|System|
+:Save document;
+:Calculate page count;
+
+|User|
+:Select printer;
+
+|System|
+:Validate printer;
+
+|User|
+:Configure print settings;
+note right
+  Page size, Color mode,
+  Copies, Print side
+end note
+
+|System|
+:Calculate cost;
+:Show cost preview;
+
+|User|
+if (Payment method?) then (Balance)
+  :Pay with balance;
+else (QR Code)
+  :Pay with QR code;
+endif
+
+|System|
+if (Payment method?) then (Balance)
+  if (Balance sufficient?) then (Yes)
+    :Create print job;
+    :Process payment;
+    :Deduct balance;
+  else (No)
+    :Show insufficient balance;
+    stop
+  endif
+else (QR Code)
+  :Create print job;
+  :Generate QR code;
+  |User|
+  :Complete QR payment;
+  |System|
+  :Confirm payment;
+endif
+
+|System|
+:Queue print job;
+
+|Printer|
+:Wait for availability;
+
+|System|
+:Start printing;
+
+|Printer|
+:Print pages;
+
+|System|
+:Track progress;
+
+repeat
+  |Printer|
+  :Print page;
+  |System|
+  :Update progress;
+repeat while (More pages?) is (Yes)
+->No;
+
+|System|
+:Complete job;
+:Notify user;
+
+|User|
+:Receive completion;
+stop
+
+@enduml

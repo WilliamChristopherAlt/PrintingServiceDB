@@ -1,0 +1,109 @@
+@startuml Print Document Use Case - Class Diagram
+
+!theme plain
+top to bottom direction
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+
+skinparam class {
+  BackgroundColor LightBlue
+  BorderColor Blue
+}
+
+' Level 0: Independent classes (referenced by others)
+' Pricing tables that PrintJob depends on - must be above PrintJob
+class PageSizePrice {
+  - price_id
+  - page_price
+  - is_active
+}
+
+class ColorModePrice {
+  - setting_id
+  - price_multiplier
+  - is_active
+}
+
+class PageDiscountPackage {
+  - package_id
+  - min_pages
+  - discount_percentage
+  - is_active
+}
+
+class Student {
+  - student_id
+  - student_code
+  - status
+  + getBalance()
+}
+
+class PrinterPhysical {
+  - printer_id
+  - serial_number
+  - is_enabled
+  - status
+  - printing_status
+}
+
+' Level 1: Depends on Level 0
+class UploadedFile {
+  - uploaded_file_id
+  - file_name
+  - file_type
+  - page_count
+  - file_url
+}
+
+' Level 2: Depends on Level 0 and Level 1
+class PrintJob {
+  - job_id
+  - print_status
+  - page_orientation
+  - print_side
+  - number_of_copy
+  - total_pages
+  - total_price
+  - payment_method
+}
+
+' Level 3: Depends on Level 2
+class PrintJobPage {
+  - page_record_id
+  - page_number
+  - is_printed
+  - printed_at
+}
+
+class Payment {
+  - payment_id
+  - payment_method
+  - payment_status
+  - amount_paid_from_balance
+  - amount_paid_directly
+  - total_amount
+}
+
+class RefundPrintJob {
+  - refund_id
+  - pages_not_printed
+}
+
+' Relationships - arrows point from dependent to dependency
+' Composition: PrintJob contains PrintJobPage (strong ownership)
+PrintJob "1" *-- "*" PrintJobPage : contains
+
+' Associations: General relationships
+Student "1" --> "*" UploadedFile : uploads
+Student "1" --> "*" PrintJob : creates
+UploadedFile "1" --> "*" PrintJob : used in
+PrinterPhysical "1" --> "*" PrintJob : prints on
+PrintJob "1" --> "1" Payment : has
+PrintJob "1" --> "0..1" RefundPrintJob : may have
+
+' Dependencies: PrintJob depends on pricing/discount tables (arrows point from dependent to dependency)
+PrintJob ..> PageSizePrice : uses
+PrintJob ..> ColorModePrice : uses
+PrintJob ..> PageDiscountPackage : applies
+
+@enduml

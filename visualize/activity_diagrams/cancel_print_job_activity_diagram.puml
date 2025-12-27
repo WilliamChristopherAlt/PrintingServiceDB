@@ -1,0 +1,50 @@
+@startuml Cancel Print Job Use Case - Activity Diagram
+
+|User|
+start
+:Request cancel print job;
+
+|System|
+:Validate cancellation request;
+note right
+  Check:
+  - Job belongs to user
+  - Job can be cancelled
+end note
+
+if (Job status?) then (printing)
+  |System|
+  :Stop print job;
+  :Count pages not printed;
+  
+  |Printer|
+  :Stop printing;
+  :Eject current page;
+  
+  |System|
+  :Calculate refund;
+  note right
+    Refund = total_price ×
+    (pages_not_printed / total_pages)
+  end note
+  :Process refund;
+  :Refund to balance;
+  :Notify cancellation;
+elseif (queued) then
+  |System|
+  :Remove from queue;
+  :Cancel job;
+  :Refund full amount;
+  :Notify cancellation;
+else (pending_payment)
+  |System|
+  :Cancel payment;
+  :Cancel job;
+  :Notify cancellation;
+endif
+
+|User|
+:Receive cancellation notification;
+stop
+
+@enduml

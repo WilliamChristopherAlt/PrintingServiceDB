@@ -1,0 +1,80 @@
+@startuml HCMSIU-SSPS System Architecture
+
+!theme plain
+skinparam linetype ortho
+skinparam componentStyle rectangle
+
+package "Presentation Layer" {
+  component [Next.js Frontend] as Frontend
+  component [React Components] as ReactComp
+  component [API Client] as APIClient
+  component [WebSocket Client] as WSClient
+}
+
+package "API Gateway Layer" {
+  component [Spring Boot API] as BackendAPI
+  component [REST Controllers] as Controllers
+  component [WebSocket Handlers] as WSHandlers
+  component [Security Filter] as Security
+}
+
+package "Business Logic Layer" {
+  component [Print Service] as PrintService
+  component [Payment Service] as PaymentService
+  component [Deposit Service] as DepositService
+  component [Pricing Service] as PricingService
+  component [Ledger Service] as LedgerService
+  component [Print Job Processor] as JobProcessor
+  component [Progress Updater] as ProgressUpdater
+}
+
+package "Data Access Layer" {
+  component [JPA Repository] as Repositories
+  database "Azure SQL Server" as Database
+}
+
+package "External Services" {
+  component [Supabase Storage] as Supabase
+  component [Payment Gateway] as PaymentGateway
+  component [Email Service] as EmailService
+  component [Printer Hardware] as PrinterHW
+}
+
+' Presentation to API Gateway
+Frontend --> BackendAPI
+ReactComp --> APIClient
+APIClient --> BackendAPI
+WSClient --> BackendAPI
+
+' API Gateway to Business Logic
+BackendAPI --> PrintService
+BackendAPI --> PaymentService
+BackendAPI --> DepositService
+Controllers --> PrintService
+Controllers --> PaymentService
+WSHandlers --> PrintService
+Security --> BackendAPI
+
+' Business Logic Layer
+PrintService --> PricingService
+PrintService --> PaymentService
+JobProcessor --> PrintService
+ProgressUpdater --> PrintService
+
+' Business Logic to Data Access
+PrintService --> Repositories
+PaymentService --> Repositories
+DepositService --> Repositories
+PricingService --> Repositories
+LedgerService --> Repositories
+Repositories --> Database
+
+' Business Logic to External Services
+PrintService --> PrinterHW
+PaymentService --> PaymentGateway
+DepositService --> PaymentGateway
+PrintService --> Supabase
+PaymentService --> Supabase
+PrintService --> EmailService
+
+@enduml

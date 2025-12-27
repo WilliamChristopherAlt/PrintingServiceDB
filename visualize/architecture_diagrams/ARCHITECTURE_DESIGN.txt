@@ -1,0 +1,55 @@
+THIẾT KẾ KIẾN TRÚC HỆ THỐNG HCMSIU-SSPS
+==========================================
+
+SƠ ĐỒ KIẾN TRÚC TỔNG THỂ
+--------------------------
+
+Hệ thống HCMSIU-SSPS (HCMIU Student Smart Printing Service) được thiết kế theo kiến trúc phân tầng (Layered Architecture) với bốn tầng chính: Presentation Layer (Tầng Giao Diện), API Gateway Layer (Tầng Cổng API), Business Logic Layer (Tầng Logic Nghiệp Vụ), và Data Access Layer (Tầng Truy Cập Dữ Liệu).
+
+Tầng Presentation chứa ứng dụng Next.js frontend với React Components, API Client, và WebSocket Client để tương tác với người dùng. Tầng API Gateway đóng vai trò là điểm vào duy nhất với REST Controllers, WebSocket Handlers, và Security Filter để xử lý xác thực và định tuyến yêu cầu. Tầng Business Logic bao gồm các service xử lý logic nghiệp vụ như Print Service, Payment Service, Deposit Service, Pricing Service, và Ledger Service, cùng với các scheduler như Print Job Processor và Progress Updater để xử lý các tác vụ nền. Tầng Data Access sử dụng JPA Repository pattern để truy cập Azure SQL Server database.
+
+Hệ thống cũng tích hợp với các dịch vụ bên ngoài như Supabase Storage cho lưu trữ file, Payment Gateway (SePay) cho thanh toán, Email Service (Gmail SMTP) cho thông báo, và Printer Hardware thông qua Printer Controller. Kiến trúc này tách biệt rõ ràng các mối quan tâm, cho phép phát triển, bảo trì và mở rộng từng tầng độc lập, đồng thời đảm bảo tính bảo mật và khả năng mở rộng của hệ thống.
+
+
+CHIẾN LƯỢC TRÌNH BÀY GIAO DIỆN NGƯỜI DÙNG
+------------------------------------------
+
+Hệ thống sử dụng Next.js 14 với React 18 và TypeScript để xây dựng giao diện người dùng theo mô hình Server-Side Rendering (SSR) và Static Site Generation (SSG), giúp tối ưu hiệu suất, cải thiện SEO, và giảm thời gian tải trang cho người dùng. Next.js được chọn vì khả năng tự động code splitting, image optimization, và built-in routing, giúp tạo ra ứng dụng web nhanh và hiệu quả.
+
+Giao diện được tổ chức thành hai phần chính: phần dành cho sinh viên và phần dành cho nhân viên quản trị, mỗi phần có các trang chức năng riêng biệt được bảo vệ bởi authentication middleware. Sinh viên có thể truy cập các trang như dashboard để xem tổng quan, trang in tài liệu để tải file và cấu hình in, trang lịch sử in để xem các công việc in trước đó, trang nạp tiền để nạp số dư tài khoản, và trang quản lý hồ sơ. Nhân viên có thể truy cập các trang quản lý máy in, quản lý sinh viên, xem báo cáo, và cấu hình hệ thống.
+
+Hệ thống sử dụng Tailwind CSS cho styling, đảm bảo giao diện responsive và hiện đại trên mọi thiết bị. State management được xử lý bằng Zustand cho global state (như authentication state, theme preferences) và React Query (TanStack Query) cho server state management, giúp quản lý cache, synchronization với backend, và tự động refetch khi cần thiết. WebSocket được tích hợp thông qua custom hooks để cung cấp real-time updates cho tiến trình in, thông báo, và trạng thái thanh toán mà không cần polling.
+
+Giao diện hỗ trợ đa ngôn ngữ (i18n) thông qua next-intl, cho phép chuyển đổi giữa tiếng Việt và tiếng Anh một cách mượt mà. Form validation được thực hiện bằng React Hook Form kết hợp với Zod schema validation, đảm bảo dữ liệu đầu vào hợp lệ cả ở client-side và có thể validate lại ở server-side. Component library được xây dựng với các reusable components như Button, Input, Modal, Toast để đảm bảo tính nhất quán trong toàn bộ ứng dụng.
+
+Tham khảo: Next.js Documentation (https://nextjs.org/docs), React Query Documentation (https://tanstack.com/query/latest), Tailwind CSS Documentation (https://tailwindcss.com/docs), Zustand Documentation (https://docs.pmnd.rs/zustand/getting-started/introduction).
+
+
+CHIẾN LƯỢC LƯU TRỮ DỮ LIỆU
+----------------------------
+
+Hệ thống sử dụng Azure SQL Server làm cơ sở dữ liệu quan hệ chính để lưu trữ tất cả dữ liệu nghiệp vụ bao gồm thông tin người dùng, công việc in, thanh toán, nạp tiền, sổ cái tài chính, và các cấu hình hệ thống. Azure SQL Server được chọn vì khả năng đảm bảo ACID compliance, hỗ trợ transactions phức tạp, tích hợp tốt với hệ sinh thái Microsoft Azure, và cung cấp các tính năng như automated backups, point-in-time restore, và high availability.
+
+Dữ liệu được tổ chức theo mô hình quan hệ chuẩn hóa với các bảng được liên kết thông qua foreign keys để đảm bảo tính toàn vẹn dữ liệu và giảm thiểu dữ liệu trùng lặp. Hệ thống sử dụng Spring Data JPA với Hibernate làm ORM framework để ánh xạ các entity Java sang các bảng trong database, giảm thiểu việc viết SQL thủ công, tăng tính bảo trì của code, và cung cấp các tính năng như lazy loading, caching, và transaction management tự động. JPA Repository pattern được sử dụng để truy cập dữ liệu, cho phép dễ dàng thêm các custom queries sử dụng JPQL hoặc native SQL khi cần thiết, đồng thời cung cấp các phương thức CRUD cơ bản tự động.
+
+Để tối ưu hiệu suất, hệ thống sử dụng database indexing trên các cột thường xuyên được truy vấn như foreign keys, trạng thái, ngày tháng, và các cột được sử dụng trong WHERE clauses. Composite indexes được tạo cho các truy vấn phức tạp thường xuyên được thực hiện. Connection pooling được cấu hình thông qua HikariCP (mặc định trong Spring Boot) để quản lý hiệu quả các kết nối database, giảm overhead của việc tạo và đóng kết nối, và cải thiện hiệu suất tổng thể.
+
+File uploads (tài liệu cần in) được lưu trữ trên Supabase Storage thay vì database để tối ưu hiệu suất và chi phí, Supabase Storage cung cấp CDN distribution tự động, khả năng scale tốt, và tích hợp dễ dàng với ứng dụng thông qua REST API hoặc SDK. Backup và disaster recovery được xử lý bởi Azure SQL Server với tính năng automated backups hàng ngày và point-in-time restore trong vòng 7-35 ngày tùy theo tier. Database migration được quản lý thông qua SQL migration scripts, cho phép version control và rollback khi cần thiết.
+
+Tham khảo: Azure SQL Database Documentation (https://learn.microsoft.com/en-us/azure/azure-sql/database/), Spring Data JPA Documentation (https://spring.io/projects/spring-data-jpa), Hibernate Documentation (https://hibernate.org/orm/documentation/), Supabase Storage Documentation (https://supabase.com/docs/guides/storage).
+
+
+QUẢN LÝ TRUY CẬP API VÀ DỊCH VỤ BÊN NGOÀI
+-------------------------------------------
+
+Hệ thống quản lý truy cập đến các dịch vụ bên ngoài thông qua một lớp abstraction và integration pattern để đảm bảo tính linh hoạt, dễ bảo trì, và khả năng test. Payment Gateway (SePay) được tích hợp thông qua REST API và webhook mechanism: khi sinh viên yêu cầu nạp tiền, hệ thống gọi API của SePay để tạo mã QR thanh toán với thông tin giao dịch, SePay trả về mã QR và thời gian hết hạn, sau đó SePay gửi webhook về hệ thống khi thanh toán thành công. Webhook được xác thực bằng chữ ký số (HMAC signature) để đảm bảo tính bảo mật và tính toàn vẹn của dữ liệu, ngăn chặn các cuộc tấn công giả mạo. Tất cả các webhook requests đều được log vào bảng payment_webhook_log để audit và debug.
+
+Supabase Storage được tích hợp thông qua Supabase Java Client để upload và download files, với retry mechanism và error handling để xử lý các lỗi network, timeout, và rate limiting. File uploads sử dụng presigned URLs để cho phép frontend upload trực tiếp lên Supabase mà không cần đi qua backend, giảm tải cho server và cải thiện hiệu suất. Email service sử dụng Gmail SMTP thông qua Spring Mail để gửi email xác thực, đặt lại mật khẩu, và thông báo. Spring Mail cung cấp abstraction layer cho việc gửi email, cho phép dễ dàng thay đổi email provider mà không cần thay đổi code business logic.
+
+Printer hardware được điều khiển thông qua Printer Controller component, component này giao tiếp với máy in vật lý thông qua network protocol (có thể là IPP - Internet Printing Protocol, SNMP - Simple Network Management Protocol, hoặc custom protocol tùy theo loại máy in). Tất cả các integration với external services đều được wrap trong service classes với interface abstraction, cho phép dễ dàng thay thế implementation hoặc thêm mock cho testing.
+
+Circuit breaker pattern có thể được áp dụng (sử dụng Resilience4j hoặc Spring Cloud Circuit Breaker) để xử lý các lỗi từ external services và tránh cascade failures khi dịch vụ bên ngoài bị lỗi. API rate limiting được áp dụng ở tầng API Gateway sử dụng Spring Security và có thể kết hợp với Redis để lưu trữ rate limit counters, bảo vệ backend khỏi quá tải và DDoS attacks. CORS được cấu hình để chỉ cho phép frontend domain truy cập API, ngăn chặn các cuộc tấn công CSRF.
+
+Tất cả các API endpoints đều yêu cầu JWT authentication trừ các endpoint công khai như đăng nhập và đăng ký. JWT tokens được sử dụng với access token (thời gian sống ngắn) và refresh token (thời gian sống dài hơn) để cân bằng giữa bảo mật và trải nghiệm người dùng. API versioning được thực hiện thông qua URL path (ví dụ: /api/v1/) để đảm bảo backward compatibility khi có thay đổi API.
+
+Tham khảo: Spring Integration Documentation (https://spring.io/projects/spring-integration), Webhook Best Practices (https://webhooks.fyi/), API Gateway Pattern (https://microservices.io/patterns/apigateway.html), Circuit Breaker Pattern (https://martinfowler.com/bliki/CircuitBreaker.html), JWT Authentication (https://jwt.io/introduction), Spring Security Documentation (https://spring.io/projects/spring-security).

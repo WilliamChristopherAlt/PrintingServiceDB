@@ -1,0 +1,62 @@
+@startuml Print Document Use Case - Sequence Diagram
+
+actor User
+participant "Web UI" as UI
+participant "Backend API" as API
+participant "Payment Gateway" as Payment
+participant "Printer" as Printer
+
+User -> UI: Upload document
+UI -> API: Upload file
+API --> UI: File uploaded
+UI --> User: Show file
+
+User -> UI: Select printer
+UI -> API: Get printers
+API --> UI: Printer list
+UI --> User: Display printers
+
+User -> UI: Configure settings
+UI -> API: Calculate cost
+API --> UI: Cost preview
+UI --> User: Show cost
+
+alt Payment: Balance
+  User -> UI: Pay with balance
+  UI -> API: Create job
+  alt Balance sufficient
+    API -> API: Process payment
+    API -> Printer: Queue job
+    Printer --> API: Job queued
+    loop Printing
+      Printer -> Printer: Print page
+      Printer -> API: Update progress
+    end
+    Printer -> API: Job completed
+    API --> User: Completion notification
+  else Insufficient balance
+    API --> UI: Error
+    UI --> User: Show error
+  end
+  
+else Payment: QR Code
+  User -> UI: Pay with QR
+  UI -> API: Create job
+  API -> Payment: Generate QR
+  Payment --> API: QR code
+  API --> UI: QR payment info
+  UI --> User: Show QR code
+  
+  User -> Payment: Complete payment
+  Payment -> API: Payment confirmed
+  API -> Printer: Queue job
+  Printer --> API: Job queued
+  loop Printing
+    Printer -> Printer: Print page
+    Printer -> API: Update progress
+  end
+  Printer -> API: Job completed
+  API --> User: Completion notification
+end
+
+@enduml
