@@ -318,14 +318,17 @@ copy_distribution:
 
 # System Configuration
 system_configs:
+  duplex_price_factor: 0.8
+  qr_expiration_minutes: 10
   max_file_size_mb: 50
-  max_pages_per_job: 100
-  queue_timeout_minutes: 30
-  maintenance_interval_days: 90
-  backup_retention_days: 365
-  session_timeout_minutes: 120
-  max_daily_jobs_per_student: 20
-  min_balance_warning: 10
+  min_deposit_amount: 10000
+  max_deposit_amount: 5000000
+  low_balance_threshold: 5000
+  print_job_timeout_minutes: 30
+  page_printing_rate_seconds: 10
+  semester_bonus_distribution_day: 1
+  password_reset_token_expiry_minutes: 30
+  refresh_token_expiry_days: 7
 
 # Permitted file types
 permitted_extensions:

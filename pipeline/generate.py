@@ -1575,6 +1575,36 @@ class PrintingServiceDataGenerator:
         for stmt in bulk_page_prices.get_statements():
             self.add_sql(stmt)
         
+        # Generate system page allocation (initial inventory)
+        self.add_sql("\n-- System Page Allocation (Initial Inventory)")
+        bulk_page_allocation = BulkInsertHelper("system_page_allocation", [
+            "allocation_id", "page_size_id", "quantity", "created_at", "updated_at"
+        ])
+        
+        # Initial inventory: A4 = 10000 pages, A3 = 5000 pages, A5 = 8000 pages
+        initial_quantities = {
+            "A4": 10000,
+            "A3": 5000,
+            "A5": 8000
+        }
+        
+        created_at = random_date_in_range(365, 30)
+        for page_size in self.page_sizes:
+            allocation_id = generate_uuid()
+            size_name = page_size["size_name"]
+            quantity = initial_quantities.get(size_name, 5000)  # Default 5000 if not specified
+            
+            bulk_page_allocation.add_row([
+                allocation_id,
+                page_size["page_size_id"],
+                quantity,
+                created_at.strftime('%Y-%m-%d %H:%M:%S'),
+                created_at.strftime('%Y-%m-%d %H:%M:%S')
+            ])
+        
+        for stmt in bulk_page_allocation.get_statements():
+            self.add_sql(stmt)
+        
         # Generate color modes first
         self.add_sql("\n-- Color Modes")
         bulk_color_modes = BulkInsertHelper("color_mode", [
@@ -1927,8 +1957,8 @@ class PrintingServiceDataGenerator:
             
             # Test accounts get 5-9 deposits each
             num_deposits = random.randint(5, 9)
-            
-            for _ in range(num_deposits):
+                
+                for _ in range(num_deposits):
                     deposit_id = generate_uuid()
                     
                     # Generate unique deposit code
@@ -1958,13 +1988,13 @@ class PrintingServiceDataGenerator:
                     reference = f"DEP-{random.randint(100000, 999999)}"
                     
                     # Payment status distribution: completed (90%), pending (5%), failed (3%), expired (1%), cancelled (1%)
-                    rand = random.random()
-                    if rand < 0.90:
-                        status = 'completed'
+                        rand = random.random()
+                        if rand < 0.90:
+                            status = 'completed'
                     elif rand < 0.95:
-                        status = 'pending'
+                            status = 'pending'
                     elif rand < 0.98:
-                        status = 'failed'
+                            status = 'failed'
                     elif rand < 0.99:
                         status = 'expired'
                     else:
@@ -2270,21 +2300,34 @@ class PrintingServiceDataGenerator:
         # System configurations
         bulk_config = BulkInsertHelper("system_configuration", [
             "config_id", "config_key", "config_value", "description", 
-            "updated_at", "updated_by"
+            "updated_at"
         ])
         
+        # Description mapping for Vietnamese descriptions
+        description_map = {
+            'duplex_price_factor': 'Hệ số giá in 2 mặt (0.8 = giảm 20% so với 1 mặt)',
+            'qr_expiration_minutes': 'Thời gian hết hạn mã QR thanh toán (phút)',
+            'max_file_size_mb': 'Kích thước file tối đa được phép upload (MB)',
+            'min_deposit_amount': 'Số tiền nạp tối thiểu (VNĐ)',
+            'max_deposit_amount': 'Số tiền nạp tối đa mỗi lần (VNĐ)',
+            'low_balance_threshold': 'Ngưỡng số dư thấp để cảnh báo (VNĐ)',
+            'print_job_timeout_minutes': 'Thời gian timeout lệnh in pending (phút)',
+            'page_printing_rate_seconds': 'Thời gian ước tính in mỗi trang (giây)',
+            'semester_bonus_distribution_day': 'Ngày trong tháng phát bonus học kỳ tự động',
+            'password_reset_token_expiry_minutes': 'Thời gian hết hạn token reset mật khẩu (phút)',
+            'refresh_token_expiry_days': 'Thời gian hết hạn refresh token (ngày)'
+        }
+        
         configs = self.spec['system_configs']
-        updater_staff = random.choice(self.staff) if self.staff else None
         updated_at = random_date_in_range(30, 0)
         
         for key, value in configs.items():
             config_id = generate_uuid()
-            description = f"System configuration for {key.replace('_', ' ')}"
+            description = description_map.get(key, f"System configuration for {key.replace('_', ' ')}")
             
             bulk_config.add_row([
                 config_id, key, str(value), description,
-                updated_at.strftime('%Y-%m-%d %H:%M:%S'),
-                updater_staff['staff_id'] if updater_staff else None
+                updated_at.strftime('%Y-%m-%d %H:%M:%S')
             ])
         
         for stmt in bulk_config.get_statements():

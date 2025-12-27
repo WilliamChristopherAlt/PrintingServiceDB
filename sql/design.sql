@@ -235,7 +235,8 @@ CREATE TABLE printer_physical (
     printer_pixel_coordinate VARCHAR(100) NULL, -- JSON: {"grid": [x, y], "pixel": [x, y]}
     is_enabled BIT DEFAULT 1,
     status VARCHAR(20) NOT NULL DEFAULT 'idle' CHECK (status IN ('unplugged', 'idle', 'printing', 'maintained')),
-    printing_status VARCHAR(50) NULL CHECK (printing_status IN ('printing', 'paper_jam', 'out_of_paper', 'out_of_toner', 'low_toner', 'door_open', 'paper_tray_empty', 'network_error', 'offline', 'error')),
+    printing_status VARCHAR(50) NULL CHECK (printing_status IN ('printing', 'paper_jam', 'out_of_paper', 'out_of_toner', 'low_toner',
+     'door_open', 'paper_tray_empty', 'network_error', 'offline', 'error')),
     installed_date DATE,
     last_maintenance_date DATE,
     created_at DATETIME DEFAULT GETDATE(),
@@ -397,6 +398,22 @@ CREATE TABLE page_size_price (
 );
 CREATE INDEX idx_page_size_price_page_size ON page_size_price (page_size_id);
 CREATE INDEX idx_page_size_price_active ON page_size_price (is_active);
+GO
+
+-- System page allocation - tracks available paper inventory by page type
+CREATE TABLE system_page_allocation (
+    allocation_id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    page_size_id UNIQUEIDENTIFIER NOT NULL,
+    quantity INT NOT NULL CHECK (quantity >= 0), -- Available pages in stock
+    created_at DATETIME DEFAULT GETDATE(),
+    updated_at DATETIME DEFAULT GETDATE(),
+    updated_by UNIQUEIDENTIFIER,
+    FOREIGN KEY (page_size_id) REFERENCES page_size(page_size_id),
+    FOREIGN KEY (updated_by) REFERENCES staff(staff_id),
+    UNIQUE (page_size_id) -- One allocation record per page size
+);
+CREATE INDEX idx_system_page_allocation_page_size ON system_page_allocation (page_size_id);
+CREATE INDEX idx_system_page_allocation_quantity ON system_page_allocation (quantity);
 GO
 
 -- Page discount package - defines volume discounts based on number of pages
@@ -661,12 +678,15 @@ CREATE TABLE notification (
     notification_type VARCHAR(50) NOT NULL, -- e.g. 'DEPOSIT_COMPLETED', 'PRINT_JOB_COMPLETED', 'PRINT_JOB_FAILED'
     title NVARCHAR(200) NOT NULL,
     message NVARCHAR(1000) NOT NULL,
+    reference_id UNIQUEIDENTIFIER NULL, -- Reference to related entity (e.g., deposit_id, job_id)
+    reference_type NVARCHAR(50) NULL, -- Type of reference (e.g., 'deposit', 'print_job', 'payment')
     is_read BIT NOT NULL DEFAULT 0,
     created_at DATETIME NOT NULL DEFAULT GETDATE(),
     FOREIGN KEY (student_id) REFERENCES student(student_id) ON DELETE CASCADE
 );
 CREATE INDEX idx_notification_student ON notification (student_id, created_at);
 CREATE INDEX idx_notification_unread ON notification (student_id, is_read, created_at);
+CREATE INDEX idx_notification_reference ON notification(reference_id, reference_type) WHERE reference_id IS NOT NULL;
 GO
 
 -- Audit and Logging Tables
