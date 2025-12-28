@@ -1,0 +1,487 @@
+TRANG QUẢN LÝ PHÂN BỔ TRANG (PAGE ALLOCATION MANAGEMENT - STAFF)
+1. CÁC THÀNH PHẦN TRÊN TRANG
+
+1.1 Tiêu đề trang (Page Header)
+Tiêu đề chính: "Page Allocation Management"
+Mô tả phụ: "View current page inventory by size and allocation change history"
+Không có nút hành động ở header
+
+1.2 Thẻ thống kê (Statistics Cards)
+Có 3 thẻ thống kê hiển thị tổng quan:
+- Total Pages: Tổng số trang trong kho (tất cả các loại)
+- Available Types: Số loại trang có sẵn (A3, A4, A5)
+- Low Stock: Số loại trang có tồn kho thấp (< 1,000 trang)
+
+1.3 Bảng Phân Bổ Hiện Tại (Current Page Allocations Table)
+Mô tả
+Bảng hiển thị tổng số trang hiện có cho từng loại trang (A3, A4, A5). Staff có thể cập nhật hoặc xóa phân bổ.
+Lưu ý về Current Quantity:
+- Current Quantity được tính toán tự động dựa trên:
+  + Tất cả các trang được thêm vào từ các phân bổ (page allocations) - các bản ghi INSERT/UPDATE trong system_page_allocation
+  + Trừ đi số trang đã được sử dụng trong các print jobs đã hoàn thành (status = 'COMPLETED')
+- Khi staff cập nhật quantity thủ công, giá trị này sẽ được sử dụng làm baseline và hệ thống sẽ tiếp tục tính toán tự động từ đó
+- Hệ thống tự động cập nhật quantity khi:
+  + Staff thêm/cập nhật phân bổ trang (tăng quantity)
+  + Print job hoàn thành (giảm quantity theo số trang đã in)
+Các cột:
+- Page Size (tên kích thước giấy)
+- Current Quantity (số lượng hiện tại - được tính tự động từ allocations và print jobs)
+- Last Updated (ngày giờ cập nhật cuối)
+- Updated By (tên nhân viên cập nhật)
+- Status (badge trạng thái: In Stock / Medium / Low Stock)
+- Actions (các nút hành động)
+Mỗi dòng hiển thị:
+- Tên kích thước: A4, A3, A5 (in đậm)
+- Số lượng: hiển thị với dấu phẩy phân cách (ví dụ: 10,000)
+- Ngày cập nhật: định dạng YYYY-MM-DD HH:mm
+- Tên nhân viên: tên đầy đủ
+- Badge trạng thái:
+  + Màu xanh (In Stock): quantity >= 5,000
+  + Màu cam (Medium): 1,000 <= quantity < 5,000
+  + Màu đỏ (Low Stock): quantity < 1,000
+- Actions column:
+  + Icon nút "Update" (bút chì màu tím) - cập nhật số lượng
+  + Icon nút "Delete" (thùng rác màu đỏ) - xóa phân bổ
+
+1.4 Bảng Lịch Sử Phân Bổ (Allocation History Table)
+Mô tả
+Bảng hiển thị lịch sử tất cả các thay đổi về phân bổ trang, được lấy từ bảng system_audit_log với điều kiện table_name = 'system_page_allocation'.
+Nút hành động
+Nút "+ Add Allocation" (primary style, ở góc phải header của table)
+Bộ lọc (Filters)
+Các bộ lọc nằm trong một section riêng phía trên bảng:
+- Page Size: Dropdown chọn "All Sizes", "A4", "A3", "A5"
+- Date From: Input date để chọn ngày bắt đầu
+- Date To: Input date để chọn ngày kết thúc
+- Updated By: Input text để tìm kiếm theo tên nhân viên
+- Nút "Apply": Áp dụng các bộ lọc
+- Nút "Clear": Xóa tất cả bộ lọc và reset về mặc định
+Các cột trong bảng:
+- Timestamp: Thời gian thay đổi (có thể sắp xếp)
+- Page Size: Loại trang (A3, A4, A5) (có thể sắp xếp)
+- Change: Số lượng thay đổi (+/-) (có thể sắp xếp)
+- Updated By: Tên nhân viên thực hiện thay đổi (có thể sắp xếp)
+- Actions: Các nút hành động
+Mỗi dòng hiển thị:
+- Timestamp: Định dạng YYYY-MM-DD HH:mm:ss
+- Page Size: Tên loại trang (in đậm)
+- Change: Số lượng thay đổi với dấu + (tăng) hoặc - (giảm), màu xanh cho tăng, màu đỏ cho giảm
+- Updated By: Tên đầy đủ nhân viên
+- Actions column:
+  + Icon nút "View" (mắt màu xanh) - xem chi tiết lịch sử
+Sắp xếp (Sorting)
+Tất cả các cột đều có thể sắp xếp bằng cách click vào header:
+- Click lần đầu: Sắp xếp giảm dần (desc)
+- Click lần hai: Sắp xếp tăng dần (asc)
+- Icon mũi tên hiển thị trạng thái sắp xếp hiện tại
+Phân trang (Pagination)
+- Hiển thị thông tin: "Showing X-Y of Z entries"
+- Nút điều hướng: First (⏮), Previous (◀), Next (▶), Last (⏭)
+- Hiển thị số trang: "Page X of Y"
+- Dropdown chọn số dòng mỗi trang: 10, 25, 50, 100
+- Các nút bị disable khi không thể điều hướng (trang đầu/cuối)
+
+2. LUỒNG TƯƠNG TÁC
+
+2.1 Truy cập và hiển thị ban đầu
+Staff click menu "Page Allocation" trong sidebar
+Trang load và hiển thị:
+- 3 thẻ thống kê với dữ liệu tổng quan
+- Bảng Current Page Allocations với các dòng hiện có
+- Bảng Allocation History với dữ liệu mặc định (sắp xếp theo timestamp giảm dần)
+
+2.2 Thêm phân bổ mới (Add Allocation)
+Staff click nút "+ Add Allocation" ở header của bảng Allocation History
+Modal "Add Page Allocation" hiển thị
+Modal có:
+- Field "Page Size" (dropdown, required): Chọn A4/A3/A5
+- Field "Initial Quantity" (input number, required): Nhập số lượng ban đầu
+- Nút "Cancel" và "Create"
+Staff chọn page size và nhập số lượng
+Staff click "Create"
+Hệ thống validate:
+- Page size đã chọn
+- Quantity >= 0
+- Page size chưa có allocation (UNIQUE constraint)
+Hệ thống tạo bản ghi mới trong system_page_allocation
+Hệ thống ghi log vào system_audit_log với action_type = 'INSERT'
+Modal đóng
+Toast hiển thị "Allocation created successfully"
+Bảng Current Page Allocations tự động refresh với dòng mới
+Bảng Allocation History tự động refresh với entry mới
+
+2.3 Cập nhật phân bổ (Update Allocation)
+Staff click icon "Update" (bút chì) ở một dòng trong bảng Current Page Allocations
+Modal "Update Page Allocation" hiển thị
+Modal có:
+- Field "Page Size" (read-only): Hiển thị loại trang hiện tại
+- Field "Current Quantity" (read-only): Hiển thị số lượng hiện tại
+- Field "New Quantity" (input number, required): Nhập số lượng mới
+- Nút "Cancel" và "Update"
+Staff nhập số lượng mới
+Staff click "Update"
+Hệ thống validate: New Quantity >= 0
+Hệ thống cập nhật bản ghi trong system_page_allocation:
+- Cập nhật quantity = new quantity
+- Cập nhật updated_at = GETDATE()
+- Cập nhật updated_by = current staff_id
+Hệ thống ghi log vào system_audit_log với:
+- action_type = 'UPDATE'
+- changed_field = JSON chứa previous_quantity và new_quantity
+Modal đóng
+Toast hiển thị "Allocation updated successfully"
+Bảng Current Page Allocations tự động refresh với số lượng mới
+Bảng Allocation History tự động refresh với entry mới (hiển thị change = new - previous)
+
+2.4 Xóa phân bổ (Delete Allocation)
+Staff click icon "Delete" (thùng rác) ở một dòng trong bảng Current Page Allocations
+Modal "Delete Page Allocation" hiển thị
+Modal có:
+- Thông báo xác nhận: "Are you sure you want to delete the allocation for [Page Size]?"
+- Cảnh báo: "This action cannot be undone. The allocation record will be permanently removed from the system."
+- Nút "Cancel" và "Delete" (màu đỏ)
+Staff xác nhận bằng cách click "Delete"
+Hệ thống xóa bản ghi trong system_page_allocation
+Hệ thống ghi log vào system_audit_log với action_type = 'DELETE'
+Modal đóng
+Toast hiển thị "Allocation deleted successfully"
+Bảng Current Page Allocations tự động refresh (dòng đã xóa biến mất)
+Bảng Allocation History tự động refresh với entry mới
+
+2.5 Lọc lịch sử phân bổ
+Staff sử dụng các bộ lọc ở bảng Allocation History:
+Lọc theo Page Size:
+Staff chọn một loại trang từ dropdown "Page Size"
+Staff click nút "Apply"
+Bảng history chỉ hiển thị các thay đổi của loại trang đã chọn
+Lọc theo Date Range:
+Staff chọn "Date From" và/hoặc "Date To"
+Staff click nút "Apply"
+Bảng history chỉ hiển thị các thay đổi trong khoảng thời gian đã chọn
+Lọc theo Updated By:
+Staff nhập tên nhân viên vào ô "Updated By"
+Staff click nút "Apply"
+Bảng history chỉ hiển thị các thay đổi của nhân viên có tên chứa từ khóa
+Lọc kết hợp:
+Staff có thể kết hợp nhiều bộ lọc cùng lúc
+Staff click "Apply"
+Bảng history hiển thị kết quả thỏa mãn tất cả điều kiện
+Xóa bộ lọc:
+Staff click nút "Clear"
+Tất cả các bộ lọc được reset về mặc định
+Bảng history hiển thị lại toàn bộ dữ liệu
+
+2.6 Sắp xếp lịch sử phân bổ
+Staff click vào header của một cột trong bảng Allocation History
+Hệ thống sắp xếp dữ liệu theo cột đó:
+- Click lần đầu: Sắp xếp giảm dần (mới nhất ở trên)
+- Click lần hai: Sắp xếp tăng dần (cũ nhất ở trên)
+Icon mũi tên trên header cập nhật để hiển thị hướng sắp xếp
+Bảng tự động refresh với dữ liệu đã sắp xếp
+Lưu ý: Sắp xếp áp dụng cho dữ liệu đã được lọc (nếu có).
+
+2.7 Phân trang lịch sử phân bổ
+Thay đổi số dòng mỗi trang:
+Staff chọn số dòng từ dropdown "Rows per page" (10/25/50/100)
+Bảng tự động refresh với số dòng mới
+Trang hiện tại reset về trang 1
+Điều hướng trang:
+Staff click nút "Next" để chuyển sang trang tiếp theo
+Staff click nút "Previous" để quay lại trang trước
+Staff click nút "First" để về trang đầu tiên
+Staff click nút "Last" để đến trang cuối cùng
+Các nút bị disable khi không thể điều hướng (đã ở trang đầu/cuối)
+Thông tin phân trang:
+Hiển thị "Showing X-Y of Z entries" (X = dòng đầu, Y = dòng cuối, Z = tổng số)
+Hiển thị "Page X of Y" (X = trang hiện tại, Y = tổng số trang)
+
+2.8 Cancel/Đóng modal
+Trong bất kỳ modal nào, staff có thể:
+Click nút "Cancel"
+Click nút "×" (close) ở góc phải modal header
+Click vùng ngoài modal (backdrop)
+Nhấn phím ESC
+Modal đóng
+Form reset về trạng thái ban đầu (nếu có thay đổi)
+Quay về trang chính không có thay đổi
+
+3. USE CASE: PAGE ALLOCATION MANAGEMENT
+
+3.1 Danh sách Use Cases
+Use Case Index
+Tên Use Case
+MoSCoW
+NV-11-1
+Xem phân bổ trang hiện tại
+Must Have
+NV-11-2
+Thêm phân bổ trang mới
+Must Have
+NV-11-3
+Cập nhật phân bổ trang
+Must Have
+NV-11-4
+Xóa phân bổ trang
+Must Have
+
+3.2 Use Case NV-11-1: Xem phân bổ trang hiện tại
+
+Mục
+Nội dung
+Usecase ID
+NV-11-1
+Tên
+Xem phân bổ trang hiện tại (View Current Page Allocations)
+Mô tả
+Staff xem tổng số trang hiện có trong kho cho từng loại trang (A3, A4, A5) cùng với thông tin cập nhật lần cuối và lịch sử thay đổi.
+Actor
+Staff (SPSO)
+Trigger
+Staff truy cập trang "Page Allocation Management"
+Quy định nghiệp vụ
+- Hiển thị tất cả các loại trang có trong bảng system_page_allocation
+- Mỗi loại trang chỉ có một bản ghi (ràng buộc UNIQUE trên page_size_id)
+- Số lượng phải >= 0 (CHECK constraint)
+- Hiển thị thông tin nhân viên cập nhật lần cuối (từ bảng staff qua updated_by)
+- Hiển thị lịch sử từ system_audit_log với table_name = 'system_page_allocation'
+Main Flow
+1. Staff truy cập trang Page Allocation Management
+2. Hệ thống truy vấn dữ liệu từ bảng system_page_allocation
+3. Hệ thống JOIN với bảng page_size để lấy tên loại trang (size_name)
+4. Hệ thống JOIN với bảng staff và user để lấy tên nhân viên (full_name)
+5. Hệ thống tính toán trạng thái tồn kho cho mỗi loại:
+   - In Stock: quantity >= 5,000
+   - Medium: 1,000 <= quantity < 5,000
+   - Low Stock: quantity < 1,000
+6. Hệ thống hiển thị bảng Current Page Allocations với các cột: Page Size, Current Quantity, Last Updated, Updated By, Status, Actions
+7. Hệ thống cập nhật các thẻ thống kê:
+   - Total Pages: Tổng quantity của tất cả loại
+   - Available Types: Số loại trang có trong hệ thống
+   - Low Stock: Số loại có quantity < 1,000
+8. Hệ thống truy vấn lịch sử từ system_audit_log với điều kiện table_name = 'system_page_allocation'
+9. Hệ thống parse trường changed_field (JSON) để lấy thông tin thay đổi
+10. Hệ thống hiển thị bảng Allocation History với các cột: Timestamp, Page Size, Change, Updated By
+Alternative Flow
+Không có alternative flow (chỉ xem, không có tương tác)
+Exception Flow
+- Tại bước 2-4, nếu không có dữ liệu
+- Hiển thị bảng trống với thông báo "No allocations found"
+- Các thẻ thống kê hiển thị 0
+- Tại bước 8-9, nếu không có lịch sử
+- Hiển thị bảng trống với thông báo "No history records found"
+Tiền điều kiện
+- Staff đã đăng nhập với quyền SPSO
+Hậu điều kiện
+- Staff xem được tổng số trang hiện tại của từng loại
+- Staff xem được lịch sử thay đổi phân bổ
+- Thông tin được hiển thị chính xác và cập nhật
+Input
+Không có input từ staff (chỉ xem)
+Output
+- Bảng Current Page Allocations với dữ liệu đầy đủ
+- Bảng Allocation History với lịch sử đầy đủ
+- Các thẻ thống kê với số liệu chính xác
+
+3.3 Use Case NV-11-2: Thêm phân bổ trang mới
+
+Mục
+Nội dung
+Usecase ID
+NV-11-2
+Tên
+Thêm phân bổ trang mới (Create Page Allocation)
+Mô tả
+Staff tạo phân bổ mới cho một loại trang chưa có trong hệ thống. Hệ thống tạo bản ghi mới trong system_page_allocation và ghi log vào system_audit_log.
+Actor
+Staff (SPSO)
+Trigger
+Staff click nút "+ Add Allocation" ở header của bảng Current Page Allocations
+Quy định nghiệp vụ
+- Page size phải đã tồn tại trong hệ thống (bảng page_size)
+- Page size chưa có allocation (UNIQUE constraint trên page_size_id)
+- Quantity phải >= 0
+- Một page size chỉ có thể có một allocation tại một thời điểm
+- Tự động ghi log vào system_audit_log với action_type = 'INSERT'
+Main Flow
+1. Staff click nút "+ Add Allocation"
+2. Hệ thống hiển thị modal "Add Page Allocation"
+3. Modal hiển thị: dropdown "Page Size" (chọn A4/A3/A5), input "Initial Quantity"
+4. Staff chọn page size từ dropdown
+5. Staff nhập số lượng ban đầu
+6. Staff click "Create"
+7. Hệ thống validate:
+   - Page size đã chọn
+   - Quantity >= 0
+   - Page size chưa có allocation (kiểm tra UNIQUE constraint)
+8. Hệ thống tạo bản ghi mới trong system_page_allocation:
+   - allocation_id = NEWID()
+   - page_size_id = page size đã chọn
+   - quantity = số lượng đã nhập
+   - created_at = GETDATE()
+   - updated_at = GETDATE()
+   - updated_by = current staff_id
+9. Hệ thống ghi log vào system_audit_log:
+   - audit_id = NEWID()
+   - user_id = current user_id
+   - action_type = 'INSERT'
+   - table_name = 'system_page_allocation'
+   - record_id = allocation_id vừa tạo
+   - changed_field = JSON chứa new_quantity
+   - action_timestamp = GETDATE()
+10. Hệ thống đóng modal và hiển thị thông báo "Allocation created successfully"
+11. Bảng Current Page Allocations tự động refresh với dòng mới
+12. Bảng Allocation History tự động refresh với entry mới
+Alternative Flow
+- Tại bước 4-6, Staff click "Cancel" hoặc "×" hoặc nhấn ESC
+- Modal đóng, không có thay đổi
+Exception Flow
+- Tại bước 7, nếu page size đã có allocation
+- Hệ thống hiển thị lỗi "This page size already has an allocation. Please update the existing one instead."
+- Quay lại bước 4
+- Tại bước 7, nếu quantity < 0 hoặc không hợp lệ
+- Hệ thống hiển thị lỗi validation
+- Quay lại bước 5
+Tiền điều kiện
+- Staff đã đăng nhập với quyền SPSO
+- Có ít nhất một page size trong hệ thống chưa có allocation
+Hậu điều kiện
+- Bản ghi mới được tạo trong system_page_allocation
+- Log được ghi vào system_audit_log
+- Page size đã chọn có thể được sử dụng cho print job
+- Bảng Current Page Allocations hiển thị dòng mới
+Input
+- Page size (dropdown selection)
+- Initial quantity (number input)
+Output
+- Modal đóng
+- Toast thông báo "Allocation created successfully"
+- Bảng Current Page Allocations hiển thị dòng mới
+- Bảng Allocation History hiển thị entry mới
+
+3.4 Use Case NV-11-3: Cập nhật phân bổ trang
+
+Mục
+Nội dung
+Usecase ID
+NV-11-3
+Tên
+Cập nhật phân bổ trang (Update Page Allocation)
+Mô tả
+Staff cập nhật số lượng trang cho một loại trang đã có trong hệ thống. Hệ thống cập nhật bản ghi trong system_page_allocation và ghi log vào system_audit_log với thông tin thay đổi.
+Actor
+Staff (SPSO)
+Trigger
+Staff click nút "Update" (icon bút chì) ở một dòng trong bảng Current Page Allocations
+Quy định nghiệp vụ
+- Quantity mới phải >= 0
+- Page size không thể thay đổi
+- Cập nhật updated_at và updated_by
+- Ghi log vào system_audit_log với action_type = 'UPDATE' và changed_field chứa previous_quantity và new_quantity
+Main Flow
+1. Staff click icon "Update" trên một dòng allocation
+2. Hệ thống hiển thị modal "Update Page Allocation" với các trường: Page Size (read-only), Current Quantity (read-only), New Quantity (input)
+3. Staff nhập số lượng mới vào trường "New Quantity"
+4. Staff click nút "Update"
+5. Hệ thống validate: New Quantity >= 0
+6. Hệ thống lấy số lượng hiện tại (previous_quantity) từ database
+7. Hệ thống cập nhật bản ghi trong system_page_allocation:
+   - quantity = new_quantity
+   - updated_at = GETDATE()
+   - updated_by = current staff_id
+8. Hệ thống ghi log vào system_audit_log:
+   - audit_id = NEWID()
+   - user_id = current user_id
+   - action_type = 'UPDATE'
+   - table_name = 'system_page_allocation'
+   - record_id = allocation_id
+   - changed_field = JSON chứa { "quantity": { "previous": previous_quantity, "new": new_quantity } }
+   - action_timestamp = GETDATE()
+9. Hệ thống đóng modal và hiển thị thông báo "Allocation updated successfully"
+10. Bảng Current Page Allocations tự động refresh với số lượng mới
+11. Bảng Allocation History tự động refresh với entry mới (hiển thị change = new_quantity - previous_quantity)
+Alternative Flow
+- Tại bước 3-4, Staff click "Cancel" hoặc "×" hoặc nhấn ESC
+- Modal đóng, không có thay đổi
+Exception Flow
+- Tại bước 5, nếu New Quantity < 0 hoặc không phải số
+- Hệ thống hiển thị lỗi validation
+- Quay lại bước 3
+Tiền điều kiện
+- Staff đã đăng nhập với quyền SPSO
+- Có ít nhất một allocation đã được tạo
+Hậu điều kiện
+- Bản ghi trong system_page_allocation được cập nhật với số lượng mới
+- Log được ghi vào system_audit_log với thông tin thay đổi
+- Bảng Current Page Allocations hiển thị số lượng mới
+- Bảng Allocation History hiển thị entry mới với change đúng
+Input
+- Allocation ID (từ dòng được chọn)
+- New Quantity (number input)
+Output
+- Modal đóng
+- Toast thông báo "Allocation updated successfully"
+- Bảng Current Page Allocations được cập nhật với số lượng mới
+- Bảng Allocation History hiển thị entry mới với change = new - previous
+
+3.5 Use Case NV-11-4: Xóa phân bổ trang
+
+Mục
+Nội dung
+Usecase ID
+NV-11-4
+Tên
+Xóa phân bổ trang (Delete Page Allocation)
+Mô tả
+Staff xóa phân bổ của một loại trang khỏi hệ thống. Hệ thống xóa bản ghi trong system_page_allocation và ghi log vào system_audit_log.
+Actor
+Staff (SPSO)
+Trigger
+Staff click nút "Delete" (icon thùng rác) ở một dòng trong bảng Current Page Allocations
+Quy định nghiệp vụ
+- Xóa bản ghi trong system_page_allocation
+- Ghi log vào system_audit_log với action_type = 'DELETE'
+- Hành động không thể hoàn tác (permanent delete)
+- Cần xác nhận từ staff trước khi xóa
+Main Flow
+1. Staff click icon "Delete" trên một dòng allocation
+2. Hệ thống hiển thị modal "Delete Page Allocation" với thông báo xác nhận
+3. Modal hiển thị:
+   - Thông báo: "Are you sure you want to delete the allocation for [Page Size]?"
+   - Cảnh báo: "This action cannot be undone. The allocation record will be permanently removed from the system."
+   - Nút "Cancel" và "Delete" (màu đỏ)
+4. Staff xác nhận bằng cách click nút "Delete"
+5. Hệ thống xóa bản ghi trong system_page_allocation (DELETE WHERE allocation_id = ...)
+6. Hệ thống ghi log vào system_audit_log:
+   - audit_id = NEWID()
+   - user_id = current user_id
+   - action_type = 'DELETE'
+   - table_name = 'system_page_allocation'
+   - record_id = allocation_id đã xóa
+   - changed_field = NULL hoặc JSON chứa thông tin đã xóa
+   - action_timestamp = GETDATE()
+7. Hệ thống đóng modal và hiển thị thông báo "Allocation deleted successfully"
+8. Bảng Current Page Allocations tự động refresh (dòng đã xóa biến mất)
+9. Bảng Allocation History tự động refresh với entry mới
+Alternative Flow
+- Tại bước 3-4, Staff click "Cancel" hoặc "×" hoặc nhấn ESC
+- Modal đóng, không có thay đổi
+- Allocation không bị xóa
+Exception Flow
+- Tại bước 5, nếu có lỗi database (ví dụ: foreign key constraint)
+- Hệ thống hiển thị lỗi "Failed to delete allocation. It may be referenced by other records."
+- Modal vẫn mở, allocation không bị xóa
+Tiền điều kiện
+- Staff đã đăng nhập với quyền SPSO
+- Có ít nhất một allocation đã được tạo
+Hậu điều kiện
+- Bản ghi trong system_page_allocation bị xóa
+- Log được ghi vào system_audit_log với action_type = 'DELETE'
+- Bảng Current Page Allocations không còn hiển thị dòng đã xóa
+- Bảng Allocation History hiển thị entry mới
+Input
+- Allocation ID (từ dòng được chọn)
+Output
+- Modal đóng
+- Toast thông báo "Allocation deleted successfully"
+- Bảng Current Page Allocations không còn hiển thị dòng đã xóa
+- Bảng Allocation History hiển thị entry mới

@@ -1,0 +1,926 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Page Allocation Management - Printing Service</title>
+  <style>
+    :root {
+      --bg: #f7f7fb;
+      --card: #ffffff;
+      --border: #e5e7eb;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --accent: #2563eb;
+      --accent-2: #10b981;
+      --danger: #dc2626;
+      --warn: #f59e0b;
+      --shadow: 0 12px 30px -18px rgba(15, 23, 42, 0.4);
+      font-family: "Inter", system-ui, -apple-system, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      display: grid;
+      grid-template-rows: 72px 1fr;
+      grid-template-columns: 260px 1fr;
+      grid-template-areas:
+        "sidebar header"
+        "sidebar main";
+      min-height: 100vh;
+    }
+    header {
+      grid-area: header;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      z-index: 10;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 18px; }
+    .brand span { color: var(--muted); font-weight: 500; }
+    .actions { display: flex; align-items: center; gap: 12px; }
+    .btn {
+      border: 1px solid var(--border);
+      background: var(--card);
+      padding: 10px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--text);
+      transition: 0.2s ease;
+    }
+    .btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .btn.secondary { background: #eef2ff; color: #1e3a8a; border-color: #c7d2fe; }
+    .btn:hover { box-shadow: 0 6px 18px -12px rgba(37, 99, 235, 0.8); }
+    .icon-btn {
+      width: 40px; height: 40px; display: grid; place-items: center;
+      border-radius: 10px; border: 1px solid var(--border); background: var(--card);
+      cursor: pointer; transition: 0.2s ease;
+    }
+    .icon-btn:hover { border-color: var(--accent); }
+    aside {
+      grid-area: sidebar;
+      background: #0f172a;
+      color: #e2e8f0;
+      display: flex;
+      flex-direction: column;
+      padding: 20px 16px;
+      gap: 16px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+    }
+    nav { display: flex; flex-direction: column; gap: 6px; }
+    .nav-item {
+      padding: 12px 14px; border-radius: 10px; color: inherit; text-decoration: none;
+      display: flex; align-items: center; gap: 10px; transition: 0.2s ease;
+    }
+    .nav-item:hover, .nav-item.active { background: rgba(59, 130, 246, 0.15); color: #fff; }
+    main { grid-area: main; padding: 28px 28px 40px; display: flex; flex-direction: column; gap: 20px; }
+    .page-title { font-size: 28px; font-weight: 700; margin: 0; }
+    .sub { color: var(--muted); margin-top: 6px; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: var(--shadow);
+    }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+    .stat-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+      padding: 20px; box-shadow: var(--shadow); display: flex; align-items: center; gap: 16px;
+    }
+    .stat-icon {
+      width: 56px; height: 56px; border-radius: 12px; display: grid; place-items: center;
+      font-size: 24px; flex-shrink: 0;
+    }
+    .stat-icon.blue { background: rgba(37, 99, 235, 0.1); color: #2563eb; }
+    .stat-icon.green { background: rgba(16, 185, 129, 0.12); color: #059669; }
+    .stat-icon.orange { background: rgba(245, 158, 11, 0.12); color: #f59e0b; }
+    .stat-info { display: flex; flex-direction: column; gap: 6px; }
+    .stat-label { color: var(--muted); font-size: 14px; }
+    .stat-value { font-size: 24px; font-weight: 700; }
+    .table-card { padding: 0; }
+    .table-header {
+      padding: 18px; border-bottom: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
+    }
+    .table-header .title { font-weight: 700; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { text-align: left; padding: 14px 16px; }
+    th {
+      color: var(--muted); font-size: 13px; letter-spacing: 0.3px;
+      border-bottom: 1px solid var(--border); cursor: pointer; user-select: none;
+    }
+    th.sortable::after { content: " ↕"; opacity: 0.5; }
+    th.sort-desc::after { content: " ↓"; opacity: 1; }
+    th.sort-asc::after { content: " ↑"; opacity: 1; }
+    tr:hover td { background: #f9fafb; }
+    td { border-bottom: 1px solid var(--border); font-size: 14px; }
+    .badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 10px; font-weight: 600; font-size: 12px; }
+    .badge.green { background: #ecfdf3; color: #166534; }
+    .badge.orange { background: #fff7ed; color: #9a3412; }
+    .badge.red { background: #fef2f2; color: #b91c1c; }
+    .muted { color: var(--muted); }
+    .quantity-cell { font-weight: 600; font-size: 16px; }
+    .quantity-cell.low { color: var(--warn); }
+    .quantity-cell.critical { color: var(--danger); }
+    .change-positive { color: var(--accent-2); font-weight: 600; }
+    .change-negative { color: var(--danger); font-weight: 600; }
+    .filters {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      align-items: end;
+    }
+    label { font-weight: 600; font-size: 14px; color: var(--muted); margin-bottom: 6px; display: block; }
+    input, select {
+      width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px;
+      font-size: 14px; background: #fff;
+    }
+    input:focus, select:focus {
+      outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+    .pagination {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 18px; gap: 12px; flex-wrap: wrap;
+    }
+    .pager { display: flex; align-items: center; gap: 8px; }
+    .pager button, .pager select {
+      padding: 8px 12px; border: 1px solid var(--border); background: #fff; border-radius: 8px; cursor: pointer;
+    }
+    .pager button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .pager span { white-space: nowrap; }
+    .pager select { min-width: 90px; }
+    /* Modal */
+    .modal-backdrop {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+      display: none; align-items: center; justify-content: center; z-index: 20;
+    }
+    .modal {
+      background: #fff; border-radius: 14px; padding: 24px; width: min(600px, 90vw);
+      box-shadow: var(--shadow);
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 2px solid var(--border); }
+    .modal-header h3 { margin: 0; font-size: 20px; }
+    .modal-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
+    .kv { display: flex; flex-direction: column; gap: 6px; }
+    .kv .label { color: var(--muted); font-size: 13px; font-weight: 600; }
+    .kv .value { font-weight: 600; }
+    .kv input, .kv select {
+      width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px;
+      font-size: 14px; background: #fff; margin-top: 4px;
+    }
+    .kv input:focus, .kv select:focus {
+      outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+    .info-box {
+      padding: 12px; background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px;
+      color: #0c4a6e; font-size: 13px; margin-top: 8px;
+    }
+    .modal-footer {
+      display: flex; justify-content: flex-end; gap: 10px;
+      margin-top: 24px; padding-top: 20px; border-top: 2px solid var(--border);
+    }
+    .radio-group {
+      display: flex; flex-direction: column; gap: 12px; margin-top: 8px;
+    }
+    .radio-option {
+      display: flex; align-items: center; gap: 12px; padding: 12px;
+      border: 2px solid var(--border); border-radius: 8px; cursor: pointer;
+      transition: 0.2s ease;
+    }
+    .radio-option:hover { border-color: var(--accent); background: #f8fafc; }
+    .radio-option input[type="radio"] { margin: 0; cursor: pointer; }
+    .radio-option.selected { border-color: var(--accent); background: #eef2ff; }
+    .radio-option-label { flex: 1; }
+    .radio-option-title { font-weight: 600; margin-bottom: 4px; }
+    .radio-option-desc { font-size: 12px; color: var(--muted); }
+    .actions-col { display: flex; gap: 6px; flex-wrap: wrap; }
+    .pill-btn {
+      border: 1px solid var(--border);
+      background: #fff;
+      padding: 6px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: 0.2s ease;
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+    }
+    .pill-btn svg { width: 16px; height: 16px; }
+    .pill-btn.view { color: #2563eb; border-color: #bfdbfe; }
+    .pill-btn.edit { color: #7c3aed; border-color: #ddd6fe; }
+    .pill-btn.delete { color: #dc2626; border-color: #fecaca; }
+    .pill-btn:hover { box-shadow: 0 6px 12px -10px rgba(0,0,0,0.25); }
+    .btn {
+      border: 1px solid var(--border);
+      background: var(--card);
+      padding: 8px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--text);
+      transition: 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .btn-primary:hover { box-shadow: 0 6px 18px -12px rgba(37, 99, 235, 0.8); }
+    .form-group {
+      margin-bottom: 16px;
+    }
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 14px;
+      background: #fff;
+      font-family: inherit;
+    }
+    .form-group small {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .modal-backdrop.active { display: flex; }
+    .modal-close {
+      width: 32px;
+      height: 32px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      border-radius: 8px;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      font-size: 18px;
+      color: var(--muted);
+      transition: 0.2s ease;
+    }
+    .modal-close:hover { border-color: var(--text); color: var(--text); }
+  </style>
+</head>
+<body>
+  <aside>
+    <div class="brand" style="color:#fff;">Smart Print <span>Dashboard</span></div>
+    <nav>
+      <a class="nav-item" href="#">🏠 Dashboard</a>
+      <a class="nav-item" href="#">🖨️ Printers</a>
+      <a class="nav-item" href="#">📄 Jobs</a>
+      <a class="nav-item" href="#">💰 Fund Management</a>
+      <a class="nav-item active" href="#">📄 Page Allocation</a>
+      <a class="nav-item" href="#">🧾 Reports</a>
+    </nav>
+    <div class="sidebar-footer" style="margin-top: auto; padding: 12px 14px; border-radius: 10px; background: rgba(226, 232, 240, 0.05); color: #cbd5e1; font-size: 13px; line-height: 1.5;">
+      View current page inventory and allocation history.
+    </div>
+  </aside>
+  <header>
+    <div class="brand">Page Allocation Management <span>View inventory and history</span></div>
+    <div class="actions">
+      <div class="icon-btn">🔔</div>
+      <div class="icon-btn">☰</div>
+    </div>
+  </header>
+  <main>
+    <div>
+      <h1 class="page-title">Page Allocation Management</h1>
+      <div class="sub">View current page inventory by size and allocation change history</div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon blue">📄</div>
+        <div class="stat-info">
+          <div class="stat-label">Total Pages</div>
+          <div class="stat-value" id="stat-total">23,000</div>
+          <div class="muted">All page sizes</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon green">✅</div>
+        <div class="stat-info">
+          <div class="stat-label">Available Types</div>
+          <div class="stat-value" id="stat-types">3</div>
+          <div class="muted">A3, A4, A5</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon orange">⚠</div>
+        <div class="stat-info">
+          <div class="stat-label">Low Stock</div>
+          <div class="stat-value" id="stat-low">0</div>
+          <div class="muted">&lt; 1,000 pages</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Current Allocations Table -->
+    <div class="card table-card">
+      <div class="table-header">
+        <div class="title">Current Page Allocations</div>
+        <div class="muted" id="current-table-info">3 page sizes</div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Page Size</th>
+            <th>Current Quantity</th>
+            <th>Last Updated</th>
+            <th>Updated By</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="current-allocation-tbody">
+          <tr>
+            <td><strong>A4</strong></td>
+            <td class="quantity-cell">10,000</td>
+            <td>2024-12-09 14:30</td>
+            <td>Nguyen Van A</td>
+            <td><span class="badge green">In Stock</span></td>
+          </tr>
+          <tr>
+            <td><strong>A3</strong></td>
+            <td class="quantity-cell">5,000</td>
+            <td>2024-12-08 10:15</td>
+            <td>Tran Thi B</td>
+            <td><span class="badge green">In Stock</span></td>
+          </tr>
+          <tr>
+            <td><strong>A5</strong></td>
+            <td class="quantity-cell">8,000</td>
+            <td>2024-12-07 16:45</td>
+            <td>Le Van C</td>
+            <td><span class="badge green">In Stock</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Allocation History Table -->
+    <div class="card table-card">
+      <div class="table-header">
+        <div class="title">Allocation History</div>
+        <button class="btn btn-primary" onclick="openModal('create-allocation-modal')">+ Add Allocation</button>
+      </div>
+
+      <!-- Filters -->
+      <div style="padding: 18px; border-bottom: 1px solid var(--border); background: #f8fafc;">
+        <div class="filters">
+          <div>
+            <label>Page Size</label>
+            <select id="filter-page-size">
+              <option value="all">All Sizes</option>
+              <option value="A4">A4</option>
+              <option value="A3">A3</option>
+              <option value="A5">A5</option>
+            </select>
+          </div>
+          <div>
+            <label>Date From</label>
+            <input type="date" id="filter-date-from" />
+          </div>
+          <div>
+            <label>Date To</label>
+            <input type="date" id="filter-date-to" />
+          </div>
+          <div>
+            <label>Updated By</label>
+            <input type="text" id="filter-staff" placeholder="Staff name" />
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn primary" onclick="applyFilters()" style="width:100%;">Apply</button>
+            <button class="btn" onclick="clearFilters()" style="width:100%;">Clear</button>
+          </div>
+        </div>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th class="sortable" data-sort="timestamp" onclick="sortTable('timestamp')">Timestamp ↕</th>
+            <th class="sortable" data-sort="pageSize" onclick="sortTable('pageSize')">Page Size ↕</th>
+            <th class="sortable" data-sort="change" onclick="sortTable('change')">Change ↕</th>
+            <th class="sortable" data-sort="updatedBy" onclick="sortTable('updatedBy')">Updated By ↕</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="history-tbody">
+        </tbody>
+      </table>
+
+      <!-- Pagination -->
+      <div class="pagination">
+        <div class="pager">
+          <button id="first-page" onclick="goToPage(1)" disabled>⏮</button>
+          <button id="prev-page" onclick="goToPrevPage()" disabled>◀</button>
+          <span class="muted" id="page-info">Page 1 of 1</span>
+          <button id="next-page" onclick="goToNextPage()" disabled>▶</button>
+          <button id="last-page" onclick="goToLastPage()" disabled>⏭</button>
+        </div>
+        <div class="pager">
+          <span class="muted">Rows per page</span>
+          <select id="page-size-select" onchange="changePageSize()">
+            <option value="10" selected>10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Create Allocation Modal -->
+  <div class="modal-backdrop" id="create-allocation-modal" onclick="closeModal('create-allocation-modal')">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Add Page Allocation</h3>
+        <button class="modal-close" onclick="closeModal('create-allocation-modal')">×</button>
+      </div>
+      <form id="create-allocation-form" onsubmit="handleCreateAllocation(event)">
+        <div class="form-group">
+          <label>Page Size <span style="color:var(--danger)">*</span></label>
+          <select id="create-page-size" required>
+            <option value="">Select page size</option>
+            <option value="A4">A4</option>
+            <option value="A3">A3</option>
+            <option value="A5">A5</option>
+          </select>
+          <small>Select the page size to allocate</small>
+        </div>
+        <div class="form-group">
+          <label>Initial Quantity <span style="color:var(--danger)">*</span></label>
+          <input type="number" id="create-quantity" min="0" step="1" placeholder="10000" required>
+          <small>Enter the initial quantity of pages to allocate</small>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn" onclick="closeModal('create-allocation-modal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Create</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Update Allocation Modal -->
+  <div class="modal-backdrop" id="update-allocation-modal" onclick="closeModal('update-allocation-modal')">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Update Page Allocation</h3>
+        <button class="modal-close" onclick="closeModal('update-allocation-modal')">×</button>
+      </div>
+      <form id="update-allocation-form" onsubmit="handleUpdateAllocation(event)">
+        <input type="hidden" id="update-allocation-id">
+        <div class="form-group">
+          <label>Page Size</label>
+          <input type="text" id="update-page-size" readonly style="background:#f3f4f6;">
+          <small>Page size cannot be changed</small>
+        </div>
+        <div class="form-group">
+          <label>Current Quantity</label>
+          <input type="text" id="update-current-quantity" readonly style="background:#f3f4f6;">
+        </div>
+        <div class="form-group">
+          <label>New Quantity <span style="color:var(--danger)">*</span></label>
+          <input type="number" id="update-new-quantity" min="0" step="1" placeholder="Enter new quantity" required>
+          <small>Enter the new quantity for this page size</small>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn" onclick="closeModal('update-allocation-modal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Update</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Delete Allocation Modal -->
+  <div class="modal-backdrop" id="delete-allocation-modal" onclick="closeModal('delete-allocation-modal')">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Delete Page Allocation</h3>
+        <button class="modal-close" onclick="closeModal('delete-allocation-modal')">×</button>
+      </div>
+      <div class="form-group">
+        <p>Are you sure you want to delete the allocation for <strong id="delete-page-size">—</strong>?</p>
+        <p style="color:var(--muted); font-size:13px;">This action cannot be undone. The allocation record will be permanently removed from the system.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn" onclick="closeModal('delete-allocation-modal')">Cancel</button>
+        <button type="button" class="btn btn-primary" style="background:var(--danger); border-color:var(--danger);" onclick="handleDeleteAllocation()">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // State
+    const currentAllocations = [
+      { id: 'a4-id', pageSize: 'A4', quantity: 10000, lastUpdated: '2024-12-09 14:30', updatedBy: 'Nguyen Van A' },
+      { id: 'a3-id', pageSize: 'A3', quantity: 5000, lastUpdated: '2024-12-08 10:15', updatedBy: 'Tran Thi B' },
+      { id: 'a5-id', pageSize: 'A5', quantity: 8000, lastUpdated: '2024-12-07 16:45', updatedBy: 'Le Van C' }
+    ];
+
+    // Mock history data (from system_audit_log where table_name = 'system_page_allocation')
+    const historyData = [
+      { id: 'hist-001', timestamp: '2024-12-09 14:30:00', pageSize: 'A4', previousQty: 8500, newQty: 10000, change: 1500, updatedBy: 'Nguyen Van A', actionType: 'UPDATE' },
+      { id: 'hist-002', timestamp: '2024-12-08 10:15:00', pageSize: 'A3', previousQty: 4500, newQty: 5000, change: 500, updatedBy: 'Tran Thi B', actionType: 'UPDATE' },
+      { id: 'hist-003', timestamp: '2024-12-07 16:45:00', pageSize: 'A5', previousQty: 7500, newQty: 8000, change: 500, updatedBy: 'Le Van C', actionType: 'UPDATE' },
+      { id: 'hist-004', timestamp: '2024-12-06 11:20:00', pageSize: 'A4', previousQty: 8000, newQty: 8500, change: 500, updatedBy: 'Pham Thi D', actionType: 'UPDATE' },
+      { id: 'hist-005', timestamp: '2024-12-05 09:10:00', pageSize: 'A3', previousQty: 4000, newQty: 4500, change: 500, updatedBy: 'Hoang Van E', actionType: 'UPDATE' },
+      { id: 'hist-006', timestamp: '2024-12-04 15:30:00', pageSize: 'A5', previousQty: 7000, newQty: 7500, change: 500, updatedBy: 'Nguyen Van A', actionType: 'UPDATE' },
+      { id: 'hist-007', timestamp: '2024-12-03 13:45:00', pageSize: 'A4', previousQty: 7500, newQty: 8000, change: 500, updatedBy: 'Tran Thi B', actionType: 'UPDATE' },
+      { id: 'hist-008', timestamp: '2024-12-02 10:00:00', pageSize: 'A3', previousQty: 3500, newQty: 4000, change: 500, updatedBy: 'Le Van C', actionType: 'UPDATE' },
+      { id: 'hist-009', timestamp: '2024-12-01 14:20:00', pageSize: 'A5', previousQty: 6500, newQty: 7000, change: 500, updatedBy: 'Pham Thi D', actionType: 'UPDATE' },
+      { id: 'hist-010', timestamp: '2024-11-30 16:15:00', pageSize: 'A4', previousQty: 7000, newQty: 7500, change: 500, updatedBy: 'Hoang Van E', actionType: 'UPDATE' },
+      { id: 'hist-011', timestamp: '2024-11-29 11:30:00', pageSize: 'A3', previousQty: 3000, newQty: 3500, change: 500, updatedBy: 'Nguyen Van A', actionType: 'UPDATE' },
+      { id: 'hist-012', timestamp: '2024-11-28 09:45:00', pageSize: 'A5', previousQty: 6000, newQty: 6500, change: 500, updatedBy: 'Tran Thi B', actionType: 'UPDATE' }
+    ];
+
+    let filteredHistory = [...historyData];
+    let currentPage = 1;
+    let pageSize = 10;
+    let sortField = 'timestamp';
+    let sortOrder = 'desc';
+    let filters = {
+      pageSize: 'all',
+      dateFrom: null,
+      dateTo: null,
+      staff: ''
+    };
+
+    function formatTimestamp(dateStr) {
+      if (!dateStr) return '—';
+      const date = new Date(dateStr.replace(' ', 'T'));
+      return date.toLocaleString('en-US', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+      }).replace(',', '');
+    }
+
+    function renderCurrentTable() {
+      const tbody = document.getElementById('current-allocation-tbody');
+      tbody.innerHTML = currentAllocations.map(alloc => {
+        const statusClass = alloc.quantity < 1000 ? 'red' : alloc.quantity < 5000 ? 'orange' : 'green';
+        const statusText = alloc.quantity < 1000 ? 'Low Stock' : alloc.quantity < 5000 ? 'Medium' : 'In Stock';
+        const qtyClass = alloc.quantity < 1000 ? 'critical' : alloc.quantity < 5000 ? 'low' : '';
+        const allocId = alloc.id || alloc.pageSize.toLowerCase().replace('a', 'a') + '-id';
+        
+        return `
+          <tr>
+            <td><strong>${alloc.pageSize}</strong></td>
+            <td class="quantity-cell ${qtyClass}">${alloc.quantity.toLocaleString()}</td>
+            <td>${alloc.lastUpdated}</td>
+            <td>${alloc.updatedBy}</td>
+            <td><span class="badge ${statusClass}">${statusText}</span></td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function applyFilters() {
+      filters.pageSize = document.getElementById('filter-page-size').value;
+      filters.dateFrom = document.getElementById('filter-date-from').value || null;
+      filters.dateTo = document.getElementById('filter-date-to').value || null;
+      filters.staff = document.getElementById('filter-staff').value.trim().toLowerCase();
+      
+      filteredHistory = historyData.filter(entry => {
+        if (filters.pageSize !== 'all' && entry.pageSize !== filters.pageSize) return false;
+        if (filters.staff && !entry.updatedBy.toLowerCase().includes(filters.staff)) return false;
+        if (filters.dateFrom) {
+          const entryDate = new Date(entry.timestamp.replace(' ', 'T'));
+          const fromDate = new Date(filters.dateFrom);
+          fromDate.setHours(0, 0, 0, 0);
+          if (entryDate < fromDate) return false;
+        }
+        if (filters.dateTo) {
+          const entryDate = new Date(entry.timestamp.replace(' ', 'T'));
+          const toDate = new Date(filters.dateTo);
+          toDate.setHours(23, 59, 59, 999);
+          if (entryDate > toDate) return false;
+        }
+        return true;
+      });
+      
+      currentPage = 1;
+      sortAndRenderHistory();
+    }
+
+    function clearFilters() {
+      document.getElementById('filter-page-size').value = 'all';
+      document.getElementById('filter-date-from').value = '';
+      document.getElementById('filter-date-to').value = '';
+      document.getElementById('filter-staff').value = '';
+      filters = { pageSize: 'all', dateFrom: null, dateTo: null, staff: '' };
+      filteredHistory = [...historyData];
+      currentPage = 1;
+      sortAndRenderHistory();
+    }
+
+    function sortTable(field) {
+      if (sortField === field) {
+        sortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
+      } else {
+        sortField = field;
+        sortOrder = 'desc';
+      }
+      sortAndRenderHistory();
+      updateSortIndicators();
+    }
+
+    function updateSortIndicators() {
+      document.querySelectorAll('th.sortable').forEach(th => {
+        th.classList.remove('sort-asc', 'sort-desc');
+        if (th.dataset.sort === sortField) {
+          th.classList.add(`sort-${sortOrder}`);
+        }
+      });
+    }
+
+    function sortAndRenderHistory() {
+      // Sort
+      filteredHistory.sort((a, b) => {
+        let aVal, bVal;
+        switch(sortField) {
+          case 'timestamp':
+            aVal = new Date(a.timestamp.replace(' ', 'T'));
+            bVal = new Date(b.timestamp.replace(' ', 'T'));
+            break;
+          case 'pageSize':
+            aVal = a.pageSize;
+            bVal = b.pageSize;
+            break;
+          case 'change':
+            aVal = a.change;
+            bVal = b.change;
+            break;
+          case 'updatedBy':
+            aVal = a.updatedBy;
+            bVal = b.updatedBy;
+            break;
+          default:
+            return 0;
+        }
+        
+        if (sortOrder === 'asc') {
+          return aVal > bVal ? 1 : aVal < bVal ? -1 : 0;
+        } else {
+          return aVal < bVal ? 1 : aVal > bVal ? -1 : 0;
+        }
+      });
+      
+      renderHistory();
+    }
+
+    function renderHistory() {
+      const start = (currentPage - 1) * pageSize;
+      const end = start + pageSize;
+      const pageData = filteredHistory.slice(start, end);
+      const tbody = document.getElementById('history-tbody');
+      
+      if (pageData.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 40px; color: var(--muted);">No history records found</td></tr>';
+      } else {
+        tbody.innerHTML = pageData.map(entry => {
+          const changeClass = entry.change > 0 ? 'change-positive' : entry.change < 0 ? 'change-negative' : '';
+          const changeSign = entry.change > 0 ? '+' : '';
+          // Find the allocation ID for this page size
+          const alloc = currentAllocations.find(a => a.pageSize === entry.pageSize);
+          const allocId = alloc ? (alloc.id || alloc.pageSize.toLowerCase() + '-id') : '';
+          
+          return `
+            <tr>
+              <td>${formatTimestamp(entry.timestamp)}</td>
+              <td><strong>${entry.pageSize}</strong></td>
+              <td class="${changeClass}">${changeSign}${entry.change.toLocaleString()}</td>
+              <td>${entry.updatedBy}</td>
+              <td>
+                <div class="actions-col">
+                  ${allocId ? `
+                  <button class="pill-btn edit" onclick="openUpdateModal('${allocId}')" aria-label="Update">
+                    <svg fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+                  </button>
+                  <button class="pill-btn delete" onclick="openDeleteModal('${allocId}')" aria-label="Delete">
+                    <svg fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                  </button>
+                  ` : ''}
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      }
+      
+      updatePagination();
+    }
+
+    function updatePagination() {
+      const total = filteredHistory.length;
+      const totalPages = Math.ceil(total / pageSize);
+      const start = total === 0 ? 0 : (currentPage - 1) * pageSize + 1;
+      const end = Math.min(currentPage * pageSize, total);
+      
+      document.getElementById('history-table-info').textContent = `Showing ${start}-${end} of ${total} entries`;
+      document.getElementById('page-info').textContent = `Page ${currentPage} of ${totalPages}`;
+      
+      document.getElementById('first-page').disabled = currentPage === 1;
+      document.getElementById('prev-page').disabled = currentPage === 1;
+      document.getElementById('next-page').disabled = currentPage >= totalPages;
+      document.getElementById('last-page').disabled = currentPage >= totalPages;
+    }
+
+    function goToPage(page) {
+      const totalPages = Math.ceil(filteredHistory.length / pageSize);
+      if (page < 1 || page > totalPages) return;
+      currentPage = page;
+      renderHistory();
+    }
+
+    function goToPrevPage() {
+      if (currentPage > 1) goToPage(currentPage - 1);
+    }
+
+    function goToNextPage() {
+      const totalPages = Math.ceil(filteredHistory.length / pageSize);
+      if (currentPage < totalPages) goToPage(currentPage + 1);
+    }
+
+    function goToLastPage() {
+      const totalPages = Math.ceil(filteredHistory.length / pageSize);
+      goToPage(totalPages);
+    }
+
+    function changePageSize() {
+      pageSize = parseInt(document.getElementById('page-size-select').value);
+      currentPage = 1;
+      renderHistory();
+    }
+
+    // Modal functions
+    function openModal(modalId) {
+      document.getElementById(modalId).classList.add('active');
+    }
+
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.remove('active');
+    }
+
+    function openUpdateModal(allocationId) {
+      // Find allocation by ID (in real app, fetch from API)
+      const alloc = currentAllocations.find(a => a.id === allocationId);
+      if (alloc) {
+        document.getElementById('update-allocation-id').value = alloc.id;
+        document.getElementById('update-page-size').value = alloc.pageSize;
+        document.getElementById('update-current-quantity').value = alloc.quantity.toLocaleString();
+        document.getElementById('update-new-quantity').value = '';
+        openModal('update-allocation-modal');
+      }
+    }
+
+    function openDeleteModal(allocationId) {
+      const alloc = currentAllocations.find(a => a.id === allocationId);
+      if (alloc) {
+        document.getElementById('delete-allocation-modal').dataset.allocationId = alloc.id;
+        document.getElementById('delete-page-size').textContent = alloc.pageSize;
+        openModal('delete-allocation-modal');
+      }
+    }
+
+    function handleCreateAllocation(event) {
+      event.preventDefault();
+      const pageSize = document.getElementById('create-page-size').value;
+      const quantity = parseInt(document.getElementById('create-quantity').value);
+      
+      // Check if page size already exists
+      if (currentAllocations.some(a => a.pageSize === pageSize)) {
+        alert('This page size already has an allocation. Please update the existing one instead.');
+        return;
+      }
+      
+      // In real app, call API to create allocation
+      const newAlloc = {
+        id: 'alloc-' + Date.now(),
+        pageSize: pageSize,
+        quantity: quantity,
+        lastUpdated: new Date().toISOString().slice(0, 16).replace('T', ' '),
+        updatedBy: 'Current Staff' // In real app, get from auth context
+      };
+      
+      currentAllocations.push(newAlloc);
+      renderCurrentTable();
+      closeModal('create-allocation-modal');
+      document.getElementById('create-allocation-form').reset();
+      alert('Allocation created successfully');
+    }
+
+    function handleUpdateAllocation(event) {
+      event.preventDefault();
+      const allocationId = document.getElementById('update-allocation-id').value;
+      const newQuantity = parseInt(document.getElementById('update-new-quantity').value);
+      
+      const alloc = currentAllocations.find(a => a.id === allocationId);
+      if (!alloc) {
+        alert('Allocation not found');
+        return;
+      }
+      
+      const oldQuantity = alloc.quantity;
+      alloc.quantity = newQuantity;
+      alloc.lastUpdated = new Date().toISOString().slice(0, 16).replace('T', ' ');
+      alloc.updatedBy = 'Current Staff'; // In real app, get from auth context
+      
+      // Add to history
+      historyData.unshift({
+        id: 'hist-' + Date.now(),
+        timestamp: new Date().toISOString().slice(0, 19).replace('T', ' '),
+        pageSize: alloc.pageSize,
+        previousQty: oldQuantity,
+        newQty: newQuantity,
+        change: newQuantity - oldQuantity,
+        updatedBy: alloc.updatedBy,
+        actionType: 'UPDATE'
+      });
+      
+      renderCurrentTable();
+      filteredHistory = [...historyData];
+      currentPage = 1;
+      sortAndRenderHistory();
+      closeModal('update-allocation-modal');
+      alert('Allocation updated successfully');
+    }
+
+    function handleDeleteAllocation() {
+      const modal = document.getElementById('delete-allocation-modal');
+      const allocationId = modal.dataset.allocationId;
+      
+      const index = currentAllocations.findIndex(a => a.id === allocationId);
+      if (index === -1) {
+        alert('Allocation not found');
+        return;
+      }
+      
+      const alloc = currentAllocations[index];
+      
+      // In real app, call API to delete
+      currentAllocations.splice(index, 1);
+      
+      renderCurrentTable();
+      closeModal('delete-allocation-modal');
+      alert(`Allocation for ${alloc.pageSize} deleted successfully`);
+    }
+
+
+    // Initialize
+    renderCurrentTable();
+    sortAndRenderHistory();
+
+    function updateStats() {
+      const total = currentAllocations.reduce((sum, a) => sum + a.quantity, 0);
+      const lowStock = currentAllocations.filter(a => a.quantity < 1000).length;
+      
+      document.getElementById('stat-total').textContent = total.toLocaleString();
+      document.getElementById('stat-types').textContent = currentAllocations.length;
+      document.getElementById('stat-low').textContent = lowStock;
+    }
+
+
+    function selectRadio(element) {
+      document.querySelectorAll('.radio-option').forEach(opt => opt.classList.remove('selected'));
+      element.classList.add('selected');
+      element.querySelector('input[type="radio"]').checked = true;
+    }
+
+    // Initialize
+    renderCurrentTable();
+    updateStats();
+    sortAndRenderHistory();
+    updateSortIndicators();
+  </script>
+</body>
+</html>
