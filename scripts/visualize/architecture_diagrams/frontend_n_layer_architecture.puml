@@ -1,0 +1,310 @@
+@startuml Frontend N-Layer Architecture
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam componentStyle rectangle
+skinparam linetype ortho
+
+title Kiến trúc Đa Lớp Frontend (Next.js)
+
+left to right direction
+
+package "Presentation Layer\n(App Router)" #E3F2FD {
+  component [Pages] as Pages
+  note right of Pages
+    - app/[locale]/student/*
+    - app/[locale]/staff/*
+    - Server Components
+    - Client Components
+    - Route handlers
+  end note
+  
+  component [UI Components] as UIComponents
+  note right of UIComponents
+    - Button, Input, Modal
+    - Card, Select, Tabs
+    - 30+ reusable components
+    - Tailwind CSS styling
+  end note
+}
+
+package "Business Logic Layer" #C8E6C9 {
+  component [Hooks] as Hooks
+  note right of Hooks
+    - useApiQuery
+    - useApiMutation
+    - useDebounce
+    - Custom React hooks
+    - Business logic hooks
+  end note
+  
+  component [Stores] as Stores
+  note right of Stores
+    - useAuthStore (Zustand)
+    - useThemeStore
+    - usePrintProgressStore
+    - Global state management
+  end note
+  
+  component [Services] as Services
+  note right of Services
+    - API service classes
+    - Domain-specific services
+    - Business logic
+  end note
+}
+
+package "Data Access Layer" #FFF9C4 {
+  component [API Client] as APIClient
+  note right of APIClient
+    - Axios instance
+    - Request interceptors
+    - Response interceptors
+    - Error handling
+    - Token refresh
+  end note
+  
+  component [React Query] as ReactQuery
+  note right of ReactQuery
+    - TanStack Query
+    - Caching
+    - Refetch logic
+    - Server state management
+  end note
+  
+  component [WebSocket Client] as WSClient
+  note right of WSClient
+    - STOMP protocol
+    - Real-time updates
+    - Connection management
+  end note
+}
+
+package "Infrastructure Layer" #FFE0B2 {
+  component [Utils] as Utils
+  note right of Utils
+    - Format helpers
+    - Date utilities
+    - String utilities
+    - Mappers
+  end note
+  
+  component [Validations] as Validations
+  note right of Validations
+    - Zod schemas
+    - Form validation
+    - Type-safe validation
+  end note
+  
+  component [Types] as Types
+  note right of Types
+    - TypeScript types
+    - API types
+    - Domain types
+  end note
+  
+  component [i18n] as i18n
+  note right of i18n
+    - next-intl
+    - Translation files
+    - Multi-language support
+  end note
+  
+  component [Providers] as Providers
+  note right of Providers
+    - ReactQueryProvider
+    - ThemeProvider
+    - MusicPlayerProvider
+    - Context providers
+  end note
+}
+
+' Force vertical layout
+Pages -[hidden]down-> UIComponents
+Pages -[hidden]down-> Hooks
+Hooks -[hidden]right-> Stores
+Stores -[hidden]right-> Services
+Services -[hidden]down-> APIClient
+APIClient -[hidden]right-> ReactQuery
+ReactQuery -[hidden]right-> WSClient
+Services -[hidden]down-> Utils
+Pages -[hidden]down-> Validations
+Pages -[hidden]down-> Types
+Pages -[hidden]down-> i18n
+Pages -[hidden]down-> Providers
+
+' Actual connections with straight lines
+Pages -[#000000]-> UIComponents : uses
+Pages -[#000000]-> Hooks : uses
+Hooks -[#000000]-> Stores : uses
+Hooks -[#000000]-> Services : uses
+Services -[#000000]-> APIClient : uses
+APIClient -[#000000]-> ReactQuery : integrates
+APIClient -[#000000]-> WSClient : uses
+Services -[#000000]-> Utils : uses
+Pages -[#000000]-> Validations : uses
+Pages -[#000000]-> Types : uses
+Pages -[#000000]-> i18n : uses
+Pages -[#000000]-> Providers : wrapped by
+ReactQuery -[#000000]-> APIClient : manages
+
+@enduml
+
+skinparam backgroundColor #FFFFFF
+skinparam componentStyle rectangle
+skinparam linetype ortho
+
+title Kiến trúc Đa Lớp Frontend (Next.js)
+
+left to right direction
+
+package "Presentation Layer\n(App Router)" #E3F2FD {
+  component [Pages] as Pages
+  note right of Pages
+    - app/[locale]/student/*
+    - app/[locale]/staff/*
+    - Server Components
+    - Client Components
+    - Route handlers
+  end note
+  
+  component [UI Components] as UIComponents
+  note right of UIComponents
+    - Button, Input, Modal
+    - Card, Select, Tabs
+    - 30+ reusable components
+    - Tailwind CSS styling
+  end note
+}
+
+package "Business Logic Layer" #C8E6C9 {
+  component [Hooks] as Hooks
+  note right of Hooks
+    - useApiQuery
+    - useApiMutation
+    - useDebounce
+    - Custom React hooks
+    - Business logic hooks
+  end note
+  
+  component [Stores] as Stores
+  note right of Stores
+    - useAuthStore (Zustand)
+    - useThemeStore
+    - usePrintProgressStore
+    - Global state management
+  end note
+  
+  component [Services] as Services
+  note right of Services
+    - API service classes
+    - Domain-specific services
+    - Business logic
+  end note
+}
+
+package "Data Access Layer" #FFF9C4 {
+  component [API Client] as APIClient
+  note right of APIClient
+    - Axios instance
+    - Request interceptors
+    - Response interceptors
+    - Error handling
+    - Token refresh
+  end note
+  
+  component [React Query] as ReactQuery
+  note right of ReactQuery
+    - TanStack Query
+    - Caching
+    - Refetch logic
+    - Server state management
+  end note
+  
+  component [WebSocket Client] as WSClient
+  note right of WSClient
+    - STOMP protocol
+    - Real-time updates
+    - Connection management
+  end note
+}
+
+package "Infrastructure Layer" #FFE0B2 {
+  component [Utils] as Utils
+  note right of Utils
+    - Format helpers
+    - Date utilities
+    - String utilities
+    - Mappers
+  end note
+  
+  component [Validations] as Validations
+  note right of Validations
+    - Zod schemas
+    - Form validation
+    - Type-safe validation
+  end note
+  
+  component [Types] as Types
+  note right of Types
+    - TypeScript types
+    - API types
+    - Domain types
+  end note
+  
+  component [i18n] as i18n
+  note right of i18n
+    - next-intl
+    - Translation files
+    - Multi-language support
+  end note
+  
+  component [Providers] as Providers
+  note right of Providers
+    - ReactQueryProvider
+    - ThemeProvider
+    - MusicPlayerProvider
+    - Context providers
+  end note
+}
+
+' Force vertical layout
+Pages -[hidden]down-> UIComponents
+Pages -[hidden]down-> Hooks
+Hooks -[hidden]right-> Stores
+Stores -[hidden]right-> Services
+Services -[hidden]down-> APIClient
+APIClient -[hidden]right-> ReactQuery
+ReactQuery -[hidden]right-> WSClient
+Services -[hidden]down-> Utils
+Pages -[hidden]down-> Validations
+Pages -[hidden]down-> Types
+Pages -[hidden]down-> i18n
+Pages -[hidden]down-> Providers
+
+' Actual connections with straight lines
+Pages -[#000000]-> UIComponents : uses
+Pages -[#000000]-> Hooks : uses
+Hooks -[#000000]-> Stores : uses
+Hooks -[#000000]-> Services : uses
+Services -[#000000]-> APIClient : uses
+APIClient -[#000000]-> ReactQuery : integrates
+APIClient -[#000000]-> WSClient : uses
+Services -[#000000]-> Utils : uses
+Pages -[#000000]-> Validations : uses
+Pages -[#000000]-> Types : uses
+Pages -[#000000]-> i18n : uses
+Pages -[#000000]-> Providers : wrapped by
+ReactQuery -[#000000]-> APIClient : manages
+
+@enduml
+
+
+
+
+
+
+
+
+
+
+

@@ -24,12 +24,14 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 SPEC_FILE_PATH = os.path.join(script_dir, "specs.yaml")
 MEDIA_FOLDER = os.path.join(script_dir, "..", "..", "assets", "docs")
 PROFILE_PICS_FOLDER = os.path.join(script_dir, "..", "..", "assets", "profile_pics")
+PRINTER_PICS_FOLDER = os.path.join(script_dir, "..", "..", "assets", "printer_pics")
 OUTPUT_SQL_FILE = os.path.join(script_dir, "..", "..", "database", "schema", "insert.sql")
 
 # Supabase storage configuration
 SUPABASE_BASE_URL = "https://ilzhoxyiftrpphhbwliz.supabase.co/storage/v1/object/public"
 SUPABASE_BUCKET_PRINT_JOBS = "print_jobs_files"
 SUPABASE_BUCKET_FLOOR_DIAGRAMS = "floor_diagrams"
+SUPABASE_BUCKET_PRINTER_MODEL_IMAGES = "printer_model_images"
 
 delete_path = os.path.join(script_dir, "..", "..", "database", "schema", "delete.sql")
 design_path = os.path.join(script_dir, "..", "..", "database", "schema", "design.sql")
@@ -93,6 +95,46 @@ def get_media_files(folder_path):
             files.append(file)
     
     return files
+
+def get_printer_image_url(model_name, brand_name):
+    """
+    Map printer model name to image file and generate Supabase URL.
+    Returns Supabase URL if image found, None otherwise.
+    """
+    if not os.path.exists(PRINTER_PICS_FOLDER):
+        return None
+    
+    # Get all image files in printer_pics folder
+    image_files = [f for f in os.listdir(PRINTER_PICS_FOLDER) 
+                   if os.path.isfile(os.path.join(PRINTER_PICS_FOLDER, f)) 
+                   and f.lower().endswith(('.jpg', '.jpeg', '.png', '.webp'))]
+    
+    if not image_files:
+        return None
+    
+    # Try to find matching image by model name or brand name
+    model_lower = model_name.lower()
+    brand_lower = brand_name.lower()
+    
+    # First, try exact match or partial match with model name
+    for img_file in image_files:
+        img_lower = img_file.lower()
+        # Check if model name keywords appear in image filename
+        model_keywords = model_lower.replace('-', ' ').replace('_', ' ').split()
+        if any(keyword in img_lower for keyword in model_keywords if len(keyword) > 3):
+            return f"{SUPABASE_BASE_URL}/{SUPABASE_BUCKET_PRINTER_MODEL_IMAGES}/{img_file}"
+        
+        # Check if brand name appears in image filename
+        if brand_lower in img_lower:
+            return f"{SUPABASE_BASE_URL}/{SUPABASE_BUCKET_PRINTER_MODEL_IMAGES}/{img_file}"
+    
+    # If no match found, use a random image (for testing purposes)
+    # In production, you might want to return None instead
+    if image_files:
+        random_image = random.choice(image_files)
+        return f"{SUPABASE_BASE_URL}/{SUPABASE_BUCKET_PRINTER_MODEL_IMAGES}/{random_image}"
+    
+    return None
 
 def generate_password_hash(password="123456"):
     """
@@ -1010,9 +1052,13 @@ class PrintingServiceDataGenerator:
                     else:
                         pages_per_second = round(random.uniform(0.5, 2.0), 2)  # 0.5-2.0 pps for B&W
                 
-                # Generate image URLs - use from config if available, otherwise NULL
+                # Generate image URLs - use from config if available, otherwise try to map from printer_pics folder
                 image_2d_url = model_config.get('image_2d_url', None)
                 image_3d_url = model_config.get('image_3d_url', None)
+                
+                # If not in config, try to find matching image file
+                if not image_2d_url:
+                    image_2d_url = get_printer_image_url(model_config['name'], brand['name'])
                 
                 model_data = {
                     'model_id': model_id,
@@ -1391,11 +1437,15 @@ class PrintingServiceDataGenerator:
                     floor_obj = self.floor_by_id.get(room['floor_id'])
                     if floor_obj and floor_obj.get('grid_to_pixel_scale'):
                         pixel_x, pixel_y = grid_to_image_coordinate(grid_x, grid_y, floor_obj['grid_to_pixel_scale'])
+                        # Ensure pixel coordinates are integers (raw pixel coordinates, not percentages)
+                        pixel_x = int(pixel_x)
+                        pixel_y = int(pixel_y)
                         # Store as JSON: {"grid": [x, y], "pixel": [x, y]}
+                        # Note: pixel coordinates are RAW PIXEL COORDINATES (integers), not percentages or grid coordinates
                         import json as json_module
                         pixel_coordinate = json_module.dumps({
                             "grid": [round(grid_x, 2), round(grid_y, 2)],
-                            "pixel": [pixel_x, pixel_y]
+                            "pixel": [pixel_x, pixel_y]  # Raw pixel coordinates as integers
                         })
                 
                 # Generate status

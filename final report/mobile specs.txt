@@ -1,0 +1,81 @@
+THÔNG SỐ KỸ THUẬT VÀ CÔNG NGHỆ
+NỀN TẢNG CORE
+React Native 0.83.0: framework chính, cho phép viết một codebase chạy trên Android và iOS. Dùng JavaScript/TypeScript, giao tiếp với native qua bridge.
+React 19.2.0: thư viện UI, quản lý component tree, state, lifecycle. Hỗ trợ hooks (useState, useEffect, useMemo, useCallback) để tối ưu render.
+TypeScript 5.8.3: bổ sung kiểu tĩnh, giảm lỗi runtime, hỗ trợ refactor và autocomplete. Dự án bật strict mode.
+Node.js >= 20: môi trường chạy JavaScript, dùng cho Metro bundler, build tools, và scripts.
+QUẢN LÝ STATE & DATA FETCHING
+Zustand 4.5.0: quản lý global state (auth, theme, language, mock mode). Nhẹ, không cần Provider, tích hợp persist với AsyncStorage.
+TanStack React Query 5.56.0: quản lý server state, caching, tự động refetch, retry, invalidation. Giảm số lần gọi API và cải thiện UX.
+NAVIGATION & ROUTING
+React Navigation 7.x: điều hướng màn hình, stack và bottom tabs. Tích hợp với native navigation, hỗ trợ deep linking và gesture.
+React Native Screens 4.4.0: tối ưu hiệu năng màn hình bằng native screen management.
+React Native Safe Area Context 5.5.2: xử lý safe area (notch, status bar) trên các thiết bị.
+React Native Gesture Handler 2.18.0: xử lý gesture (swipe, pan, pinch) với native performance.
+API & NETWORKING
+Axios 1.7.0: HTTP client, hỗ trợ interceptors, timeout, auto retry, request/response transformation.
+React Native Config 1.6.1: quản lý biến môi trường (.env), tách config theo môi trường.
+FORM & VALIDATION
+React Hook Form 7.52.0: quản lý form, giảm re-render, tích hợp validation.
+Zod 3.23.0: schema validation, type-safe, dùng chung cho client và server.
+Hookform Resolvers 3.3.4: tích hợp Zod với React Hook Form.
+QUỐC TẾ HÓA (I18N)
+i18next 24.0.0: framework i18n, hỗ trợ đa ngôn ngữ, lazy loading, interpolation.
+React i18next 15.1.0: tích hợp i18next với React, hooks (useTranslation).
+UI COMPONENTS & ICONS
+React Native Vector Icons 10.2.0: icon fonts (Material, FontAwesome, Ionicons).
+Lucide React Native 0.562.0: bộ icon hiện đại, tree-shakeable.
+React Native SVG 15.15.1: render SVG, hỗ trợ animation và tùy biến.
+React Native Linear Gradient 2.8.3: tạo gradient backgrounds.
+React Native Masked View 0.3.2: mask effects (blur, gradient mask).
+STORAGE
+React Native Async Storage 2.1.0: lưu trữ key-value bất đồng bộ, dùng cho cache, settings, tokens.
+FILE & MEDIA
+React Native Image Picker 7.1.0: chọn ảnh từ gallery/camera, hỗ trợ crop và compression.
+React Native Documents Picker 11.0.3: chọn tài liệu (PDF, DOC, XLS), hỗ trợ multiple selection.
+UTILITIES
+Date-fns 3.6.0: xử lý ngày giờ, format, tính toán, hỗ trợ timezone.
+Clsx 2.1.1: tạo className điều kiện, hữu ích cho styling động.
+BUILD & DEVELOPMENT TOOLS
+Babel Core 7.25.2: transpiler, chuyển ES6+ và JSX sang JavaScript tương thích.
+Babel Preset React Native 0.83.0: preset cho React Native, hỗ trợ JSX, Flow, ES6+.
+Babel Plugin Module Resolver 5.0.0: path aliases (ví dụ @/), giảm import dài.
+Metro Config 0.83.0: bundler của React Native, tối ưu bundle size và tốc độ.
+ESLint 8.19.0: linting, phát hiện lỗi và enforce style.
+Prettier 2.8.8: format code tự động.
+Jest 29.6.3: testing framework, unit và integration tests.
+ANDROID BUILD CONFIGURATION
+Gradle Build Tools 36.0.0: công cụ build Android.
+Min SDK 24: Android 7.0 Nougat trở lên.
+Target SDK 36: Android 15, tận dụng tính năng mới.
+Kotlin 2.1.20: ngôn ngữ native Android, dùng cho native modules.
+NDK 27.1.12297006: phát triển native code (C/C++).
+Hermes Engine: JavaScript engine tối ưu, giảm memory và tăng tốc khởi động.
+MỤC ĐÍCH SỬ DỤNG
+QUẢN LÝ IN ẤN CHO SINH VIÊN
+Xem danh sách máy in, trạng thái, hàng đợi
+Upload và in tài liệu
+Xem lịch sử in, thống kê
+Quản lý số dư và nạp tiền
+QUẢN TRỊ CHO NHÂN VIÊN
+Quản lý máy in (thêm, sửa, xóa, import/export)
+Quản lý sinh viên
+Xem báo cáo và thống kê
+Cấu hình hệ thống
+Xem system logs
+TÍNH NĂNG KỸ THUẬT
+Authentication với JWT, auto refresh token
+Offline mode: tự chuyển sang mock data khi API lỗi
+Đa ngôn ngữ (tiếng Việt, tiếng Anh)
+Dark/Light theme
+Real-time updates: polling và cache invalidation
+Error handling: tự retry, fallback, thông báo rõ ràng
+Performance: caching, memoization, lazy loading
+KIẾN TRÚC
+Clean Architecture: tách biệt layers (API, Services, Components, Screens)
+Type-safe: TypeScript strict mode
+Scalable: dễ mở rộng tính năng
+Maintainable: code rõ ràng, tuân thủ best practices
+Testable: cấu trúc hỗ trợ testing
+Dự án là ứng dụng quản lý hệ thống in ấn trong môi trường giáo dục, hỗ trợ sinh viên in tài liệu và nhân viên quản trị hệ thống.
+

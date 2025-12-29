@@ -606,10 +606,13 @@ def generate_floor_diagram(template_path, output_dir, building_code, floor_numbe
         spec = json.load(f)
     
     # Calculate grid to pixel scale (needed regardless)
+    # Grid coordinates are in grid units (e.g., 5.9 means 5.9 grid cells from origin)
+    # Pixel coordinates should be actual pixel positions on the OUTPUT_WIDTH image
     GRID_SIZE = spec.get('grid_size', 100)
     GRID_COLS = spec.get('grid_cols', 24)
     svg_width = GRID_COLS * GRID_SIZE
-    grid_to_pixel_scale = OUTPUT_WIDTH / svg_width
+    # Scale: pixels per grid unit (e.g., if 24 grid cols = 2400px, then 1 grid unit = 100px)
+    grid_to_pixel_scale = OUTPUT_WIDTH / GRID_COLS
     
     # Get building name from building code
     building_name = BUILDING_NAMES.get(building_code, building_code)

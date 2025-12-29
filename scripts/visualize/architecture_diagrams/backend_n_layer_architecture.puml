@@ -1,0 +1,274 @@
+@startuml Backend N-Layer Architecture
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam componentStyle rectangle
+skinparam linetype ortho
+
+title Kiến trúc Đa Lớp Backend (Spring Boot)
+
+left to right direction
+
+package "Presentation Layer\n(API Gateway)" #E3F2FD {
+  component [Controllers] as Controllers
+  note right of Controllers
+    - StudentPrintJobController
+    - DepositController
+    - PaymentController
+    - PrinterController
+    - 30+ controller classes
+    - REST API endpoints
+    - Request/Response validation
+    - JWT authentication
+  end note
+}
+
+package "Business Logic Layer" #C8E6C9 {
+  component [Services] as Services
+  note right of Services
+    - StudentPrintJobService
+    - PaymentService
+    - DepositService
+    - PricingService
+    - RefundService
+    - LedgerService
+    - 60+ service classes
+    - Business rules
+    - Transaction management
+  end note
+}
+
+package "Data Access Layer" #FFF9C4 {
+  component [Repositories] as Repositories
+  note right of Repositories
+    - JPA Repository pattern
+    - PrintJobRepository
+    - PaymentRepository
+    - DepositRepository
+    - 34 repository classes
+    - Custom queries
+    - CRUD operations
+  end note
+}
+
+package "Domain Layer" #F3E5F5 {
+  component [Entities] as Entities
+  note right of Entities
+    - PrintJob
+    - Payment
+    - Deposit
+    - Student
+    - 40+ entity classes
+    - JPA annotations
+    - Domain models
+  end note
+  
+  component [DTOs] as DTOs
+  note right of DTOs
+    - RequestDTO
+    - ResponseDTO
+    - 110+ DTO classes
+    - Data transfer objects
+  end note
+}
+
+package "Infrastructure Layer" #FFE0B2 {
+  component [Config] as Config
+  note right of Config
+    - SecurityConfig
+    - WebSocketConfig
+    - SupabaseConfig
+    - Application configuration
+  end note
+  
+  component [Security] as Security
+  note right of Security
+    - JwtAuthenticationFilter
+    - JwtTokenProvider
+    - UserDetailsService
+    - Authentication & Authorization
+  end note
+  
+  component [Schedulers] as Schedulers
+  note right of Schedulers
+    - ReportScheduler
+    - SemesterBonusScheduler
+    - PrintJobProgressUpdater
+    - Background jobs
+  end note
+  
+  component [External Services] as External
+  note right of External
+    - Supabase Storage
+    - SePay Payment Gateway
+    - Gmail SMTP
+    - HCMSIU SSO
+  end note
+  
+  database "Azure SQL Server" as DB
+}
+
+' Force vertical layout
+Controllers -[hidden]down-> Services
+Services -[hidden]down-> Repositories
+Repositories -[hidden]down-> Entities
+Entities -[hidden]right-> DTOs
+Services -[hidden]down-> Config
+Config -[hidden]right-> Security
+Security -[hidden]right-> Schedulers
+Schedulers -[hidden]right-> External
+Repositories -[hidden]down-> DB
+
+' Actual connections with straight lines
+Controllers -[#000000]-> Services : uses
+Services -[#000000]-> Repositories : uses
+Repositories -[#000000]-> Entities : maps to
+Services -[#000000]-> DTOs : uses
+Services -[#000000]-> External : integrates
+Repositories -[#000000]-> DB : queries
+Security -[#000000]-> Controllers : protects
+Config -[#000000]-> Services : configures
+Schedulers -[#000000]-> Services : uses
+
+@enduml
+
+skinparam backgroundColor #FFFFFF
+skinparam componentStyle rectangle
+skinparam linetype ortho
+
+title Kiến trúc Đa Lớp Backend (Spring Boot)
+
+left to right direction
+
+package "Presentation Layer\n(API Gateway)" #E3F2FD {
+  component [Controllers] as Controllers
+  note right of Controllers
+    - StudentPrintJobController
+    - DepositController
+    - PaymentController
+    - PrinterController
+    - 30+ controller classes
+    - REST API endpoints
+    - Request/Response validation
+    - JWT authentication
+  end note
+}
+
+package "Business Logic Layer" #C8E6C9 {
+  component [Services] as Services
+  note right of Services
+    - StudentPrintJobService
+    - PaymentService
+    - DepositService
+    - PricingService
+    - RefundService
+    - LedgerService
+    - 60+ service classes
+    - Business rules
+    - Transaction management
+  end note
+}
+
+package "Data Access Layer" #FFF9C4 {
+  component [Repositories] as Repositories
+  note right of Repositories
+    - JPA Repository pattern
+    - PrintJobRepository
+    - PaymentRepository
+    - DepositRepository
+    - 34 repository classes
+    - Custom queries
+    - CRUD operations
+  end note
+}
+
+package "Domain Layer" #F3E5F5 {
+  component [Entities] as Entities
+  note right of Entities
+    - PrintJob
+    - Payment
+    - Deposit
+    - Student
+    - 40+ entity classes
+    - JPA annotations
+    - Domain models
+  end note
+  
+  component [DTOs] as DTOs
+  note right of DTOs
+    - RequestDTO
+    - ResponseDTO
+    - 110+ DTO classes
+    - Data transfer objects
+  end note
+}
+
+package "Infrastructure Layer" #FFE0B2 {
+  component [Config] as Config
+  note right of Config
+    - SecurityConfig
+    - WebSocketConfig
+    - SupabaseConfig
+    - Application configuration
+  end note
+  
+  component [Security] as Security
+  note right of Security
+    - JwtAuthenticationFilter
+    - JwtTokenProvider
+    - UserDetailsService
+    - Authentication & Authorization
+  end note
+  
+  component [Schedulers] as Schedulers
+  note right of Schedulers
+    - ReportScheduler
+    - SemesterBonusScheduler
+    - PrintJobProgressUpdater
+    - Background jobs
+  end note
+  
+  component [External Services] as External
+  note right of External
+    - Supabase Storage
+    - SePay Payment Gateway
+    - Gmail SMTP
+    - HCMSIU SSO
+  end note
+  
+  database "Azure SQL Server" as DB
+}
+
+' Force vertical layout
+Controllers -[hidden]down-> Services
+Services -[hidden]down-> Repositories
+Repositories -[hidden]down-> Entities
+Entities -[hidden]right-> DTOs
+Services -[hidden]down-> Config
+Config -[hidden]right-> Security
+Security -[hidden]right-> Schedulers
+Schedulers -[hidden]right-> External
+Repositories -[hidden]down-> DB
+
+' Actual connections with straight lines
+Controllers -[#000000]-> Services : uses
+Services -[#000000]-> Repositories : uses
+Repositories -[#000000]-> Entities : maps to
+Services -[#000000]-> DTOs : uses
+Services -[#000000]-> External : integrates
+Repositories -[#000000]-> DB : queries
+Security -[#000000]-> Controllers : protects
+Config -[#000000]-> Services : configures
+Schedulers -[#000000]-> Services : uses
+
+@enduml
+
+
+
+
+
+
+
+
+
+
+

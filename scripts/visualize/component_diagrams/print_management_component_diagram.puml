@@ -3,69 +3,98 @@
 !theme plain
 skinparam componentStyle rectangle
 skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+
 top to bottom direction
 
-package "Frontend Layer" {
-  component [Web UI] <<component>> as WebUI
+title Biểu đồ Thành phần - Module Quản lý In ấn
+
+package "Frontend Layer" #E3F2FD {
+  component WebUI
 }
 
-package "API Gateway Layer" {
-  component [Backend API] <<component>> as BackendAPI
+package "API Gateway Layer" #FFF9C4 {
+  component BackendAPI
 }
 
-package "Business Logic Layer" {
-  component [Print Service] <<component>> as PrintService
-  component [Pricing Service] <<component>> as PricingService
-  component [Payment Service] <<component>> as PaymentService
-  component [Refund Service] <<component>> as RefundService
-  component [Deposit Service] <<component>> as DepositService
-  component [Bonus Service] <<component>> as BonusService
-  component [Ledger Service] <<component>> as LedgerService
+package "Business Logic Layer" #C8E6C9 {
+  component PrintService
+  component PricingService
+  component PaymentService
+  component RefundService
+  component DepositService
+  component LedgerService
 }
 
-package "Infrastructure Layer" {
-  component [Printer Controller] <<component>> as PrinterController
-  component [File Storage] <<component>> as FileStorage
-  component [Payment Gateway] <<component>> as PaymentGateway
-  component [Database] <<component>> as Database
+package "Infrastructure Layer" #FFE0B2 {
+  component PrinterController
+  component FileStorage
+  component PaymentGateway
+  database Database
 }
 
-' Frontend to API Gateway
-WebUI --> BackendAPI : REST API / WebSocket
+() "REST API" as REST
+() "WebSocket" as WS
+() "Business" as Business
+() "Pricing" as Pricing
+() "Payment" as Payment
+() "Printer" as Printer
+() "File" as File
+() "Data" as Data
+() "Ledger" as Ledger
+() "Gateway" as Gateway
+() "Webhook" as Webhook
 
-' API Gateway to Business Services
-BackendAPI --> PrintService : delegates
-BackendAPI --> PricingService : delegates
-BackendAPI --> PaymentService : delegates
-BackendAPI --> RefundService : delegates
-BackendAPI --> DepositService : delegates
-BackendAPI --> BonusService : delegates
-BackendAPI --> LedgerService : delegates
+WebUI --> REST
+WebUI --> WS
+REST - BackendAPI
+WS - BackendAPI
 
-' Business Services dependencies
-PrintService --> PricingService : uses
-PrintService --> PaymentService : uses
-PrintService --> PrinterController : controls
-PrintService --> FileStorage : accesses
-PrintService --> Database : queries
+BackendAPI --> Business
+Business - PrintService
+Business - PricingService
+Business - PaymentService
+Business - RefundService
+Business - DepositService
+Business - LedgerService
 
-PricingService --> Database : queries
+PrintService --> Pricing
+PrintService --> Payment
+PrintService --> Printer
+PrintService --> File
+PrintService --> Data
 
-PaymentService --> LedgerService : uses
-PaymentService --> PaymentGateway : integrates
-PaymentService --> Database : queries
+Pricing - PricingService
+Payment - PaymentService
+Printer - PrinterController
+File - FileStorage
+Data - Database
 
-RefundService --> PaymentService : uses
-RefundService --> LedgerService : uses
-RefundService --> Database : queries
+PricingService --> Data
+PaymentService --> Ledger
+PaymentService --> Gateway
+RefundService --> Payment
+RefundService --> Ledger
+DepositService --> Gateway
+DepositService --> Ledger
 
-DepositService --> BonusService : uses
-DepositService --> PaymentGateway : integrates
-DepositService --> LedgerService : uses
-DepositService --> Database : queries
+Ledger - LedgerService
+LedgerService --> Data
+Gateway - PaymentGateway
+PaymentGateway --> Webhook
+Webhook --> DepositService
 
-BonusService --> Database : queries
-
-LedgerService --> Database : queries
+' Force vertical layout to reduce width
+WebUI -[hidden]down-> BackendAPI
+BackendAPI -[hidden]down-> PrintService
+PrintService -[hidden]down-> PricingService
+PricingService -[hidden]down-> PaymentService
+PaymentService -[hidden]down-> RefundService
+RefundService -[hidden]down-> DepositService
+DepositService -[hidden]down-> LedgerService
+LedgerService -[hidden]down-> PrinterController
+PrinterController -[hidden]down-> FileStorage
+FileStorage -[hidden]down-> PaymentGateway
+PaymentGateway -[hidden]down-> Database
 
 @enduml

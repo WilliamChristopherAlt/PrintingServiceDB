@@ -1,0 +1,893 @@
+TRANG CẤU HÌNH GIÁ (PRICING CONFIGURATION - STAFF)
+1. CÁC THÀNH PHẦN TRÊN TRANG
+
+1.1 Tiêu đề trang (Page Header)
+Tiêu đề chính: "Pricing Configuration"
+Mô tả phụ: "Manage page prices, color mode pricing, volume discounts, and deposit bonuses"
+Nút hành động: "View Pricing History" (góc phải)
+Info Banner:
+Icon ℹ️
+Nội dung: "Changes are saved immediately and affect new transactions only. Past transactions remain unchanged."
+Background màu xanh nhạt
+1.2 Thanh Tab (Tab Navigation)
+
+Có 4 tab ngang để chuyển đổi giữa các loại cấu hình:
+Page Size Pricing (mặc định active)
+Color Mode Pricing
+Volume Discounts
+Deposit Bonus Packages
+1.3 Tab 1: Page Size Pricing
+
+
+
+Mô tả
+Text giải thích: "Set base price per page for each paper size. These prices are multiplied by color mode and applied to print jobs."
+Info Box cảnh báo
+Icon ⚠️
+Text: "When you update a price, the previous price settings are preserved in the system for historical records. Existing print jobs will continue to use their original pricing."
+Background màu vàng nhạt
+Nút hành động
+Nút "Add Page Size Price" (primary style, ở góc phải header của table)
+Bảng danh sách (Table)
+Các cột:
+Paper Size (tên kích thước giấy)
+Base Price (per page) (giá cơ bản)
+Status (trạng thái Active/Inactive)
+Last Updated (ngày cập nhật cuối)
+Actions (các nút hành động)
+Mỗi dòng có:
+Tên kích thước: A4, A3, A5, etc.
+Giá hiển thị: $0.05, $0.10, etc.
+Badge trạng thái: màu xanh (Active) hoặc xám (Inactive)
+Ngày cập nhật: 2024-12-01
+Actions column:
+Icon nút "View" (mắt) - xem chi tiết lịch sử
+Icon nút "Update" (bút chì) - cập nhật giá
+1.4 Tab 2: Color Mode Pricing
+
+
+
+Mô tả
+Text giải thích: "Configure price multipliers for different color modes. These multipliers are applied to the base page size price."
+Info Box cảnh báo
+Tương tự tab 1, nhưng text về multiplier settings
+Nút hành động
+Nút "Add Color Mode Price"
+Bảng danh sách (Table)
+Các cột:
+Color Mode (chế độ màu)
+Price Multiplier (hệ số nhân)
+Example (A4 @ $0.05) (ví dụ tính toán)
+Status
+Last Updated
+Actions
+Mỗi dòng có:
+Tên mode: Black & White, Grayscale, Color
+Multiplier: 0.5x, 1.0x, 1.5x
+Ví dụ tính: $0.025/page, $0.05/page, $0.075/page
+Badge trạng thái
+Ngày cập nhật
+Actions column:
+Icon nút "View" (mắt)
+Icon nút "Update" (bút chì)
+1.5 Tab 3: Volume Discounts
+
+
+Mô tả
+Text giải thích: "Create discount packages based on the number of pages printed. Students automatically receive the best applicable discount."
+Info Box cảnh báo
+Tương tự tab 1, nhưng text về discount settings
+Nút hành động
+Nút "Add Discount Package"
+Bảng danh sách (Table)
+Các cột:
+Package Name (tên gói)
+Minimum Pages (số trang tối thiểu)
+Discount (phần trăm giảm giá)
+Status
+Description (mô tả)
+Actions
+Mỗi dòng có:
+Tên gói: Small Volume, Medium Volume, Large Volume
+Số trang: 10 pages, 50 pages, 100 pages
+Discount: 5%, 10%, 15%
+Badge trạng thái
+Mô tả ngắn
+Actions column:
+Icon nút "Update" (bút chì)
+Toggle switch (bật/tắt)
+Pagination
+Thông tin: "Showing 1-3 of 3 entries"
+Dropdown chọn số dòng: 10/25/50 per page
+Nút Previous/Next
+Nút số trang: 1, 2, 3...
+1.6 Tab 4: Deposit Bonus Packages
+
+
+Mô tả
+Text giải thích: "Create bonus packages for deposits. Students receive bonus credits when they deposit above the minimum amount."
+Info Box cảnh báo
+Tương tự tab 1, nhưng text về bonus settings
+Nút hành động
+Nút "Add Bonus Package"
+Bảng danh sách (Table)
+Các cột:
+Package Code (mã gói)
+Package Name (tên gói)
+Minimum Deposit (số tiền nạp tối thiểu)
+Bonus % (phần trăm thưởng)
+Type (loại: Standard/Event)
+Status
+Actions
+Mỗi dòng có:
+Code: BASIC, SAVE_10, XMAS_25
+Tên: Basic Bonus, Save 10%, Christmas Special
+Min deposit: $5.00, $10.00, $20.00
+Bonus: 5%, 10%, 25%
+Badge type: Standard (xám) hoặc Event (vàng)
+Badge trạng thái
+Actions column:
+Icon nút "Update" (bút chì)
+Toggle switch (bật/tắt)
+Pagination
+Tương tự tab 3
+
+2. LUỒNG TƯƠNG TÁC
+2.1 Truy cập và hiển thị ban đầu
+Staff click menu "Pricing Configuration"
+Trang load với tab "Page Size Pricing" active
+Hiển thị bảng danh sách page sizes
+2.2 Chuyển đổi giữa các tab
+Staff click vào tab khác (Color Mode/Volume Discounts/Deposit Bonuses)
+Tab cũ mất active state
+Tab mới được active và hiển thị nội dung tương ứng
+2.3 Xem chi tiết lịch sử (View History)
+Tab Page Size Pricing:
+Staff click icon "View" (mắt) ở một dòng
+Modal "Page Size Price History" hiển thị
+Modal có:
+Title: "Page Size Price History"
+Field read-only: Page Size name
+Table lịch sử với các cột: Price, Status, Created At, Updated At
+Các dòng lịch sử (cũ nhất ở dưới)
+Nút "Close"
+Staff click "Close" hoặc click ngoài modal
+Modal đóng, quay về trang chính
+Tab Color Mode Pricing:
+Staff click icon "View" (mắt)
+Modal "Color Mode Price History" hiển thị
+Tương tự Page Size, nhưng hiển thị Multiplier thay vì Price
+Staff đóng modal
+2.4 Cập nhật giá (Update)
+Tab Page Size Pricing:
+Staff click icon "Update" (bút chì) ở một dòng
+Modal "Update Page Size Price" hiển thị
+Modal có:
+Warning box màu vàng về việc tạo setting mới
+Field "Page Size" (read-only, disabled)
+Field "Current Base Price" (read-only)
+Field "New Base Price" (input number, có thể nhập)
+Nút "Cancel" và "Update Price"
+Staff nhập giá mới
+Staff click "Update Price"
+Modal đóng
+Alert/toast hiển thị "Price updated successfully"
+Bảng tự động refresh với dữ liệu mới
+Tab Color Mode Pricing:
+Staff click icon "Update" (bút chì)
+Modal "Update Color Mode Price" hiển thị
+Tương tự Page Size, nhưng:
+Field "Color Mode" (read-only)
+Field "Current Price Multiplier" (read-only)
+Field "New Price Multiplier" (input)
+Staff cập nhật và submit
+Modal đóng, toast hiển thị, table refresh
+Tab Volume Discounts:
+Staff click icon "Update" (bút chì)
+Modal "Update Bulk Discount Package" hiển thị
+Modal có:
+Warning box
+Field "Package Name" (input, có thể edit)
+Field "Current Minimum Pages" (read-only)
+Field "Current Discount" (read-only)
+Field "New Minimum Pages" (input)
+Field "New Discount Percentage" (input)
+Field "Description" (textarea)
+Nút "Cancel" và "Update Package"
+Staff cập nhật và submit
+Modal đóng, toast hiển thị, table refresh
+Tab Deposit Bonus Packages:
+Staff click icon "Update" (bút chì)
+Modal "Update Deposit Bonus Package" hiển thị
+Modal có:
+Warning box
+Field "Package Code" (read-only)
+Field "Package Name" (input)
+Field "Current Minimum Deposit" (read-only)
+Field "Current Bonus" (read-only)
+Field "New Minimum Deposit Amount" (input)
+Field "New Bonus Percentage" (input)
+Field "Description" (textarea)
+Checkbox "Event Package"
+Nút "Cancel" và "Update Package"
+Staff cập nhật và submit
+Modal đóng, toast hiển thị, table refresh
+2.5 Thêm mới (Add/Create)
+Tab Page Size Pricing:
+Staff click nút "Add Page Size Price"
+Modal "Add Page Size Price" hiển thị
+Modal có:
+Dropdown "Page Size" (chọn A4/A3/A5/Letter/Legal)
+Field "Base Price (per page)" (input number)
+Nút "Cancel" và "Create"
+Staff chọn size và nhập giá
+Staff click "Create"
+Modal đóng
+Toast "Price created successfully"
+Table refresh, dòng mới xuất hiện
+Tab Color Mode Pricing:
+Staff click nút "Add Color Mode Price"
+Modal "Add Color Mode Price" hiển thị
+Modal có:
+Dropdown "Color Mode" (chọn Black & White/Grayscale/Color)
+Field "Price Multiplier" (input)
+Nút "Cancel" và "Create"
+Staff chọn mode và nhập multiplier
+Staff submit
+Modal đóng, toast hiển thị, table refresh
+Tab Volume Discounts:
+Staff click nút "Add Discount Package"
+Modal "Add Bulk Discount Package" hiển thị
+Modal có:
+Field "Package Name" (input)
+Field "Minimum Pages" (input number)
+Field "Discount Percentage" (input number)
+Field "Description" (textarea, optional)
+Nút "Cancel" và "Create"
+Staff điền thông tin
+Staff submit
+Modal đóng, toast hiển thị, table refresh
+Tab Deposit Bonus Packages:
+Staff click nút "Add Bonus Package"
+Modal "Add Deposit Bonus Package" hiển thị
+Modal có:
+Field "Package Code" (input text, uppercase)
+Field "Package Name" (input text)
+Field "Minimum Deposit Amount" (input number)
+Field "Bonus Percentage" (input number)
+Field "Description" (textarea, optional)
+Checkbox "Event Package"
+Nút "Cancel" và "Create"
+Staff điền thông tin
+Staff submit
+Modal đóng, toast hiển thị, table refresh
+2.6 Bật/Tắt trạng thái (Toggle)
+Tab Volume Discounts:
+Staff click vào toggle switch của một dòng
+Toggle animation chạy (loading)
+Switch chuyển trạng thái (ON ↔ OFF)
+Toast hiển thị "Status updated"
+Badge "Status" trong table cập nhật (Active ↔ Inactive)
+Tab Deposit Bonus Packages:
+Staff click toggle switch
+Tương tự Volume Discounts
+Toggle chuyển trạng thái
+Toast và badge cập nhật
+Lưu ý: Tab Page Size và Color Mode KHÔNG có toggle switch, chỉ có View và Update
+2.7 Cancel/Đóng modal
+Trong bất kỳ modal nào, staff có thể:
+Click nút "Cancel"
+Click nút "×" (close) ở góc phải modal header
+Click vùng ngoài modal (backdrop)
+Nhấn phím ESC
+Modal đóng
+Form reset về trạng thái ban đầu (nếu có thay đổi)
+Quay về trang chính không có thay đổi
+2.8 Xem toàn bộ lịch sử (View Pricing History)
+Staff click nút "View Pricing History" ở page header
+Navigate sang trang mới "/admin/pricing-history" (trang khác, không phải modal)
+Trang history có filters, search, sort, pagination
+Staff xem các thay đổi từ tất cả các loại pricing
+Staff click "Back to Configuration"
+Quay về trang Pricing Configuration
+2.9 Pagination (Tab Volume Discounts và Deposit Bonuses)
+Staff click dropdown "per page"
+Chọn 10/25/50
+Table refresh với số dòng mới
+Staff click nút "Next"
+Chuyển sang trang tiếp theo
+Nút "Previous" active (nếu không ở trang 1)
+Staff click số trang cụ thể (1, 2, 3...)
+Nhảy đến trang đó
+Nút số trang active được highlight
+
+
+3. USE CASE: PRICING CONFIGURATION
+3.1 Danh sách Use Cases
+Use Case Index
+Tên Use Case
+MoSCoW
+NV-10-1
+Cập nhật giá kích thước giấy
+Must Have
+NV-10-2
+Cập nhật hệ số nhân màu in
+Must Have
+NV-10-3
+Cập nhật gói giảm giá số lượng
+Must Have
+NV-10-4
+Cập nhật gói thưởng nạp tiền
+Must Have
+NV-10-5
+Xem lịch sử giá
+Must Have
+NV-10-6
+Thêm giá kích thước giấy
+Must Have
+NV-10-7
+Thêm hệ số nhân màu in
+Must Have
+NV-10-8
+Thêm gói giảm giá số lượng
+Must Have
+NV-10-9
+Thêm gói thưởng nạp tiền
+Must Have
+NV-10-10
+Bật/Tắt trạng thái gói
+Must Have
+
+
+3.2 Use Case NV-10-1: Cập nhật giá kích thước giấy
+
+Mục
+Nội dung
+Usecase ID
+NV-10-1
+Tên
+Cập nhật giá kích thước giấy (Update Page Size Price)
+Mô tả
+Staff cập nhật giá cơ bản cho từng kích thước giấy (A4, A3, A5, etc.). Hệ thống tạo cấu hình giá mới và lưu lại lịch sử giá cũ.
+Actor
+Staff (SPSO)
+Trigger
+Staff click nút "Update" (icon bút chì) ở một dòng trong bảng Page Size Pricing
+Quy định nghiệp vụ
+- Giá mới phải > 0
+- Kích thước giấy không thể thay đổi
+- Cấu hình cũ được đánh dấu inactive, cấu hình mới được tạo với trạng thái active
+- Các print job hiện tại giữ nguyên giá cũ
+Main Flow
+1. Staff click icon "Update" trên một dòng page size
+2. Hệ thống hiển thị modal "Update Page Size Price" với các trường: Page Size (read-only), Current Base Price (read-only), New Base Price (input)
+3. Staff nhập giá mới vào trường "New Base Price"
+4. Staff click nút "Update Price"
+5. Hệ thống validate giá > 0
+6. Hệ thống đánh dấu cấu hình cũ là inactive
+7. Hệ thống tạo bản ghi mới trong page_size_price với giá mới và trạng thái active
+8. Hệ thống đóng modal và hiển thị thông báo "Price updated successfully"
+9. Bảng tự động refresh với dữ liệu mới
+Alternative Flow
+- Tại bước 3-4, Staff click "Cancel" hoặc "×" hoặc nhấn ESC
+- Modal đóng, không có thay đổi
+Exception Flow
+- Tại bước 5, nếu giá ≤ 0 hoặc không phải số
+- Hệ thống hiển thị lỗi validation
+- Quay lại bước 3
+Tiền điều kiện
+- Staff đã đăng nhập với quyền SPSO
+- Có ít nhất một page size đã được tạo
+Hậu điều kiện
+- Cấu hình giá cũ được đánh dấu inactive và lưu trong lịch sử
+- Cấu hình giá mới được tạo với trạng thái active
+- Các print job mới sẽ sử dụng giá mới
+Input
+- Page size ID (từ dòng được chọn)
+- Giá mới (New Base Price)
+Output
+- Modal đóng
+- Toast thông báo "Price updated successfully"
+- Bảng Page Size Pricing được cập nhật với giá mới và ngày "Last Updated"
+
+
+
+3.3 Use Case NV-10-2: Cập nhật hệ số nhân màu in
+
+Mục
+Nội dung
+Usecase ID
+NV-10-2
+Tên
+Cập nhật hệ số nhân màu in (Update Color Mode Price Multiplier)
+Mô tả
+Staff cập nhật hệ số nhân giá cho các chế độ màu in (Black & White, Grayscale, Color). Hệ số này được nhân với giá cơ bản của page size để tính giá cuối cùng.
+Actor
+Staff (SPSO)
+Trigger
+Staff click nút "Update" (icon bút chì) ở một dòng trong bảng Color Mode Pricing
+Quy định nghiệp vụ
+- Hệ số nhân phải ≥ 0 và ≤ 10
+- Chế độ màu không thể thay đổi
+- Cấu hình cũ được đánh dấu inactive, cấu hình mới được tạo với trạng thái active
+- Các print job hiện tại giữ nguyên hệ số cũ
+Main Flow
+1. Staff click icon "Update" trên một dòng color mode
+2. Hệ thống hiển thị modal "Update Color Mode Price" với các trường: Color Mode (read-only), Current Price Multiplier (read-only), New Price Multiplier (input)
+3. Staff nhập hệ số nhân mới
+4. Staff click nút "Update Multiplier"
+5. Hệ thống validate hệ số nhân (0 ≤ multiplier ≤ 10)
+6. Hệ thống đánh dấu cấu hình cũ là inactive
+7. Hệ thống tạo bản ghi mới trong color_mode_price với hệ số mới và trạng thái active
+8. Hệ thống đóng modal và hiển thị thông báo "Multiplier updated successfully"
+9. Bảng tự động refresh với dữ liệu mới
+Alternative Flow
+- Tại bước 3-4, Staff click "Cancel" hoặc "×" hoặc nhấn ESC
+- Modal đóng, không có thay đổi
+Exception Flow
+- Tại bước 5, nếu hệ số < 0 hoặc > 10 hoặc không phải số
+- Hệ thống hiển thị lỗi validation
+- Quay lại bước 3
+Tiền điều kiện
+- Staff đã đăng nhập với quyền SPSO
+- Có ít nhất một color mode đã được tạo
+Hậu điều kiện
+- Cấu hình hệ số cũ được đánh dấu inactive và lưu trong lịch sử
+- Cấu hình hệ số mới được tạo với trạng thái active
+- Các print job mới sẽ sử dụng hệ số mới
+Input
+- Color mode ID (từ dòng được chọn)
+- Hệ số nhân mới (New Price Multiplier)
+Output
+- Modal đóng
+- Toast thông báo "Multiplier updated successfully"
+- Bảng Color Mode Pricing được cập nhật với hệ số mới và ngày "Last Updated"
+
+
+
+3.4 Use Case NV-10-3: Cập nhật gói giảm giá số lượng
+Mục
+Nội dung
+Usecase ID
+NV-10-3
+Tên
+Cập nhật gói giảm giá số lượng (Update Bulk Discount Package)
+Mô tả
+Staff cập nhật thông tin gói giảm giá dựa trên số lượng trang in. Bao gồm tên gói, số trang tối thiểu, phần trăm giảm giá và mô tả.
+Actor
+Staff (SPSO)
+Trigger
+Staff click nút "Update" (icon bút chì) ở một dòng trong bảng Bulk Discount Packages
+Quy định nghiệp vụ
+- Số trang tối thiểu phải > 0
+- Phần trăm giảm giá phải ≥ 0 và ≤ 100
+- Tên gói không được trùng với gói khác
+- Cấu hình cũ được đánh dấu inactive, cấu hình mới được tạo với trạng thái active
+- Các print job hiện tại giữ nguyên mức giảm giá cũ
+Main Flow
+1. Staff click icon "Update" trên một dòng bulk discount package
+2. Hệ thống hiển thị modal "Update Bulk Discount Package" với các trường: Package Name (input), Current Minimum Pages (read-only), Current Discount (read-only), New Minimum Pages (input), New Discount Percentage (input), Description (textarea)
+3. Staff cập nhật các thông tin cần thiết
+4. Staff click nút "Update Package"
+5. Hệ thống validate dữ liệu nhập vào
+6. Hệ thống đánh dấu cấu hình cũ là inactive
+7. Hệ thống tạo bản ghi mới trong page_discount_package với thông tin mới và trạng thái active
+8. Hệ thống đóng modal và hiển thị thông báo "Package updated successfully"
+9. Bảng tự động refresh với dữ liệu mới
+Alternative Flow
+- Tại bước 3-4, Staff click "Cancel" hoặc "×" hoặc nhấn ESC
+- Modal đóng, không có thay đổi
+Exception Flow
+- Tại bước 5, nếu dữ liệu không hợp lệ (min pages ≤ 0, discount < 0 hoặc > 100, tên trùng)
+- Hệ thống hiển thị lỗi validation tương ứng
+- Quay lại bước 3
+Tiền điều kiện
+- Staff đã đăng nhập với quyền SPSO
+- Có ít nhất một bulk discount package đã được tạo
+Hậu điều kiện
+- Cấu hình gói cũ được đánh dấu inactive và lưu trong lịch sử
+- Cấu hình gói mới được tạo với trạng thái active
+- Các print job mới sẽ áp dụng gói giảm giá mới nếu đủ điều kiện
+Input
+- Package ID (từ dòng được chọn)
+- Tên gói mới (Package Name)
+- Số trang tối thiểu mới (New Minimum Pages)
+- Phần trăm giảm giá mới (New Discount Percentage)
+- Mô tả (Description)
+Output
+- Modal đóng
+- Toast thông báo "Package updated successfully"
+- Bảng Bulk Discount Packages được cập nhật với thông tin mới
+
+
+3.5 Use Case NV-10-4: Cập nhật gói thưởng nạp tiền
+
+Mục
+Nội dung
+Usecase ID
+NV-10-4
+Tên
+Cập nhật gói thưởng nạp tiền (Update Deposit Bonus Package)
+Mô tả
+Staff cập nhật thông tin gói thưởng khi sinh viên nạp tiền. Bao gồm mã gói, tên gói, số tiền nạp tối thiểu, phần trăm thưởng, mô tả và loại gói (Standard/Event).
+Actor
+Staff (SPSO)
+Trigger
+Staff click nút "Update" (icon bút chì) ở một dòng trong bảng Deposit Bonus Packages
+Quy định nghiệp vụ
+- Số tiền nạp tối thiểu phải > 0
+- Phần trăm thưởng phải ≥ 0 và ≤ 100
+- Mã gói không thể thay đổi
+- Tên gói không được trùng với gói khác
+- Cấu hình cũ được đánh dấu inactive, cấu hình mới được tạo với trạng thái active
+- Các giao dịch nạp tiền hiện tại giữ nguyên mức thưởng cũ
+Main Flow
+1. Staff click icon "Update" trên một dòng deposit bonus package
+2. Hệ thống hiển thị modal "Update Deposit Bonus Package" với các trường: Package Code (read-only), Package Name (input), Current Minimum Deposit (read-only), Current Bonus (read-only), New Minimum Deposit Amount (input), New Bonus Percentage (input), Description (textarea), Event Package (checkbox)
+3. Staff cập nhật các thông tin cần thiết
+4. Staff click nút "Update Package"
+5. Hệ thống validate dữ liệu nhập vào
+6. Hệ thống đánh dấu cấu hình cũ là inactive
+7. Hệ thống tạo bản ghi mới trong deposit_bonus_package với thông tin mới và trạng thái active
+8. Hệ thống đóng modal và hiển thị thông báo "Package updated successfully"
+9. Bảng tự động refresh với dữ liệu mới
+Alternative Flow
+- Tại bước 3-4, Staff click "Cancel" hoặc "×" hoặc nhấn ESC
+- Modal đóng, không có thay đổi
+Exception Flow
+- Tại bước 5, nếu dữ liệu không hợp lệ (min deposit ≤ 0, bonus < 0 hoặc > 100, tên trùng)
+- Hệ thống hiển thị lỗi validation tương ứng
+- Quay lại bước 3
+Tiền điều kiện
+- Staff đã đăng nhập với quyền SPSO
+- Có ít nhất một deposit bonus package đã được tạo
+Hậu điều kiện
+- Cấu hình gói cũ được đánh dấu inactive và lưu trong lịch sử
+- Cấu hình gói mới được tạo với trạng thái active
+- Các giao dịch nạp tiền mới sẽ áp dụng gói thưởng mới nếu đủ điều kiện
+Input
+- Package ID (từ dòng được chọn)
+- Tên gói mới (Package Name)
+- Số tiền nạp tối thiểu mới (New Minimum Deposit Amount)
+- Phần trăm thưởng mới (New Bonus Percentage)
+- Mô tả (Description)
+- Loại gói (Event Package checkbox)
+Output
+- Modal đóng
+- Toast thông báo "Package updated successfully"
+- Bảng Deposit Bonus Packages được cập nhật với thông tin mới và badge Type (Standard/Event)
+
+
+
+3.6 Use Case NV-10-5: Xem lịch sử giá
+
+Mục
+Nội dung
+Usecase ID
+NV-10-5
+Tên
+Xem lịch sử giá (View Price History)
+Mô tả
+Staff xem lịch sử thay đổi giá của một page size hoặc color mode cụ thể, bao gồm các cấu hình giá cũ, trạng thái và thời gian tạo/cập nhật.
+Actor
+Staff (SPSO)
+Trigger
+Staff click nút "View" (icon mắt) ở một dòng trong bảng Page Size Pricing hoặc Color Mode Pricing
+Quy định nghiệp vụ
+- Hiển thị tất cả các cấu hình giá của page size/color mode đã chọn
+- Sắp xếp theo thời gian (mới nhất ở trên)
+- Hiển thị rõ trạng thái Active/Inactive
+Main Flow
+1. Staff click icon "View" trên một dòng
+2. Hệ thống xác định loại (Page Size hoặc Color Mode)
+3. Hệ thống truy vấn lịch sử giá từ bảng tương ứng (page_size_price hoặc color_mode_price)
+4. Hệ thống hiển thị modal với tiêu đề "Page Size Price History" hoặc "Color Mode Price History"
+5. Modal hiển thị: tên page size/color mode (read-only), bảng lịch sử với các cột Price/Multiplier, Status, Created At, Updated At
+6. Staff xem thông tin lịch sử
+7. Staff click "Close" để đóng modal
+Alternative Flow
+- Tại bước 6-7, Staff click "×" hoặc nhấn ESC hoặc click ngoài modal
+- Modal đóng
+Exception Flow
+- Tại bước 3, nếu không tìm thấy lịch sử
+- Hiển thị thông báo "No history found" trong modal
+Tiền điều kiện
+- Staff đã đăng nhập với quyền SPSO
+- Page size hoặc color mode đã tồn tại trong hệ thống
+Hậu điều kiện
+- Không có thay đổi dữ liệu
+- Modal đóng
+Input
+- Page size ID hoặc Color mode ID (từ dòng được chọn)
+Output
+- Modal hiển thị lịch sử giá đầy đủ
+
+
+
+3.7 Use Case NV-10-6: Thêm giá kích thước giấy
+
+Mục
+Nội dung
+Usecase ID
+NV-10-6
+Tên
+Thêm giá kích thước giấy (Add Page Size Price)
+Mô tả
+Staff tạo cấu hình giá mới cho một kích thước giấy chưa có giá trong hệ thống.
+Actor
+Staff (SPSO)
+Trigger
+Staff click nút "Add Page Size Price" ở header của bảng Page Size Pricing
+Quy định nghiệp vụ
+- Page size phải đã tồn tại trong hệ thống (bảng page_size)
+- Page size chưa có cấu hình giá active
+- Giá phải > 0
+- Một page size chỉ có thể có một cấu hình giá active tại một thời điểm
+Main Flow
+1. Staff click nút "Add Page Size Price"
+2. Hệ thống hiển thị modal "Add Page Size Price"
+3. Modal hiển thị: dropdown "Page Size" (chọn A4/A3/A5/Letter/Legal), input "Base Price (per page)"
+4. Staff chọn page size từ dropdown
+5. Staff nhập giá cơ bản
+6. Staff click "Create"
+7. Hệ thống validate: page size đã chọn, giá > 0, page size chưa có giá active
+8. Hệ thống tạo bản ghi mới trong page_size_price với trạng thái active
+9. Hệ thống đóng modal và hiển thị thông báo "Price created successfully"
+10. Bảng tự động refresh, dòng mới xuất hiện
+Alternative Flow
+- Tại bước 4-6, Staff click "Cancel" hoặc "×" hoặc nhấn ESC
+- Modal đóng, không có thay đổi
+Exception Flow
+- Tại bước 7, nếu page size đã có giá active
+- Hệ thống hiển thị lỗi "This page size already has an active price"
+- Quay lại bước 4
+
+- Tại bước 7, nếu giá ≤ 0 hoặc không hợp lệ
+- Hệ thống hiển thị lỗi validation
+- Quay lại bước 5
+Tiền điều kiện
+- Staff đã đăng nhập với quyền SPSO
+- Có ít nhất một page size trong hệ thống chưa có giá
+Hậu điều kiện
+- Bản ghi mới được tạo trong page_size_price với trạng thái active
+- Page size đã chọn có thể được sử dụng cho print job
+Input
+- Page size (dropdown selection)
+- Giá cơ bản (Base Price)
+Output
+- Modal đóng
+- Toast thông báo "Price created successfully"
+- Bảng Page Size Pricing hiển thị dòng mới
+
+
+
+3.8 Use Case NV-10-7: Thêm hệ số nhân màu in
+
+Mục
+Nội dung
+Usecase ID
+NV-10-7
+Tên
+Thêm hệ số nhân màu in (Add Color Mode Price)
+Mô tả
+Staff tạo cấu hình hệ số nhân mới cho một chế độ màu chưa có cấu hình trong hệ thống.
+Actor
+Staff (SPSO)
+Trigger
+Staff click nút "Add Color Mode Price" ở header của bảng Color Mode Pricing
+Quy định nghiệp vụ
+- Color mode phải đã tồn tại trong hệ thống (bảng color_mode)
+- Color mode chưa có cấu hình hệ số active
+- Hệ số nhân phải ≥ 0 và ≤ 10
+- Một color mode chỉ có thể có một cấu hình hệ số active tại một thời điểm
+Main Flow
+1. Staff click nút "Add Color Mode Price"
+2. Hệ thống hiển thị modal "Add Color Mode Price"
+3. Modal hiển thị: dropdown "Color Mode" (chọn Black & White/Grayscale/Color), input "Price Multiplier"
+4. Staff chọn color mode từ dropdown
+5. Staff nhập hệ số nhân
+6. Staff click "Create"
+7. Hệ thống validate: color mode đã chọn, 0 ≤ hệ số ≤ 10, color mode chưa có hệ số active
+8. Hệ thống tạo bản ghi mới trong color_mode_price với trạng thái active
+9. Hệ thống đóng modal và hiển thị thông báo "Price created successfully"
+10. Bảng tự động refresh, dòng mới xuất hiện
+Alternative Flow
+- Tại bước 4-6, Staff click "Cancel" hoặc "×" hoặc nhấn ESC
+- Modal đóng, không có thay đổi
+Exception Flow
+- Tại bước 7, nếu color mode đã có hệ số active
+- Hệ thống hiển thị lỗi "This color mode already has an active multiplier"
+- Quay lại bước 4
+
+- Tại bước 7, nếu hệ số < 0 hoặc > 10 hoặc không hợp lệ
+- Hệ thống hiển thị lỗi validation
+- Quay lại bước 5
+Tiền điều kiện
+- Staff đã đăng nhập với quyền SPSO
+- Có ít nhất một color mode trong hệ thống chưa có hệ số
+Hậu điều kiện
+- Bản ghi mới được tạo trong color_mode_price với trạng thái active
+- Color mode đã chọn có thể được sử dụng cho print job
+Input
+- Color mode (dropdown selection)
+- Hệ số nhân (Price Multiplier)
+Output
+- Modal đóng
+- Toast thông báo "Price created successfully"
+- Bảng Color Mode Pricing hiển thị dòng mới
+
+
+
+3.9 Use Case NV-10-8: Thêm gói giảm giá số lượng
+
+Mục
+Nội dung
+Usecase ID
+NV-10-8
+Tên
+Thêm gói giảm giá số lượng (Add Bulk Discount Package)
+Mô tả
+Staff tạo gói giảm giá mới dựa trên số lượng trang in để khuyến khích sinh viên in số lượng lớn.
+Actor
+Staff (SPSO)
+Trigger
+Staff click nút "Add Discount Package" ở header của bảng Bulk Discount Packages
+Quy định nghiệp vụ
+- Tên gói không được trùng với gói khác
+- Số trang tối thiểu phải > 0
+- Phần trăm giảm giá phải ≥ 0 và ≤ 100
+- Gói mới được tạo với trạng thái active
+Main Flow
+1. Staff click nút "Add Discount Package"
+2. Hệ thống hiển thị modal "Add Bulk Discount Package"
+3. Modal hiển thị: input "Package Name", input "Minimum Pages", input "Discount Percentage", textarea "Description" (optional)
+4. Staff nhập thông tin gói
+5. Staff click "Create"
+6. Hệ thống validate: tên gói unique, min pages > 0, discount 0-100
+7. Hệ thống tạo bản ghi mới trong page_discount_package với trạng thái active
+8. Hệ thống đóng modal và hiển thị thông báo "Package created successfully"
+9. Bảng tự động refresh, dòng mới xuất hiện
+Alternative Flow
+- Tại bước 4-5, Staff click "Cancel" hoặc "×" hoặc nhấn ESC
+- Modal đóng, không có thay đổi
+Exception Flow
+- Tại bước 6, nếu tên gói đã tồn tại
+- Hệ thống hiển thị lỗi "Package name already exists"
+- Quay lại bước 4
+
+- Tại bước 6, nếu dữ liệu không hợp lệ
+- Hệ thống hiển thị lỗi validation tương ứng
+- Quay lại bước 4
+Tiền điều kiện
+- Staff đã đăng nhập với quyền SPSO
+Hậu điều kiện
+- Bản ghi mới được tạo trong page_discount_package với trạng thái active
+- Gói giảm giá mới có thể được áp dụng cho print job
+Input
+- Tên gói (Package Name)
+- Số trang tối thiểu (Minimum Pages)
+- Phần trăm giảm giá (Discount Percentage)
+- Mô tả (Description, optional)
+Output
+- Modal đóng
+- Toast thông báo "Package created successfully"
+- Bảng Bulk Discount Packages hiển thị dòng mới
+
+
+
+3.10 Use Case NV-10-9: Thêm gói thưởng nạp tiền
+
+Mục
+Nội dung
+Usecase ID
+NV-10-9
+Tên
+Thêm gói thưởng nạp tiền (Add Deposit Bonus Package)
+Mô tả
+Staff tạo gói thưởng mới để khuyến khích sinh viên nạp tiền với số tiền lớn hơn, nhận thêm bonus credit.
+Actor
+Staff (SPSO)
+Trigger
+Staff click nút "Add Bonus Package" ở header của bảng Deposit Bonus Packages
+Quy định nghiệp vụ
+- Mã gói phải unique, chữ hoa, alphanumeric
+- Tên gói không được trùng với gói khác
+- Số tiền nạp tối thiểu phải > 0
+- Phần trăm thưởng phải ≥ 0 và ≤ 100
+- Có thể đánh dấu là Event Package (gói khuyến mãi tạm thời)
+- Gói mới được tạo với trạng thái active
+Main Flow
+1. Staff click nút "Add Bonus Package"
+2. Hệ thống hiển thị modal "Add Deposit Bonus Package"
+3. Modal hiển thị: input "Package Code", input "Package Name", input "Minimum Deposit Amount", input "Bonus Percentage", textarea "Description" (optional), checkbox "Event Package"
+4. Staff nhập thông tin gói
+5. Staff chọn/bỏ chọn "Event Package" nếu cần
+6. Staff click "Create"
+7. Hệ thống validate: code unique và uppercase, tên unique, min deposit > 0, bonus 0-100
+8. Hệ thống tạo bản ghi mới trong deposit_bonus_package với trạng thái active
+9. Hệ thống đóng modal và hiển thị thông báo "Package created successfully"
+10. Bảng tự động refresh, dòng mới xuất hiện với badge Type (Standard/Event)
+Alternative Flow
+- Tại bước 4-6, Staff click "Cancel" hoặc "×" hoặc nhấn ESC
+- Modal đóng, không có thay đổi
+Exception Flow
+- Tại bước 7, nếu mã gói đã tồn tại hoặc không uppercase
+- Hệ thống hiển thị lỗi "Package code already exists" hoặc "Code must be uppercase"
+- Quay lại bước 4
+
+- Tại bước 7, nếu tên gói đã tồn tại
+- Hệ thống hiển thị lỗi "Package name already exists"
+- Quay lại bước 4
+
+- Tại bước 7, nếu dữ liệu không hợp lệ
+- Hệ thống hiển thị lỗi validation tương ứng
+- Quay lại bước 4
+Tiền điều kiện
+- Staff đã đăng nhập với quyền SPSO
+Hậu điều kiện
+- Bản ghi mới được tạo trong deposit_bonus_package với trạng thái active
+- Gói thưởng mới có thể được áp dụng cho giao dịch nạp tiền
+Input
+- Mã gói (Package Code)
+- Tên gói (Package Name)
+- Số tiền nạp tối thiểu (Minimum Deposit Amount)
+- Phần trăm thưởng (Bonus Percentage)
+- Mô tả (Description, optional)
+- Loại gói (Event Package checkbox)
+Output
+- Modal đóng
+- Toast thông báo "Package created successfully"
+- Bảng Deposit Bonus Packages hiển thị dòng mới với badge Type
+
+
+
+3.11 Use Case NV-10-10: Bật/Tắt trạng thái gói
+
+Mục
+Nội dung
+Usecase ID
+NV-10-10
+Tên
+Bật/Tắt trạng thái gói (Toggle Package Status)
+Mô tả
+Staff bật hoặc tắt trạng thái active của gói giảm giá số lượng hoặc gói thưởng nạp tiền để kiểm soát việc áp dụng gói cho giao dịch mới.
+Actor
+Staff (SPSO)
+Trigger
+Staff click vào toggle switch ở một dòng trong bảng Bulk Discount Packages hoặc Deposit Bonus Packages
+Quy định nghiệp vụ
+- Chỉ áp dụng cho Bulk Discount Packages và Deposit Bonus Packages
+- Không áp dụng cho Page Size Pricing và Color Mode Pricing
+- Thay đổi trạng thái is_active trong database
+- Gói bị tắt sẽ không được áp dụng cho giao dịch mới
+- Các giao dịch đã sử dụng gói trước đó không bị ảnh hưởng
+Main Flow
+1. Staff click vào toggle switch của một dòng
+2. Toggle hiển thị animation loading
+3. Hệ thống cập nhật trường is_active trong bảng tương ứng (page_discount_package hoặc deposit_bonus_package)
+4. Hệ thống cập nhật trường updated_at
+5. Toggle switch chuyển trạng thái (ON ↔ OFF)
+6. Badge "Status" trong bảng cập nhật (Active ↔ Inactive)
+7. Hệ thống hiển thị toast "Status updated"
+Alternative Flow
+- Không có alternative flow (hành động xảy ra ngay lập tức)
+Exception Flow
+- Tại bước 3, nếu có lỗi database
+- Toggle quay về trạng thái cũ
+- Hiển thị toast "Failed to update status"
+Tiền điều kiện
+- Staff đã đăng nhập với quyền SPSO
+- Gói đã tồn tại trong hệ thống
+Hậu điều kiện
+- Trạng thái is_active của gói được cập nhật
+- Badge Status thay đổi màu và text
+- Gói bị tắt sẽ không được áp dụng cho giao dịch mới
+Input
+- Package ID (từ dòng được chọn)
+- Trạng thái mới (true/false)
+Output
+- Toggle switch thay đổi trạng thái
+- Badge Status cập nhật (Active/Inactive)
+- Toast thông báo "Status updated"
+
+

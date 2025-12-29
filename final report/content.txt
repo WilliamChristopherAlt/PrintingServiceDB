@@ -1,0 +1,767 @@
+
+KHOA KỸ THUẬT & KHOA HỌC MÁY TÍNH
+
+
+ĐỒ ÁN CUỐI KỲ
+MÔN PHÁT TRIỂN, VẬN HÀNH 
+VÀ BẢO TRÌ PHẦN MỀM
+
+
+ĐỀ TÀI:
+XÂY DỰNG WEBSITE QUẢN LÝ DỊCH VỤ IN ẤN
+
+SINH VIÊN	MSSV	Lớp
+Phan Điền Mạnh Thiên	81012302885	23DPM
+Lê Anh Tuấn	81012302887	23DPM
+Lê Ngọc Đăng Khoa	81012302870	23DPM
+Nguyễn Hồng Bảo Ngọc	81012302878	23DPM
+Phan Thanh Thái Tuấn	81012302890	23DPM
+Lý Hiểu Vy	84802403561	24DPM
+
+	
+GIẢNG VIÊN: ThS. Trần Trương Tuấn Phát
+
+HK1 NĂM HỌC 2025-2026 
+ 
+ 
+PHIẾU CHẤM ĐỒ ÁN
+Sinh viên:
+	Phan Điền Mạnh Thiên 	 81012302885	 23DPM
+	Lê Anh Tuấn 	 81012302887	 23DPM
+	Lê Ngọc Đăng Khoa 	 81012302870	 23DPM
+	Nguyễn Hồng Bảo Ngọc	 81012302878	 23DPM
+	Phan Thanh Thái Tuấn 	 81012302890	 23DPM
+	Lý Hiểu Vy 	 84802403561	 24DPM
+Tên Đồ án/Tiểu luận: XÂY DỰNG WEBSITE QUẢN LÝ DỊCH VỤ IN ẤN
+Đánh giá
+TT	Tiêu chí	Thang điểm	Điểm chấm	Ghi chú
+1	Hình thức trình bày:
+- Trình bày đúng quy định hướng dẫn (font, số trang, mục lục, bảng biểu, danh mục tài liệu tham khảo …).
+- Không lỗi chính tả, lỗi đánh máy, lỗi trích dẫn tài liệu tham khảo.
+- Trình bày đẹp, văn phong sáng, không tối nghĩa.	
+1,0
+
+
+
+0,5
+
+
+
+0,5		
+2	Nội dung
+	Lời mở đầu: Trình bày tóm tắt nội dung và cấu trúc tiểu luận.	1,0		
+	Chương 1: Tổng quan đề tài (Cơ sở lý thuyết).	2,5		
+	Chương 2: Chuyên sâu, phân tích đề tài.	2,5		
+	Chương 3: Kết luận và giải pháp đề tài.	2,0		
+3	TỔNG ĐIỂM		
+Điểm chữ: ………………………………………… (Làm tròn đến 1 số thập phân)
+	Giảng viên
+
+
+	                                           Trần Trương Tuấn Phát  
+LỜI CẢM ƠN
+Chúng em xin gửi lời cảm ơn chân thành và sâu sắc đến ThS. Trần Trương Tuấn Phát – giảng viên phụ trách Đồ án cuối kỳ môn Phát triển, Vận hành và Bảo trì Phần mềm – vì sự tận tình hướng dẫn, hỗ trợ và tạo điều kiện thuận lợi để chúng em có thể hoàn thành đề tài "Xây dựng Website Quản lý Dịch vụ In ấn."
+Trong suốt quá trình học tập và thực hiện đồ án, thầy đã cung cấp cho chúng em những kiến thức nền tảng quan trọng, định hướng rõ ràng về quy trình phát triển, vận hành và bảo trì phần mềm, đồng thời đưa ra nhiều góp ý thiết thực giúp chúng em từng bước hoàn thiện sản phẩm. Nhờ sự hướng dẫn của thầy, chúng em đã hiểu rõ hơn cách áp dụng lý thuyết vào thực tiễn, từ khâu phân tích yêu cầu đến triển khai và đánh giá hệ thống.
+Những kinh nghiệm, phương pháp làm việc và lời khuyên mà thầy truyền đạt là hành trang quý báu, giúp chúng em nâng cao tư duy kỹ thuật cũng như kỹ năng làm việc nhóm, phục vụ cho quá trình học tập và phát triển chuyên môn trong tương lai.
+Mặc dù đã cố gắng hoàn thành đồ án với tinh thần nghiêm túc và cầu thị, báo cáo của chúng em chắc chắn vẫn còn những thiếu sót. Chúng em rất mong nhận được thêm những ý kiến đóng góp và sự chỉ dẫn từ thầy để có thể rút kinh nghiệm và hoàn thiện hơn trong quá trình học tập sau này.
+
+Tp. Hồ Chí Minh, ngày 28 tháng 12 năm 2025
+        Sinh viên thực hiện
+                 Tập thể nhóm LGBBQ
+ 
+MỤC LỤC
+CHƯƠNG 1:	GIỚI THIỆU VÀ THU THẬP YÊU CẦU	6
+1.1	Bối cảnh dự án	6
+1.2	Các bên liên quan và nhu cầu	7
+1.3	Lợi ích hệ thống	7
+1.4	Yêu cầu hệ thống	7
+CHƯƠNG 2:	MÔ HÌNH HÓA USE CASE	11
+2.1	Biểu đồ Use Case	11
+2.2	Đặc tả Use case	11
+CHƯƠNG 3:	MÔ HÌNH HÓA HỆ THỐNG	12
+3.1	Biểu đồ Hoạt động (Activity Diagram)	12
+3.2	Biểu đồ Tuần tự (Sequence Diagram)	12
+3.3	Biểu đồ Lớp (Class Diagram)	12
+3.4	Thiết kế giao diện người dùng (Wireframe)	12
+CHƯƠNG 4:	THIẾT KẾ KIẾN TRÚC	13
+4.1	Kiến trúc tổng thể	13
+4.2	Biểu đồ Thành phần (Component Diagram)	13
+CHƯƠNG 5:	THIẾT KẾ PHẦN MỀM	14
+5.1	Công nghệ sử dụng	14
+5.2	Sản phẩm thực tế	14
+5.3	Các luồng chức năng quan trọng	14
+CHƯƠNG 6:	KIỂM THỬ PHẦM MỀM	15
+6.1	Công cụ kiểm thử	15
+6.2	Kết quả kiểm thử	15
+CHƯƠNG 7:	TỔNG KẾT	16
+7.1	Tóm tắt kết quả dự án	16
+7.2	Bài học kinh nghiệm	16
+7.3	Hướng phát triển	16
+TÀI LIỆU THAM KHẢO	17
+
+MỤC LỤC HÌNH ẢNH
+Hình 2.1: Biểu đồ Use Case cho Sinh viên	11
+Hình 2.2: Biểu đồ Use Case cho Nhân viên (SPSO)	11
+Hình 3.1: Biểu đồ Hoạt động - In Tài Liệu	12
+Hình 3.2: Biểu đồ Hoạt động - Hủy Công Việc In	12
+Hình 3.3: Biểu đồ Hoạt động - Nạp Tiền Vào Tài Khoản	12
+Hình 3.4: Biểu đồ Tuần tự - In Tài Liệu	12
+Hình 3.5: Biểu đồ Tuần tự - Hủy Công Việc In	12
+Hình 3.6: Biểu đồ Tuần tự - Nạp Tiền Vào Tài Khoản	12
+Hình 3.7: Biểu đồ Lớp - In Tài Liệu	12
+Hình 3.8: Biểu đồ Lớp - Hủy Công Việc In	12
+Hình 3.9: Biểu đồ Lớp - Nạp Tiền Vào Tài Khoản	12
+Hình 4.1: Kiến trúc Tổng thể Hệ thống HCMSIU-SSPS	13
+Hình 4.2: Biểu đồ Thành phần - Module Quản Lý In Ấn	13
+Hình 5.1: Sơ đồ Kiến trúc Đa Lớp (N-Layer Architecture)	14
+Hình 5.2: Sơ đồ Cơ sở Dữ Liệu	14
+
+ 
+DANH SÁCH CÁC CHỮ VIẾT TẮT
+SSPS	Student Smart Printing Service - Dịch vụ In Thông minh cho Sinh viên
+HCMSIU	Ho Chi Minh City International University - Đại học Quốc tế Sài Gòn
+SPSO	Student Printing Service Officer - Cán bộ Dịch vụ In Sinh viên
+SSO	Single Sign-On - Đăng nhập Đơn
+API	Application Programming Interface - Giao diện Lập trình Ứng dụng
+REST	Representational State Transfer
+JWT	JSON Web Token
+ORM	Object-Relational Mapping
+JPA	Java Persistence API
+SQL	Structured Query Language
+UI	User Interface - Giao diện Người dùng
+UX	User Experience - Trải nghiệm Người dùng
+SSR	Server-Side Rendering
+SSG	Static Site Generation
+PWA	Progressive Web App
+CI/CD	Continuous Integration/Continuous Deployment
+UML	Unified Modeling Language
+ACID	Atomicity, Consistency, Isolation, Durability
+
+ 
+CHƯƠNG 1. GIỚI THIỆU VÀ THU THẬP YÊU CẦU
+1.1	Bối cảnh dự án
+1.1.1 Bối cảnh
+Trong thời đại công nghệ số hiện nay, ngành công nghiệp in ấn đóng vai trò thiết yếu trong đời sống hàng ngày, từ báo chí, sách vở cho đến tài liệu học tập. Với sự phát triển của công nghệ, xu hướng chuyển đổi từ in ấn truyền thống sang các phần mềm trực tuyến đang ngày càng phổ biến, cho phép người dùng đặt lệnh in tại nhà hoặc bất cứ đâu theo yêu cầu.
+Tại trường Đại học Quốc tế Sài Gòn (HCMSIU), nhu cầu in ấn tài liệu học tập của sinh viên là rất lớn. Để đáp ứng nhu cầu này một cách hiện đại và hiệu quả, nhà trường có ý định xây dựng hệ thống Dịch vụ In ấn Thông minh cho Sinh viên (HCMSIU_SSPS) để phục vụ sinh viên in tài liệu tại các cơ sở của trường.
+1.1.2 Vấn đề
+Hiện tại, việc quản lý in ấn thủ công hoặc thiếu hệ thống tập trung có thể gây khó khăn trong việc theo dõi lịch sử in ấn và quản lý tài nguyên giấy. Sinh viên cần một phương thức linh hoạt để tải tài liệu, chọn máy in và thanh toán trực tuyến thay vì phụ thuộc vào các quy trình thủ công. Hệ thống cần giải quyết việc ghi lại các hành động in ấn một cách chính xác, bao gồm ID sinh viên, máy in, và số lượng trang.
+1.1.3. Mục tiêu
+Mục tiêu chính của dự án là xây dựng hệ thống HCMSIU_SSPS nhằm:
+-	Cung cấp dịch vụ in ấn tự phục vụ cho sinh viên thông qua nền tảng Web.
+-	Cho phép sinh viên tải tài liệu, tùy chỉnh thuộc tính in và thanh toán trực tuyến thông qua hệ thống SIUPay.
+-	Hỗ trợ Cán bộ Dịch vụ In ấn (SPSO) trong việc quản lý máy in, cấu hình hệ thống và cấu hình giá in.
+1.1.4. Phạm vi
+Hệ thống HCMSIU_SSPS bao gồm các máy in được đặt xung quanh các khuôn viên trường, mỗi máy in được định danh cụ thể với vị trí (cơ sở, tòa nhà, số phòng). Hệ thống phục vụ hai đối tượng chính là Sinh viên và SPSO, tích hợp với hệ thống xác thực HCMSIU_SSO và hệ thống thanh toán SIUPay.
+ 
+1.2. Các bên liên quan và nhu cầu
+1.2.1. Sinh viên (Students)
+Đây là đối tượng sử dụng chính của hệ thống.
+-	Nhu cầu: Sinh viên cần một hệ thống cho phép họ tải tệp tài liệu lên, chọn máy in gần nhất và chỉ định các thuộc tính in ấn như kích thước giấy, số trang, in một/hai mặt. Họ cũng cần khả năng mua thêm trang in khi sử dụng hết số lượng mặc định được cấp mỗi học kỳ. Ngoài ra, sinh viên muốn xem lại lịch sử in ấn của mình để quản lý chi tiêu.
+1.2.2. Cán bộ Dịch vụ In ấn (SPSO/Admin)
+Đây là người chịu trách nhiệm quản lý vận hành hệ thống.
+-	Nhu cầu: SPSO cần các công cụ để thêm, bật hoặc tắt máy in trong hệ thống. Họ cần quyền cấu hình các tham số hệ thống như số trang mặc định cấp cho sinh viên, ngày cấp phát và định dạng tệp cho phép. Quan trọng nhất, SPSO cần xem được toàn bộ lịch sử in ấn và các báo cáo tự động về tình hình sử dụng hệ thống theo tháng hoặc năm.
+1.3. Lợi ích hệ thống 
+1.3.1. Đối với Sinh viên
+Hệ thống mang lại sự tiện lợi tối đa khi cho phép sinh viên chủ động in ấn tài liệu mọi lúc, mọi nơi thông qua ứng dụng web hoặc di động. Việc tích hợp thanh toán online giúp sinh viên dễ dàng mua thêm trang in mà không cần giao dịch tiền mặt phức tạp. Sinh viên cũng có thể quản lý hạn ngạch in ấn của mình minh bạch thông qua tính năng xem log.
+1.3.2 Đối với Nhà trường (SPSO)
+Hệ thống giúp hợp lý hóa quy trình quản lý (streamline processes) và duy trì kết nối tốt hơn với nhu cầu của sinh viên. Việc tự động hóa ghi log và tạo báo cáo giúp SPSO giảm tải công việc thủ công, dễ dàng theo dõi hiệu suất của từng máy in và hành vi in ấn của sinh viên. Hệ thống cũng giúp kiểm soát chi phí in ấn thông qua việc quản lý hạn ngạch trang in chặt chẽ.
+1.4. Yêu cầu hệ thống
+1.4.1. Yêu cầu chức năng
+Dựa trên mô tả dự án, các yêu cầu chức năng được xác định như sau:
+ 
+Bảng 1: Nhóm chức năng cho Sinh viên
+ID	Mô tả (Description)	Ghi chú (Note - Exception/Constraint)
+1.1	Sinh viên phải đăng nhập vào hệ thống thông qua dịch vụ xác thực HCMSIU_SSO.	Nếu xác thực thất bại, hệ thống từ chối truy cập.
+1.2	Sinh viên có thể tải tệp tài liệu cần in lên hệ thống.	Ngoại lệ: Hiển thị lỗi nếu định dạng tệp không được phép.
+1.3	Sinh viên có thể chọn máy in cụ thể từ danh sách các máy in đang hoạt động.	Chỉ hiển thị các máy in đang bật.
+1.4	Sinh viên có thể tùy chỉnh thuộc tính in ấn (khổ giấy, số trang, in 2 mặt, số lượng bản sao) và xem tổng chi phí dự kiến.	Hệ thống tự động tính tổng tiền dựa trên đơn giá hiện tại.
+1.5	Sinh viên chọn phương thức thanh toán cho lệnh in: (1) Số dư ví, (2) Cổng thanh toán trực tiếp, hoặc (3) Kết hợp cả hai.	Phương thức (3) chỉ hiện khi số dư ví > 0 nhưng không đủ trả toàn bộ.
+1.6	Sinh viên thực hiện xác nhận lệnh in và thanh toán.	Nếu chọn (2) hoặc (3), chuyển hướng sang cổng thanh toán. Hệ thống tự động ghi log chi tiết giao dịch tài chính và hoạt động in ấn.
+1.7	Sinh viên có thể xem số dư ví tiền hiện tại và lịch sử giao dịch (nạp tiền/trừ tiền in).	Số dư cập nhật ngay sau khi giao dịch thành công.
+1.8	Sinh viên có thể thực hiện chức năng "Nạp tiền" (Top-up) vào tài khoản ví in ấn.	Hệ thống hiển thị các gói nạp và số tiền thưởng (bonus) tương ứng nếu có.
+1.9	Sinh viên thực hiện thanh toán nạp tiền thông qua cổng thanh toán trực tuyến (ví dụ: SIUPay).	Hệ thống tự động cộng thêm tiền thưởng vào ví khi nạp tiền thỏa mãn điều kiện khuyến mãi (theo cấu hình SPSO).
+1.10	Sinh viên có thể xem lịch sử in ấn của cá nhân trong một khoảng thời gian cụ thể.	Dữ liệu gồm: Tên tệp, chi phí, phương thức thanh toán đã dùng.
+ 
+Bảng 2: Nhóm chức năng cho Quản trị viên (SPSO)
+ID	Mô tả (Description)	Ghi chú (Note - Exception/Constraint)
+2.1	SPSO phải đăng nhập vào hệ thống thông qua dịch vụ xác thực HCMSIU_SSO.	-
+2.2	SPSO có thể thêm máy in mới vào hệ thống (ID, thương hiệu, model, vị trí).	-
+2.3	SPSO có thể bật (Enable) hoặc tắt (Disable) trạng thái hoạt động của một máy in.	-
+2.4	SPSO có thể cấu hình danh sách các loại tệp được phép in.	-
+2.5	SPSO có thể thiết lập Đơn giá in (Unit Price) cho từng loại khổ giấy (A4, A3) và kiểu in (màu/trắng đen).	Thay thế cho chức năng cấp trang mặc định cũ.
+2.6	SPSO có thể cấu hình Chính sách khuyến mãi nạp tiền (Bonus Rules).	Ví dụ: Nạp > 100k tặng 10%, Nạp > 200k tặng 20%.
+2.7	SPSO có thể xem lịch sử in ấn và lịch sử giao dịch nạp tiền của sinh viên.	-
+2.8	SPSO có thể lọc lịch sử theo thời gian, máy in, hoặc sinh viên cụ thể.	-
+2.9	SPSO có thể cấu hình giá in cho từng loại kích thước giấy và chế độ màu.	-
+ 
+1.4.2. Yêu cầu phi chức năng
+Để đảm bảo hệ thống vận hành ổn định và an toàn, các yêu cầu sau cần được đáp ứng:
+1.	Tính bảo mật (Security):
+o	Mọi hoạt động đăng nhập đều phải thông qua giao thức an toàn của HCMSIU_SSO.
+o	Dữ liệu thanh toán và số dư ví phải được mã hóa và bảo vệ nghiêm ngặt.
+2.	Tính toàn vẹn dữ liệu (Data Integrity):
+o	Hệ thống phải đảm bảo tính nhất quán của giao dịch tài chính (ACID properties), đặc biệt trong kịch bản thanh toán kết hợp (Ví + Online). Không được phép xảy ra trường hợp trừ tiền nhưng không ghi nhận lệnh in.
+3.	Hiệu năng (Performance):
+o	Hệ thống phải phản hồi yêu cầu tính toán chi phí in (REQ-ST-04) dưới 1 giây.
+o	Số dư ví phải được cập nhật tức thì sau khi nạp tiền thành công.
+4.	Tính khả dụng (Availability):
+o	Hệ thống cần hoạt động liên tục 24/7 để phục vụ nhu cầu nạp tiền và in ấn bất cứ lúc nào của sinh viên.
+
+
+ 
+CHƯƠNG 2: MÔ HÌNH HÓA USE CASE
+2.1. Biểu đồ Use Case
+Hệ thống HCMSIU-SSPS được mô hình hóa với hai nhóm actor chính: Sinh viên và Nhân viên (SPSO). Mỗi nhóm có các use case riêng biệt phản ánh nhu cầu và quyền hạn của họ trong hệ thống.
+
+2.1.1. Đối tượng Sinh viên
+Sinh viên là người dùng chính của hệ thống với các use case bao gồm:
+- Đăng nhập hệ thống (qua HCMSIU_SSO)
+- Tải tài liệu lên hệ thống
+- Chọn máy in
+- Cấu hình tùy chọn in (kích thước giấy, chế độ màu, số bản, in một/hai mặt)
+- Xem giá dự kiến
+- Thanh toán (số dư ví, QR code, hoặc kết hợp)
+- Xem tiến trình in thời gian thực
+- Xem lịch sử in và giao dịch
+- Nạp tiền vào tài khoản
+- Hủy công việc in và nhận hoàn tiền
+- Xem thông tin cá nhân và số dư
+
+Hình 2.1: Biểu đồ Use Case cho Sinh viên
+
+2.1.2. Đối tượng Nhân viên (SPSO)
+Nhân viên quản trị có các use case quản lý hệ thống:
+- Đăng nhập hệ thống (qua HCMSIU_SSO)
+- Quản lý máy in (thêm, sửa, xóa, bật/tắt)
+- Quản lý cấu hình giá (giá theo kích thước giấy, hệ số màu)
+- Quản lý gói khuyến mãi nạp tiền
+- Quản lý loại file được phép
+- Cấu hình giá in (giá theo kích thước giấy, hệ số màu)
+- Xem lịch sử in của tất cả sinh viên
+- Quản lý sinh viên và tài khoản
+- Xem nhật ký hệ thống và audit logs
+- Quản lý phân bổ trang hệ thống
+
+Hình 2.2: Biểu đồ Use Case cho Nhân viên (SPSO)
+
+2.2. Đặc tả Use case
+2.2.1. Đối tượng Sinh viên
+
+Use Case UC-01: In Tài Liệu
+- Mục đích: Cho phép sinh viên in tài liệu thông qua hệ thống
+- Actor: Sinh viên
+- Precondition: Sinh viên đã đăng nhập vào hệ thống
+- Main Flow:
+  1. Sinh viên tải file tài liệu lên hệ thống
+  2. Hệ thống xác thực file và tính số trang
+  3. Sinh viên chọn máy in từ danh sách
+  4. Sinh viên cấu hình tùy chọn in (kích thước, màu, số bản, một/hai mặt)
+  5. Hệ thống tính giá và hiển thị bản xem trước
+  6. Sinh viên chọn phương thức thanh toán
+  7. Hệ thống xử lý thanh toán
+  8. Hệ thống tạo công việc in và gửi đến máy in
+  9. Hệ thống cập nhật tiến trình in thời gian thực
+  10. Sinh viên nhận thông báo khi in hoàn thành
+- Postcondition: Công việc in được tạo và thực hiện thành công
+
+Use Case UC-02: Nạp Tiền Vào Tài Khoản
+- Mục đích: Cho phép sinh viên nạp tiền vào ví in ấn
+- Actor: Sinh viên
+- Precondition: Sinh viên đã đăng nhập vào hệ thống
+- Main Flow:
+  1. Sinh viên chọn số tiền muốn nạp
+  2. Hệ thống kiểm tra gói khuyến mãi và tính tiền thưởng
+  3. Hệ thống tạo mã QR thanh toán
+  4. Sinh viên quét mã QR và thanh toán
+  5. Cổng thanh toán gửi webhook xác nhận
+  6. Hệ thống cập nhật số dư và ghi sổ cái
+  7. Sinh viên nhận thông báo nạp tiền thành công
+- Postcondition: Số dư tài khoản được cập nhật
+
+Use Case UC-03: Hủy Công Việc In
+- Mục đích: Cho phép sinh viên hủy công việc in và nhận hoàn tiền
+- Actor: Sinh viên
+- Precondition: Sinh viên có công việc in đang chờ hoặc đang in
+- Main Flow:
+  1. Sinh viên yêu cầu hủy công việc in
+  2. Hệ thống kiểm tra trạng thái công việc
+  3. Nếu đang in, hệ thống gửi lệnh dừng đến máy in
+  4. Hệ thống tính số trang đã in và số tiền hoàn lại
+  5. Hệ thống cập nhật số dư và ghi sổ cái hoàn tiền
+  6. Hệ thống cập nhật trạng thái công việc thành "đã hủy"
+  7. Sinh viên nhận thông báo hủy thành công
+- Postcondition: Công việc in bị hủy và tiền được hoàn lại
+
+2.2.2	Đối tượng Admin
+
+Use Case UC-04: Quản Lý Máy In
+- Mục đích: Cho phép SPSO quản lý máy in trong hệ thống
+- Actor: SPSO
+- Precondition: SPSO đã đăng nhập vào hệ thống
+- Main Flow:
+  1. SPSO xem danh sách máy in
+  2. SPSO thêm máy in mới hoặc cập nhật thông tin máy in
+  3. SPSO bật/tắt trạng thái hoạt động của máy in
+  4. Hệ thống cập nhật thông tin máy in
+- Postcondition: Thông tin máy in được cập nhật trong hệ thống
+
+Use Case UC-05: Cấu hình Giá In
+- Mục đích: Cho phép SPSO thiết lập và quản lý giá in cho các loại kích thước giấy và chế độ màu
+- Actor: SPSO
+- Precondition: SPSO đã đăng nhập vào hệ thống
+- Main Flow:
+  1. SPSO truy cập màn hình cấu hình giá
+  2. SPSO chọn loại cấu hình: giá theo kích thước giấy hoặc hệ số màu
+  3. SPSO nhập hoặc cập nhật giá cho từng loại (A3, A4, A5 cho kích thước; đen trắng, xám, màu cho chế độ màu)
+  4. Hệ thống xác thực và lưu cấu hình giá
+  5. SPSO có thể xem lịch sử thay đổi giá
+- Postcondition: Giá in được cập nhật và áp dụng cho các công việc in mới
+
+
+ 
+CHƯƠNG 3: MÔ HÌNH HÓA HỆ THỐNG
+3.1. Biểu đồ Hoạt động (Activity Diagram)
+Để mô hình hóa luồng công việc của hệ thống, nhóm đã xây dựng ba biểu đồ hoạt động (Activity Diagram) cho ba use case quan trọng nhất: In Tài Liệu, Hủy Công Việc In, và Nạp Tiền Vào Tài Khoản. Các biểu đồ này được vẽ bằng PlantUML.
+
+3.1.1. Biểu đồ Hoạt động - In Tài Liệu
+Biểu đồ hoạt động cho use case "In Tài Liệu" mô tả chi tiết quy trình từ khi sinh viên tải file lên hệ thống đến khi công việc in hoàn thành. Quy trình bắt đầu với hành động "Tải file tài liệu lên", hệ thống sẽ lưu file vào Supabase Storage và sử dụng thư viện PDFBox (cho file PDF) hoặc ConvertAPI kết hợp PDFBox (cho file DOCX/DOC) để đếm số trang tự động. Tiếp theo, sinh viên chọn máy in từ danh sách các máy in đang hoạt động trong hệ thống.
+
+Sau đó, sinh viên cấu hình các tùy chọn in: kích thước giấy (A3, A4, A5), chế độ màu (đen trắng, xám, màu), số bản sao, và kiểu in (một mặt hoặc hai mặt). Hệ thống tính toán chi phí theo công thức: (tổng số trang × giá cơ bản × hệ số màu) × hệ số in hai mặt × (1 - phần trăm giảm giá), trong đó hệ số in hai mặt là 0.7 nếu in hai mặt và 1.0 nếu in một mặt. Hệ thống kiểm tra các gói giảm giá khối lượng để áp dụng nếu số trang đủ điều kiện.
+
+Sinh viên chọn phương thức thanh toán: nếu chọn thanh toán bằng số dư tài khoản, hệ thống kiểm tra số dư hiện tại của sinh viên. Nếu số dư đủ, hệ thống trừ tiền từ số dư và ghi nhận giao dịch thanh toán. Nếu số dư không đủ, hệ thống yêu cầu thanh toán bổ sung qua QR code hoặc từ chối giao dịch.
+
+Sau khi thanh toán thành công, hệ thống tạo công việc in với trạng thái "đang chờ" và tạo các bản ghi để theo dõi từng trang trong công việc in. Hệ thống gửi lệnh in đến máy in vật lý thông qua PrinterController. Máy in bắt đầu in và báo cáo tiến trình về hệ thống. Hệ thống cập nhật trạng thái từng trang đã in và cập nhật trạng thái công việc từ "đang chờ" → "đang in" → "hoàn thành". Khi hoàn thành, hệ thống gửi thông báo qua WebSocket đến frontend và tạo thông báo cho sinh viên.
+
+Hình 3.1: Biểu đồ Hoạt động - In Tài Liệu
+
+3.1.2. Biểu đồ Hoạt động - Hủy Công Việc In
+Biểu đồ hoạt động cho use case "Hủy Công Việc In" mô tả quy trình hủy công việc in và hoàn tiền cho sinh viên. Quy trình bắt đầu khi sinh viên gửi yêu cầu hủy một công việc in thông qua giao diện web. Hệ thống kiểm tra trạng thái hiện tại của công việc in.
+
+Nếu công việc đã hoàn thành, hệ thống từ chối yêu cầu hủy và trả về thông báo lỗi cho sinh viên. Nếu công việc đang chờ xử lý, hệ thống hủy ngay lập tức và tính toán số tiền hoàn lại bằng toàn bộ số tiền đã thanh toán. Nếu công việc đang được in, hệ thống gửi lệnh dừng đến máy in vật lý thông qua PrinterController. Máy in dừng quá trình in và báo cáo lại số trang đã in thành công. Hệ thống đếm số trang đã in và tính số trang chưa in.
+
+Hệ thống tính số tiền hoàn lại dựa trên tỷ lệ số trang chưa in so với tổng số trang. Hệ thống tạo bản ghi hoàn tiền và cập nhật số dư tài khoản của sinh viên bằng cách ghi nhận giao dịch hoàn tiền vào sổ cái tài chính. Cuối cùng, hệ thống cập nhật trạng thái công việc thành "đã hủy" và gửi thông báo xác nhận hủy cùng với thông tin hoàn tiền cho sinh viên qua WebSocket.
+
+Hình 3.2: Biểu đồ Hoạt động - Hủy Công Việc In
+
+3.1.3. Biểu đồ Hoạt động - Nạp Tiền Vào Tài Khoản
+Biểu đồ hoạt động cho use case "Nạp Tiền Vào Tài Khoản" mô tả quy trình nạp tiền vào ví in ấn của sinh viên. Quy trình bắt đầu khi sinh viên chọn số tiền muốn nạp và phương thức thanh toán (chuyển khoản ngân hàng, ví điện tử, hoặc thẻ) trên giao diện web. Hệ thống kiểm tra các gói khuyến mãi hiện có để tìm gói phù hợp dựa trên số tiền nạp. Nếu tìm thấy gói khuyến mãi, hệ thống tính số tiền thưởng dựa trên tỷ lệ thưởng của gói.
+
+Hệ thống tạo mã giao dịch nạp tiền duy nhất và gọi API của SePay Payment Gateway để tạo mã QR thanh toán. SePay trả về mã QR code và thời gian hết hạn (mặc định 10 phút). Hệ thống tạo bản ghi giao dịch nạp tiền với trạng thái "đang chờ" và trả về mã QR cho giao diện để hiển thị cho sinh viên.
+
+Sinh viên quét mã QR và thực hiện thanh toán trên ứng dụng ngân hàng hoặc ví điện tử. SePay xử lý giao dịch và gửi webhook xác nhận về hệ thống khi thanh toán thành công. Hệ thống nhận webhook, xác thực tính hợp lệ bằng cách kiểm tra mã giao dịch, số tiền, và chữ ký xác thực. Hệ thống ghi log webhook để audit.
+
+Nếu webhook hợp lệ, hệ thống cập nhật trạng thái giao dịch nạp tiền thành "hoàn thành". Hệ thống tính tổng số tiền được cộng vào tài khoản (số tiền nạp cộng với tiền thưởng) và ghi nhận vào sổ cái tài chính: tạo bản ghi cho số tiền nạp và một bản ghi riêng cho tiền thưởng (nếu có). Hệ thống gửi thông báo xác nhận nạp tiền thành công cho sinh viên qua WebSocket, bao gồm số tiền đã nạp, tiền thưởng (nếu có), và số dư tài khoản mới.
+
+Hình 3.3: Biểu đồ Hoạt động - Nạp Tiền Vào Tài Khoản
+
+3.2. Biểu đồ Tuần tự (Sequence Diagram)
+Biểu đồ tuần tự mô tả tương tác giữa các đối tượng trong hệ thống theo thời gian, thể hiện rõ thứ tự các message được gửi và nhận giữa các component. Nhóm đã xây dựng ba biểu đồ tuần tự tương ứng với ba use case chính, được vẽ bằng PlantUML.
+
+3.2.1. Biểu đồ Tuần tự - In Tài Liệu
+Biểu đồ tuần tự cho use case "In Tài Liệu" mô tả tương tác giữa các component: StudentUI (Frontend), StudentPrintJobController (Backend API), StudentFileService, PricingService, PaymentService, PrinterController, và Database.
+
+Khi sinh viên tải file lên qua giao diện, StudentUI gửi POST request đến endpoint upload file. Controller nhận request và gọi StudentFileService để upload file lên Supabase Storage, sau đó sử dụng PageCountService để đếm số trang: với file PDF sử dụng PDFBox, với file DOCX/DOC sử dụng ConvertAPI để chuyển sang PDF rồi dùng PDFBox. StudentFileService lưu thông tin file vào database và trả về thông tin file cho StudentUI.
+
+Sinh viên chọn máy in, StudentUI gọi API để lấy danh sách máy in đang hoạt động. Controller gọi PrinterPhysicalService để lấy danh sách máy in. Sinh viên cấu hình tùy chọn in, StudentUI gửi request tính giá với các tham số: file đã upload, máy in, kích thước giấy, chế độ màu, số bản sao, kiểu in. Controller gọi PricingService để tính toán giá.
+
+PricingService truy vấn database để lấy giá cơ bản theo kích thước giấy, hệ số màu, và kiểm tra gói giảm giá phù hợp nếu số trang đủ điều kiện. PricingService tính toán giá theo công thức và trả về kết quả cho Controller. Controller trả về kết quả cho StudentUI để hiển thị bản xem trước chi phí.
+
+Nếu sinh viên chọn thanh toán bằng số dư, StudentUI gửi request tạo công việc in. Controller gọi PaymentService để xử lý thanh toán. PaymentService kiểm tra số dư tài khoản của sinh viên. Nếu số dư đủ, PaymentService trừ tiền từ số dư và ghi nhận giao dịch thanh toán. PaymentService trả về xác nhận thanh toán thành công.
+
+Nếu thanh toán thành công, Controller gọi PrintJobService để tạo công việc in với các thông tin đã tính toán và tạo các bản ghi để theo dõi từng trang trong công việc in. Controller gửi lệnh in đến PrinterController. PrinterController điều khiển máy in vật lý để bắt đầu in.
+
+Máy in báo cáo tiến trình in về PrinterController. PrinterController gửi update đến WebSocketController, WebSocketController cập nhật trạng thái từng trang đã in và broadcast message qua WebSocket đến StudentUI. StudentUI nhận message và cập nhật giao diện hiển thị tiến trình in thời gian thực. Khi in hoàn thành, Controller cập nhật trạng thái công việc thành "hoàn thành" và gửi thông báo xác nhận đến StudentUI.
+
+Hình 3.4: Biểu đồ Tuần tự - In Tài Liệu
+
+3.2.2. Biểu đồ Tuần tự - Hủy Công Việc In
+Biểu đồ tuần tự cho use case "Hủy Công Việc In" mô tả tương tác khi sinh viên yêu cầu hủy một công việc in. StudentUI gửi DELETE request đến endpoint hủy công việc in. Controller nhận request và truy vấn database để lấy thông tin công việc in, bao gồm trạng thái, tổng số trang, và tổng giá.
+
+Nếu công việc đã hoàn thành, Controller trả về lỗi từ chối hủy cho StudentUI. Nếu công việc đang chờ xử lý, Controller gọi RefundService để tính toán hoàn tiền. RefundService truy vấn thông tin thanh toán để lấy tổng số tiền đã thanh toán, tính số tiền hoàn lại bằng toàn bộ số tiền (vì chưa in trang nào), và trả về số tiền hoàn lại cho Controller.
+
+Nếu công việc đang được in, Controller gửi lệnh dừng đến PrinterController. PrinterController điều khiển máy in vật lý để dừng quá trình in. Máy in báo cáo lại số trang đã in thành công về PrinterController. PrinterController trả về thông tin số trang đã in cho Controller. Controller gọi RefundService để tính toán số tiền hoàn lại dựa trên số trang chưa in. RefundService đếm số trang đã in, tính số trang chưa in, truy vấn thông tin thanh toán để lấy tổng số tiền, tính số tiền hoàn lại theo tỷ lệ, và trả về số tiền hoàn lại cho Controller.
+
+Controller gọi RefundService để xử lý hoàn tiền. RefundService tạo bản ghi hoàn tiền, cập nhật số dư tài khoản của sinh viên bằng cách ghi nhận giao dịch hoàn tiền vào sổ cái tài chính, và cập nhật trạng thái công việc thành "đã hủy". Controller trả về xác nhận hủy thành công cùng thông tin hoàn tiền cho StudentUI. StudentUI hiển thị thông báo hủy thành công và cập nhật số dư tài khoản.
+
+Hình 3.5: Biểu đồ Tuần tự - Hủy Công Việc In
+
+3.2.3. Biểu đồ Tuần tự - Nạp Tiền Vào Tài Khoản
+Biểu đồ tuần tự cho use case "Nạp Tiền Vào Tài Khoản" mô tả tương tác giữa StudentUI, DepositController, BonusService, PaymentGateway (SePay), và Database. StudentUI gửi POST request đến endpoint nạp tiền với số tiền và phương thức thanh toán. Controller nhận request và gọi BonusService để kiểm tra các gói khuyến mãi hiện có.
+
+BonusService truy vấn database để tìm gói khuyến mãi phù hợp dựa trên số tiền nạp. Nếu tìm thấy gói, BonusService tính số tiền thưởng dựa trên tỷ lệ thưởng của gói và trả về kết quả cho Controller. Controller gọi PaymentGatewayService để tạo mã QR thanh toán với thông tin giao dịch.
+
+PaymentGatewayService gọi REST API của SePay để tạo mã QR thanh toán. SePay trả về QR code data và thời gian hết hạn. PaymentGatewayService trả về QR code cho Controller. Controller tạo bản ghi giao dịch nạp tiền với trạng thái "đang chờ" và trả về QR code cho StudentUI.
+
+StudentUI hiển thị mã QR cho sinh viên. Sinh viên quét mã QR và thực hiện thanh toán trên ứng dụng ngân hàng hoặc ví điện tử. SePay xử lý thanh toán và gửi POST webhook về hệ thống khi giao dịch thành công với payload chứa thông tin giao dịch và chữ ký xác thực. PaymentController nhận webhook và gọi PaymentWebhookService để xác thực chữ ký.
+
+PaymentWebhookService tính toán và so sánh chữ ký để xác thực tính hợp lệ của webhook. Nếu hợp lệ, Service ghi log webhook để audit và gọi DepositService để hoàn tất giao dịch nạp tiền. DepositService truy vấn database để tìm giao dịch nạp tiền tương ứng. Nếu hợp lệ, DepositService cập nhật trạng thái giao dịch thành "hoàn thành" và gọi LedgerService để ghi nhận vào sổ cái.
+
+LedgerService tạo bản ghi cho số tiền nạp và một bản ghi riêng cho tiền thưởng (nếu có) trong sổ cái tài chính. LedgerService trả về xác nhận cho DepositService. DepositService gửi thông báo qua WebSocket để broadcast message đến StudentUI với thông tin số tiền đã nạp, tiền thưởng, và số dư mới. StudentUI nhận message và cập nhật giao diện hiển thị số dư mới.
+
+Hình 3.6: Biểu đồ Tuần tự - Nạp Tiền Vào Tài Khoản
+
+3.3. Biểu đồ Lớp (Class Diagram)
+Biểu đồ lớp mô tả cấu trúc dữ liệu và mối quan hệ giữa các entity trong cơ sở dữ liệu cho từng use case. Nhóm đã xây dựng ba biểu đồ lớp tương ứng với ba use case chính, được vẽ bằng PlantUML với các ký hiệu UML chuẩn (association, composition, aggregation, inheritance).
+
+3.3.1. Biểu đồ Lớp - In Tài Liệu
+Biểu đồ lớp cho use case "In Tài Liệu" mô tả các entity chính và mối quan hệ giữa chúng trong cơ sở dữ liệu. Lớp `Student` đại diện cho thông tin sinh viên, có quan hệ one-to-many với lớp `PrintJob` (một sinh viên có thể có nhiều công việc in). Lớp `UploadedFile` lưu trữ thông tin file tài liệu mà sinh viên đã tải lên, có quan hệ many-to-one với `Student` và one-to-many với `PrintJob` (một file có thể được sử dụng cho nhiều công việc in).
+
+Các lớp định giá được tổ chức độc lập: `PageSizePrice` chứa giá cơ bản cho mỗi kích thước giấy (A3, A4, A5), có quan hệ one-to-many với `PrintJob`. `ColorModePrice` chứa hệ số nhân giá cho từng chế độ màu (đen trắng, xám, màu), có quan hệ one-to-many với `PrintJob`. `PageDiscountPackage` chứa thông tin về các gói giảm giá khối lượng dựa trên số trang, có quan hệ one-to-many với `PrintJob` (optional, chỉ khi đủ điều kiện).
+
+Lớp `PrinterPhysical` đại diện cho máy in vật lý trong hệ thống, có quan hệ one-to-many với `PrintJob` (một máy in có thể thực hiện nhiều công việc in). Lớp `PrintJob` là trung tâm của use case, lưu trữ thông tin về một công việc in cụ thể với các thuộc tính: tổng số trang, giá trước giảm, phần trăm giảm giá, số tiền giảm giá, tổng giá, trạng thái in (đang chờ, đang in, hoàn thành, thất bại, đã hủy, chờ thanh toán), hướng trang, kiểu in, số bản sao, và các tham chiếu đến các lớp định giá, file đã upload, và máy in.
+
+`PrintJob` có quan hệ composition (one-to-many) với `PrintJobPage`, mỗi `PrintJobPage` đại diện cho một trang cụ thể trong công việc in với các thuộc tính: số trang, trạng thái đã in, và thời gian in. `PrintJob` có quan hệ one-to-one với `Payment`, `Payment` lưu trữ thông tin thanh toán với các thuộc tính: số tiền thanh toán trực tiếp, số tiền thanh toán từ số dư, tổng số tiền, phương thức thanh toán, trạng thái thanh toán, và mã thanh toán. `PrintJob` có quan hệ one-to-one (optional) với `RefundPrintJob` nếu công việc bị hủy, `RefundPrintJob` lưu trữ số trang chưa in để tính toán số tiền hoàn lại.
+
+Hình 3.7: Biểu đồ Lớp - In Tài Liệu
+
+3.3.2. Biểu đồ Lớp - Hủy Công Việc In
+Biểu đồ lớp cho use case "Hủy Công Việc In" tập trung vào các entity liên quan trực tiếp đến quy trình hủy và hoàn tiền. Lớp `Student` có quan hệ one-to-many với `PrintJob`, mỗi sinh viên có thể có nhiều công việc in. Lớp `PrinterPhysical` có quan hệ one-to-many với `PrintJob`, mỗi máy in có thể thực hiện nhiều công việc in.
+
+Lớp `PrintJob` là trung tâm, lưu trữ thông tin về công việc in bao gồm trạng thái (đang chờ, đang in, hoàn thành, thất bại, đã hủy), thời gian bắt đầu, thời gian kết thúc, tổng số trang, và tổng giá. `PrintJob` có quan hệ composition với `PrintJobPage`, mỗi `PrintJobPage` có thuộc tính để xác định trang đã được in hay chưa và thời gian in nếu đã in. Hệ thống sử dụng các bản ghi `PrintJobPage` để đếm số trang đã in khi tính toán hoàn tiền.
+
+Lớp `Payment` lưu trữ thông tin về thanh toán ban đầu của công việc in, có quan hệ one-to-one với `PrintJob`. `Payment` có các thuộc tính: số tiền trả từ số dư, số tiền thanh toán trực tiếp qua QR, và tổng số tiền đã thanh toán. Lớp `RefundPrintJob` được tạo khi công việc in bị hủy, có quan hệ one-to-one với `PrintJob`, lưu trữ số trang chưa in để tính toán số tiền hoàn lại. Hệ thống sử dụng công thức tính số tiền hoàn lại dựa trên tỷ lệ số trang chưa in so với tổng số trang.
+
+Lớp `StudentWalletLedger` là sổ cái tài chính trung tâm, có quan hệ many-to-one với `Student`. Khi hủy công việc in, hệ thống tạo một bản ghi trong `StudentWalletLedger` để ghi nhận giao dịch hoàn tiền với số tiền hoàn lại, hướng giao dịch là "vào", và loại nguồn là "hoàn tiền". Mối quan hệ giữa các lớp cho thấy: một sinh viên có thể có nhiều công việc in, một máy in có thể thực hiện nhiều công việc in, mỗi công việc in có một thanh toán, và mỗi công việc in có thể có một hoàn tiền nếu bị hủy.
+
+Hình 3.8: Biểu đồ Lớp - Hủy Công Việc In
+
+3.3.3. Biểu đồ Lớp - Nạp Tiền Vào Tài Khoản
+Biểu đồ lớp cho use case "Nạp Tiền Vào Tài Khoản" mô tả cấu trúc dữ liệu để quản lý các giao dịch nạp tiền và ghi nhận vào sổ cái tài chính. Lớp `Student` có quan hệ one-to-many với `Deposit`, mỗi sinh viên có thể thực hiện nhiều giao dịch nạp tiền. Lớp `DepositBonusPackage` lưu trữ thông tin về các gói khuyến mãi nạp tiền với các thuộc tính: số tiền nạp tối thiểu, tỷ lệ thưởng, trạng thái hoạt động, và loại gói (thường hoặc sự kiện). `DepositBonusPackage` có quan hệ one-to-many với `Deposit`.
+
+Lớp `Deposit` là trung tâm của use case, lưu trữ thông tin về một giao dịch nạp tiền cụ thể với các thuộc tính: số tiền nạp, số tiền thưởng (nếu có), tổng số tiền được cộng vào tài khoản, phương thức thanh toán, mã giao dịch, trạng thái giao dịch (đang chờ, hoàn thành, thất bại, hết hạn), thời gian tạo, và thời gian hoàn thành. `Deposit` có quan hệ many-to-one với `DepositBonusPackage` nếu giao dịch đủ điều kiện nhận khuyến mãi.
+
+Mỗi `Deposit` tạo ra một hoặc nhiều bản ghi trong `StudentWalletLedger`, đây là sổ cái tài chính trung tâm ghi nhận tất cả các giao dịch tài chính trong hệ thống. `StudentWalletLedger` có quan hệ many-to-one với `Student`. `StudentWalletLedger` lưu trữ các thuộc tính: số tiền (dương cho giao dịch vào, âm cho giao dịch ra), hướng giao dịch (vào hoặc ra), loại nguồn giao dịch (nạp tiền, bonus học kỳ, thanh toán, hoàn tiền), tham chiếu đến bản ghi nguồn, mô tả, và thời gian tạo.
+
+Khi một giao dịch nạp tiền hoàn thành, hệ thống tạo ít nhất một bản ghi trong `StudentWalletLedger`: một cho số tiền nạp và một bản ghi riêng cho tiền thưởng (nếu có). Mối quan hệ giữa các lớp cho thấy: một sinh viên có thể thực hiện nhiều giao dịch nạp tiền, một gói khuyến mãi có thể áp dụng cho nhiều giao dịch nạp tiền, và mỗi giao dịch nạp tiền tạo ra ít nhất một bản ghi sổ cái (một cho số tiền nạp và có thể thêm một cho tiền thưởng).
+
+Hình 3.9: Biểu đồ Lớp - Nạp Tiền Vào Tài Khoản
+
+3.4. Thiết kế giao diện người dùng (Wireframe)
+Nhóm đã thiết kế và triển khai các màn hình giao diện người dùng cho cả sinh viên và nhân viên quản trị. Các màn hình được thiết kế dưới dạng HTML/CSS/JavaScript với cấu trúc mỗi màn hình có tài liệu mô tả chi tiết chức năng.
+
+3.4.1. Giao diện Sinh viên
+Giao diện sinh viên bao gồm các màn hình sau:
+SV-3: Màn hình nạp tiền vào tài khoản, cho phép sinh viên chọn số tiền muốn nạp, xem các gói khuyến mãi hiện có, tạo mã QR thanh toán, và theo dõi trạng thái giao dịch nạp tiền. Màn hình hiển thị số dư tài khoản hiện tại và lịch sử nạp tiền gần đây.
+
+SV-4: Màn hình in tài liệu, cho phép sinh viên tải file tài liệu lên hệ thống, chọn máy in, cấu hình các tùy chọn in như kích thước giấy, chế độ màu, số bản sao, kiểu in một mặt hoặc hai mặt, xem giá dự kiến, và thực hiện thanh toán. Màn hình hiển thị tiến trình in thời gian thực và thông báo khi hoàn thành.
+
+SV-5: Màn hình lịch sử công việc in, cho phép sinh viên xem danh sách tất cả các công việc in đã thực hiện trong quá khứ, bao gồm thông tin chi tiết như thời gian in, máy in sử dụng, số trang, tổng giá, trạng thái công việc. Sinh viên có thể lọc và sắp xếp lịch sử theo các tiêu chí khác nhau, xem chi tiết từng công việc in, và hủy các công việc in đang chờ xử lý hoặc đang in.
+
+3.4.2. Giao diện Nhân viên (SPSO)
+Giao diện nhân viên bao gồm các màn hình sau:
+NV-5: Màn hình nhật ký máy in và kiểm tra hệ thống, cho phép nhân viên xem nhật ký hoạt động của các máy in, bao gồm các sự kiện như bật tắt máy in, lỗi kỹ thuật, bảo trì, và các thao tác quản trị. Màn hình cung cấp các công cụ lọc và tìm kiếm để theo dõi các sự kiện cụ thể, xuất báo cáo nhật ký, và quản lý các cảnh báo hệ thống.
+
+NV-8: Màn hình quản lý cấu hình giá, cho phép nhân viên thiết lập giá theo kích thước giấy và hệ số màu, quản lý các gói giảm giá khối lượng dựa trên số trang. Màn hình cho phép nhân viên tạo, sửa, xóa các cấu hình giá và xem lịch sử thay đổi giá.
+
+NV-9: Màn hình quản lý gói khuyến mãi nạp tiền, cho phép nhân viên tạo, sửa, xóa các gói khuyến mãi với điều kiện số tiền nạp tối thiểu và tỷ lệ thưởng. Màn hình cho phép nhân viên kích hoạt hoặc vô hiệu hóa các gói khuyến mãi, thiết lập thời gian áp dụng, và xem thống kê hiệu quả của các gói khuyến mãi.
+
+NV-10: Màn hình quản lý giá, cho phép nhân viên xem và quản lý tất cả các cấu hình giá trong hệ thống, bao gồm giá theo kích thước giấy, hệ số màu, và các gói giảm giá. Màn hình cung cấp giao diện thống nhất để quản lý toàn bộ cấu hình định giá của hệ thống.
+
+NV-11: Màn hình quản lý phân bổ trang hệ thống, cho phép nhân viên xem tổng số trang hiện có theo từng kích thước giấy, xem lịch sử phân bổ trang, và thực hiện các thao tác tạo, sửa, xóa các bản ghi phân bổ trang. Màn hình hiển thị thống kê tổng quan về số lượng trang hiện có và lịch sử thay đổi.
+
+Tất cả các màn hình đều được thiết kế responsive, hỗ trợ đa ngôn ngữ (Tiếng Việt/Tiếng Anh) thông qua next-intl, và có theme tối/sáng. Các màn hình sử dụng Tailwind CSS cho styling và được tích hợp với backend API thông qua TanStack Query để quản lý data fetching và caching.
+
+
+ 
+CHƯƠNG 4: THIẾT KẾ KIẾN TRÚC
+4.1. Kiến trúc tổng thể
+Hệ thống HCMSIU-SSPS được thiết kế theo kiến trúc phân tầng (Layered Architecture) với bốn tầng chính: Presentation Layer (Tầng Giao Diện), API Gateway Layer (Tầng Cổng API), Business Logic Layer (Tầng Logic Nghiệp Vụ), và Data Access Layer (Tầng Truy Cập Dữ Liệu). Kiến trúc này được mô hình hóa bằng biểu đồ kiến trúc tổng thể, được vẽ bằng PlantUML.
+
+4.1.1. Chiến lược thiết kế
+Kiến trúc phân tầng được chọn dựa trên các nguyên tắc: tách biệt rõ ràng các mối quan tâm (separation of concerns), cho phép phát triển song song các tầng bởi các thành viên nhóm khác nhau, dễ dàng bảo trì và mở rộng từng tầng độc lập, và tăng tính testability của hệ thống. Mỗi tầng chỉ giao tiếp với tầng liền kề thông qua các interface được định nghĩa rõ ràng, đảm bảo tính modular và giảm thiểu coupling giữa các tầng.
+
+4.1.2. Giao diện
+Tầng Presentation được triển khai bằng Next.js 14 với App Router, sử dụng React 18 và TypeScript ở chế độ strict mode. Giao diện được tổ chức để hỗ trợ đa ngôn ngữ, với hai nhánh chính cho giao diện sinh viên và giao diện nhân viên quản trị. Mỗi nhánh chứa các route tương ứng với các chức năng: dashboard, print, history, recharge, profile cho sinh viên; dashboard, manage-printers, manage-students, reports, configuration, page-allocation cho nhân viên.
+
+Hệ thống sử dụng Tailwind CSS cho styling, đảm bảo giao diện responsive với breakpoints: sm (640px), md (768px), lg (1024px), xl (1280px). State management được xử lý bằng hai công cụ: Zustand cho global state như authentication, theme, dock position; TanStack Query (React Query) cho server state management, tự động quản lý cache, refetch, và synchronization với backend.
+
+WebSocket được tích hợp thông qua thư viện `@stomp/stompjs` và `sockjs-client`, với các WebSocket controllers được định nghĩa trong backend: `PrintJobProgressWebSocketController`, `PrintJobPaymentWebSocketController`, `DepositWebSocketController`, và `StudentNotificationWebSocketController`. Frontend kết nối đến các endpoint WebSocket thông qua STOMP protocol và subscribe vào các topic tương ứng để nhận real-time updates.
+
+Giao diện hỗ trợ đa ngôn ngữ thông qua next-intl với các file translation cho tiếng Việt và tiếng Anh. Form validation được thực hiện bằng React Hook Form kết hợp với Zod schema validation, đảm bảo dữ liệu đầu vào hợp lệ trước khi gửi đến backend.
+
+4.1.3. Lưu trữ dữ liệu
+Hệ thống sử dụng Azure SQL Server làm cơ sở dữ liệu quan hệ chính với tổng cộng 35 bảng chính. Dữ liệu được tổ chức theo mô hình quan hệ chuẩn hóa (3NF) với các bảng được liên kết thông qua foreign keys để đảm bảo tính toàn vẹn dữ liệu (referential integrity). Các bảng chính bao gồm: quản lý người dùng, cơ cấu học thuật, quản lý máy in, quản lý in ấn, quản lý tài chính, cấu hình giá, và hệ thống.
+
+Hệ thống sử dụng Spring Data JPA với Hibernate làm ORM framework, các entity classes được định nghĩa với tổng cộng 40+ entity classes. Mỗi entity class được ánh xạ với một bảng trong database thông qua các annotation JPA: `@Entity`, `@Table`, `@Id`, `@Column`, `@ManyToOne`, `@OneToMany`, `@OneToOne`. JPA Repository pattern được sử dụng với các interface repository kế thừa từ `JpaRepository<T, ID>` hoặc `PagingAndSortingRepository<T, ID>`, tổng cộng có 34 repository classes.
+
+Để tối ưu hiệu suất, hệ thống sử dụng database indexing trên các cột thường xuyên được truy vấn. Các index bao gồm: index trên foreign keys, index trên các cột tìm kiếm, composite index cho các query phức tạp để tối ưu hiệu suất truy vấn. Connection pooling được cấu hình thông qua HikariCP với các tham số tối ưu cho production.
+
+File uploads (tài liệu cần in) được lưu trữ trên Supabase Storage thay vì database để tối ưu hiệu suất và chi phí. Supabase Storage được tích hợp thông qua Supabase Java Client trong class SupabaseStorageService. File được upload lên bucket trên Supabase, URL của file được lưu trong database. Supabase Storage cung cấp CDN distribution tự động và khả năng scale tốt, đồng thời hỗ trợ signed URL để truy cập file an toàn.
+
+4.1.4. Quản lý API
+Hệ thống quản lý truy cập đến các dịch vụ bên ngoài thông qua một lớp abstraction và integration pattern để đảm bảo tính linh hoạt và dễ bảo trì. Payment Gateway (SePay) được tích hợp thông qua REST API và webhook mechanism. Khi sinh viên yêu cầu nạp tiền, hệ thống gọi API của SePay để tạo mã QR thanh toán với các thông tin: số tiền, mô tả, URL trả về, và URL webhook của hệ thống. SePay trả về QR code data và mã giao dịch. Khi thanh toán thành công, SePay gửi POST webhook đến endpoint webhook của hệ thống với payload chứa mã giao dịch, số tiền, trạng thái, và chữ ký xác thực (HMAC-SHA256). Webhook được xác thực trong class PaymentWebhookService bằng cách tính toán HMAC-SHA256 của payload với secret key và so sánh với chữ ký. Mọi webhook đều được ghi log vào database để audit và xử lý lỗi nếu có.
+
+Supabase Storage được tích hợp thông qua Supabase Java Client trong class `SupabaseStorageService`, sử dụng thư viện `io.supabase` để upload và download files. Service này có các phương thức: `uploadFile(InputStream fileStream, String fileName, String contentType)` trả về URL của file đã upload, `downloadFile(String fileUrl)` trả về InputStream của file, và `deleteFile(String fileUrl)` để xóa file. Service có retry mechanism với exponential backoff để xử lý các lỗi network tạm thời.
+
+Email service sử dụng Gmail SMTP thông qua Spring Mail với cấu hình SMTP host, port, authentication, và TLS. Email được gửi thông qua class EmailServiceImpl với các phương thức gửi email reset mật khẩu, xác nhận nạp tiền, và thông báo hoàn thành công việc in.
+
+Printer hardware được điều khiển thông qua Printer Controller component, component này giao tiếp với máy in vật lý thông qua network protocol (IPP - Internet Printing Protocol hoặc SNMP - Simple Network Management Protocol tùy theo loại máy in). Printer Controller được triển khai như một service riêng biệt, có thể chạy trên cùng server với backend hoặc trên server riêng, giao tiếp với backend thông qua REST API hoặc message queue.
+
+Tất cả các API endpoints đều yêu cầu JWT authentication trừ các endpoint công khai như login, register, và forgot-password. JWT authentication được xử lý bởi JwtAuthenticationFilter, filter này intercept mọi request đến API, extract JWT token từ header Authorization, validate token bằng JwtTokenProvider, và load user details từ database thông qua UserDetailsServiceImpl. Nếu token hợp lệ, filter set authentication vào SecurityContext. CORS được cấu hình để chỉ cho phép frontend domain truy cập API.
+
+Hình 4.1: Kiến trúc Tổng thể Hệ thống HCMSIU-SSPS
+
+4.2. Biểu đồ Thành phần (Component Diagram)
+Biểu đồ thành phần mô tả cấu trúc module quản lý in ấn với các component và interface của chúng, được vẽ bằng PlantUML với các ký hiệu UML chuẩn: provided interfaces (lollipop notation), required interfaces (socket notation), ports, và assemblies.
+
+Kiến trúc được tổ chức thành bốn tầng: Frontend Layer, API Gateway Layer, Business Logic Layer, và Infrastructure Layer. Tầng Frontend chứa Web UI component, component này có provided interface `UserInterface` để hiển thị giao diện người dùng và required interface `RESTAPI` để gọi backend API và `WebSocketAPI` để nhận real-time updates. Web UI gửi các yêu cầu HTTP đến Backend API component ở tầng API Gateway thông qua interface `RESTAPI`.
+
+Tầng API Gateway chứa Backend API component, component này đóng vai trò là điểm vào duy nhất với provided interface `RESTAPI` và `WebSocketAPI`, và required interface `BusinessService` để gọi các service trong tầng Business Logic. Backend API xử lý xác thực (JWT), định tuyến yêu cầu, validation request/response thông qua DTO classes, và quản lý WebSocket connections.
+
+Tầng Business Logic bao gồm các service components: Print Service (quản lý công việc in, có required interface PricingService, PaymentService, PrinterController, và Database), Pricing Service (tính toán giá, có required interface Database), Payment Service (xử lý thanh toán, có required interface LedgerService và Database), Refund Service (xử lý hoàn tiền, có required interface LedgerService và Database), Deposit Service (xử lý nạp tiền, có required interface BonusService, PaymentGateway, LedgerService, và Database), Bonus Service (tính toán tiền thưởng, có required interface Database), và Ledger Service (quản lý sổ cái tài chính, có required interface Database). Các service này được triển khai với tổng cộng 60+ service classes.
+
+Tầng Infrastructure bao gồm Printer Controller component (điều khiển máy in vật lý, có provided interface `PrinterControl`), Payment Gateway component (kết nối với cổng thanh toán bên thứ ba SePay, có provided interface `PaymentProcessing`), và Database component (lưu trữ tất cả dữ liệu, có provided interface `DataAccess`). Tất cả các service trong tầng Business Logic đều truy cập Database component thông qua interface `DataAccess` được triển khai bởi JPA Repository classes.
+
+Kiến trúc này cho phép tách biệt các mối quan tâm, dễ dàng bảo trì và mở rộng từng thành phần độc lập. Ví dụ, nếu cần thay đổi cách tính giá, chỉ cần sửa Pricing Service mà không ảnh hưởng đến các service khác. Tương tự, nếu cần thay đổi payment gateway từ SePay sang một provider khác, chỉ cần thay đổi implementation của Payment Gateway component mà không ảnh hưởng đến Deposit Service.
+
+Hình 4.2: Biểu đồ Thành phần - Module Quản Lý In Ấn
+
+
+ 
+CHƯƠNG 5: THIẾT KẾ PHẦN MỀM
+5.1. Công nghệ sử dụng
+5.1.1. Công cụ phát triển
+Nhóm sử dụng Visual Studio Code làm IDE chính cho frontend development với các extensions: ESLint, Prettier, Tailwind CSS IntelliSense, và TypeScript. IntelliJ IDEA Ultimate được sử dụng cho backend development với các plugins: Spring Boot, Lombok, và Database Navigator. Version control được quản lý bằng Git với remote repository trên GitHub, sử dụng Git Flow workflow với các nhánh main (production), develop (development), và feature branches. Project management được thực hiện trên Trello với các board riêng cho frontend, backend, và database tasks. CI/CD được thiết lập bằng GitHub Actions với các workflow: build và test cho mỗi pull request, deploy tự động lên Heroku khi merge vào main. Code quality được đảm bảo bằng SonarQube, ESLint cho TypeScript/JavaScript, và Prettier cho code formatting. Pre-commit hooks được thiết lập bằng Husky và lint-staged để tự động chạy ESLint và Prettier trước khi commit.
+
+5.1.2. Cơ sở dữ liệu
+Hệ thống sử dụng Azure SQL Server làm cơ sở dữ liệu quan hệ chính, connection string được cấu hình với format JDBC cho SQL Server. ORM được thực hiện bằng Spring Data JPA với Hibernate, cấu hình không tự động tạo schema, tắt log SQL trong production, và sử dụng SQL Server dialect. Connection pooling được quản lý bởi HikariCP với các tham số tối ưu cho production. File storage được thực hiện bằng Supabase Storage với Java Client SDK, cấu hình trong class SupabaseConfig với các tham số URL, key, và bucket name.
+
+5.1.3. Frontend
+Frontend được xây dựng bằng Next.js 14 với App Router (thay vì Pages Router). TypeScript được sử dụng ở chế độ strict mode với các tùy chọn strict, noImplicitAny, và strictNullChecks. React 18 được sử dụng với các tính năng mới như Server Components và Suspense. Styling được thực hiện bằng Tailwind CSS với custom color palette và spacing scale. State management được chia thành hai phần: Zustand cho client-side state như authentication, theme, dock position; TanStack Query (React Query) cho server state với staleTime 5 phút và cacheTime 10 phút. Form handling được thực hiện bằng React Hook Form với Zod schema validation. Đa ngôn ngữ được hỗ trợ bằng next-intl với các file translation cho tiếng Việt và tiếng Anh. WebSocket được tích hợp bằng @stomp/stompjs và sockjs-client, kết nối đến backend WebSocket endpoint qua STOMP protocol. 3D graphics được render bằng Three.js cho hiển thị máy in 3D, charts được vẽ bằng Recharts cho dashboard và báo cáo.
+
+5.1.4. Backend
+Backend được xây dựng bằng Spring Boot 3.3.6, sử dụng Java 17 (LTS). Security được thực hiện bằng Spring Security với JWT authentication, cấu hình trong SecurityConfig với các filter: JwtAuthenticationFilter (xử lý JWT token), JwtAuthenticationEntryPoint (xử lý lỗi authentication). JWT token được tạo và validate bởi JwtTokenProvider với secret key và expiration time: access token 15 phút, refresh token 7 ngày. API documentation được tự động generate bằng OpenAPI/Swagger, truy cập tại swagger-ui.html. WebSocket được triển khai bằng Spring WebSocket với STOMP protocol, cấu hình trong WebSocketConfig với các endpoint cho print job progress, payment, deposit, và notifications. Email được gửi bằng Spring Mail với Gmail SMTP. Scheduling được thực hiện bằng Spring Scheduler với các job: ReportScheduler (tạo báo cáo hàng tháng), SemesterBonusScheduler (phát bonus học kỳ), PrintJobProgressUpdater (cập nhật tiến trình in), PrintJobQueueProcessor (xử lý hàng đợi in), DepositExpirationScheduler (xử lý giao dịch nạp tiền hết hạn). Build tool là Maven, sử dụng Spring Boot Maven Plugin để build và package ứng dụng thành JAR file.
+
+5.1.5. Các dịch vụ bên ngoài
+Authentication được tích hợp với HCMSIU SSO thông qua JWT token, backend validate token từ SSO service và tạo internal JWT token cho ứng dụng. Payment Gateway SePay được tích hợp qua REST API để tạo QR code thanh toán và webhook để nhận xác nhận thanh toán, endpoint được cấu hình với URL, API key, và webhook secret. Supabase Storage được sử dụng để lưu trữ file tài liệu, tích hợp qua Supabase Java Client SDK. Email service sử dụng Gmail SMTP.
+
+5.2. Kiến trúc đa lớp (N-Layer Architecture)
+Hệ thống được tổ chức theo kiến trúc đa lớp (N-Layer Architecture) với năm tầng chính:
+
+1. **Presentation Layer**: Next.js frontend application, tổ chức theo App Router với hỗ trợ đa ngôn ngữ, sử dụng Server Components và Client Components, tích hợp với backend qua REST API và WebSocket.
+
+2. **API Gateway Layer**: Spring Boot REST API, đóng vai trò là điểm vào duy nhất với Spring Security để xử lý authentication và authorization, định tuyến request đến các controller tương ứng, validation request/response thông qua DTO classes, và quản lý WebSocket connections.
+
+3. **Business Logic Layer**: Các service classes xử lý logic nghiệp vụ như tính giá, xử lý thanh toán, quản lý công việc in, với tổng cộng 60+ service classes được tổ chức theo domain: StudentPrintJobService, PaymentService, DepositService, PricingService, RefundService, LedgerService, v.v.
+
+4. **Data Access Layer**: JPA Repository pattern, các interface repository kế thừa từ JpaRepository hoặc PagingAndSortingRepository, với tổng cộng 34 repository classes, hỗ trợ custom queries bằng @Query annotation hoặc method naming convention.
+
+5. **Infrastructure Layer**: Database (Azure SQL Server), External Services (Supabase Storage, SePay Payment Gateway, Gmail SMTP), và Printer Controller (điều khiển máy in vật lý).
+
+Hình 5.1: Sơ đồ Kiến trúc Đa Lớp (N-Layer Architecture)
+
+5.3. Sản phẩm thực tế
+5.3.1. Cơ sở dữ liệu
+Hệ thống có cơ sở dữ liệu với 35 bảng chính. Các bảng được tổ chức theo các module:
+
+- **Quản lý người dùng** (3 bảng): `user` (thông tin chung), `student` (thông tin sinh viên, FK đến `user` và `class`), `staff` (thông tin nhân viên, FK đến `user`).
+
+- **Cơ cấu học thuật** (6 bảng): `faculty` (khoa), `department` (bộ môn, FK đến `faculty`), `major` (ngành học, FK đến `department`), `class` (lớp học, FK đến `major` và `academic_year`), `semester` (học kỳ, FK đến `academic_year`), `academic_year` (năm học).
+
+- **Quản lý máy in** (6 bảng): `printer_physical` (máy in vật lý, FK đến `printer_model` và `room`), `printer_model` (model máy in, FK đến `brand` và `page_size`), `brand` (hãng máy in), `room` (phòng, FK đến `floor`), `floor` (tầng, FK đến `building`), `building` (tòa nhà).
+
+- **Quản lý in ấn** (3 bảng): `print_job` (công việc in, FK đến `student`, `printer_physical`, `uploaded_file`, `page_size_price`, `color_mode_price`, `page_discount_package`), `print_job_page` (từng trang trong công việc in, FK đến `print_job`), `uploaded_file` (file tài liệu đã upload, FK đến `student`).
+
+- **Quản lý tài chính** (5 bảng): `payment` (thanh toán, FK đến `print_job` và `student`), `deposit` (nạp tiền, FK đến `student` và `deposit_bonus_package`), `student_wallet_ledger` (sổ cái tài chính, FK đến `student`), `refund_print_job` (hoàn tiền, FK đến `print_job`), `deposit_bonus_package` (gói khuyến mãi nạp tiền).
+
+- **Cấu hình giá** (3 bảng): `page_size_price` (giá theo kích thước giấy, FK đến `page_size`), `color_mode_price` (hệ số màu, FK đến `color_mode`), `page_discount_package` (gói giảm giá khối lượng).
+
+- **Quản lý kho** (3 bảng): `system_page_allocation` (phân bổ trang hệ thống, FK đến `page_size`), `paper_purchase_item` (chi tiết mua giấy, FK đến `supplier_paper_purchase` và `page_size`), `supplier_paper_purchase` (đơn mua giấy từ nhà cung cấp).
+
+- **Hệ thống** (6 bảng): `system_configuration` (cấu hình hệ thống), `system_audit_log` (nhật ký audit), `notification` (thông báo, FK đến `student` hoặc `staff`), `permitted_file_type` (loại file được phép), `semester_bonus` (bonus học kỳ, FK đến `semester`), `student_semester_bonus` (bonus học kỳ của sinh viên, FK đến `student` và `semester_bonus`).
+
+Tổng cộng có 80+ indexes được tạo để tối ưu hiệu suất query, bao gồm: index trên foreign keys, index trên các cột tìm kiếm (email, student_code), composite index cho các query phức tạp (ví dụ: `idx_print_job_printer_status_created`).
+
+Hình 5.2: Sơ đồ Cơ sở Dữ Liệu
+
+5.3.2. Backend API
+Backend API được xây dựng với Spring Boot, bao gồm:
+
+- **30 Controller classes** xử lý các endpoint REST API: StudentPrintJobController (quản lý công việc in của sinh viên), StudentFileController (upload file), StudentBalanceController (số dư), StudentPrintHistoryController (lịch sử in), DepositController (nạp tiền), PaymentController (thanh toán), PrinterController (quản lý máy in), AdminUserController (quản lý người dùng), StaffReportController (báo cáo), SystemConfigController (cấu hình hệ thống), PageAllocationController (phân bổ trang), v.v. Mỗi controller có các endpoint với HTTP methods: GET (lấy dữ liệu), POST (tạo mới), PUT/PATCH (cập nhật), DELETE (xóa).
+
+- **60+ Service classes** xử lý logic nghiệp vụ: StudentPrintJobServiceImpl (tạo và quản lý công việc in, tính giá), PaymentServiceImpl (xử lý thanh toán, tích hợp với ledger), DepositServiceImpl (xử lý nạp tiền, tích hợp với SePay), PricingServiceImpl (tính toán giá theo công thức), RefundServiceImpl (xử lý hoàn tiền), LedgerServiceImpl (ghi nhận vào sổ cái), BonusService (tính toán tiền thưởng), PageCountServiceImpl (đếm số trang từ file), SupabaseStorageService (upload/download file), EmailServiceImpl (gửi email), v.v.
+
+- **34 Repository classes** truy cập cơ sở dữ liệu: PrintJobRepository, PaymentRepository, DepositRepository, StudentWalletLedgerRepository, PrinterPhysicalRepository, UserRepository, StudentRepository, v.v. Mỗi repository có các phương thức CRUD cơ bản và custom queries bằng @Query annotation.
+
+- **40+ Entity classes** ánh xạ với database tables: PrintJob, Payment, Deposit, StudentWalletLedger, Student, Staff, User, PrinterPhysical, UploadedFile, v.v. Mỗi entity được đánh dấu bằng @Entity, @Table, và các annotation JPA khác.
+
+- **110+ DTO classes** cho request/response: PrintJobRequestDTO, PrintJobResponseDTO, DepositRequestDTO, DepositResponseDTO, PaymentResponseDTO, v.v. DTO classes được sử dụng để transfer data giữa các tầng và validate input/output.
+
+- **4 WebSocket Controller classes**: PrintJobProgressWebSocketController (cập nhật tiến trình in), PrintJobPaymentWebSocketController (cập nhật trạng thái thanh toán), DepositWebSocketController (cập nhật trạng thái nạp tiền), StudentNotificationWebSocketController (gửi thông báo).
+
+- **5 Scheduler classes**: ReportScheduler (tạo báo cáo hàng tháng, chạy vào ngày 1 mỗi tháng), SemesterBonusScheduler (phát bonus học kỳ tự động, chạy theo cấu hình trong system_configuration), PrintJobProgressUpdater (cập nhật tiến trình in, chạy mỗi 10 giây), PrintJobQueueProcessor (xử lý hàng đợi in), DepositExpirationScheduler (xử lý giao dịch nạp tiền hết hạn, chạy mỗi phút).
+
+5.3.3. Frontend Application
+Frontend application được xây dựng với Next.js, bao gồm:
+
+- **Giao diện sinh viên**: dashboard (dashboard với thống kê số dư, công việc in gần đây), print (màn hình in tài liệu với wizard nhiều bước: upload file, chọn máy in, cấu hình, xem giá, thanh toán), history (lịch sử in với filter, sort, pagination), recharge (nạp tiền với danh sách gói khuyến mãi), top-up (nạp tiền với QR code), profile (quản lý hồ sơ cá nhân), printers (danh sách máy in với bản đồ tầng).
+
+- **Giao diện nhân viên**: dashboard (dashboard quản trị với thống kê tổng quan), manage-printers (quản lý máy in: thêm, sửa, xóa, bật/tắt), manage-students (quản lý sinh viên: xem danh sách, filter, search), reports (xem báo cáo: doanh thu, sử dụng máy in), configuration (cấu hình hệ thống: giá, gói khuyến mãi, loại file), page-allocation (quản lý phân bổ trang hệ thống), system-logs (xem nhật ký hệ thống).
+
+- **Components tái sử dụng**: UI components (Button, Input, Modal, Select, Tabs, Pagination, DatePicker, v.v.), layout components (Header, Footer, StudentHeader, PageBackground), common components (Loading, ErrorBoundary, Skeleton), notification components (NotificationContainer, NotificationDropdown, NotificationItem).
+
+- **API client**: Axios instance với interceptors, các service classes cho từng domain (student, payment, printers, adminUsers, v.v.), WebSocket client với STOMP.
+
+- **State management**: useAuthStore (authentication state), useThemeStore (theme tối/sáng), useDockPositionStore (vị trí dock), usePrintProgressStore (tiến trình in), useMusicSettingsStore (cài đặt nhạc).
+
+- **i18n support** với file translation cho tiếng Việt và tiếng Anh, mỗi locale có common (từ ngữ chung) và pages (từ ngữ theo trang).
+
+5.4. Các luồng chức năng quan trọng
+5.4.1. Luồng In Tài Liệu
+Luồng in tài liệu được triển khai trong StudentPrintJobController và StudentPrintJobServiceImpl. Khi sinh viên tải file lên, frontend gọi POST endpoint upload file, backend nhận file qua MultipartFile, upload lên Supabase Storage thông qua SupabaseStorageService, trả về URL. Backend sử dụng PageCountServiceImpl để đếm số trang: với file PDF sử dụng PDFBox, với file DOCX/DOC sử dụng ConvertAPI để chuyển sang PDF rồi dùng PDFBox. Backend lưu thông tin file vào database với số trang và URL file.
+
+Sinh viên chọn máy in và cấu hình tùy chọn, frontend gọi POST endpoint calculate-price với request body chứa uploadedFileId, printerId, pageSize, colorMode, numberOfCopy, printSide. Backend gọi PricingService để tính giá theo công thức: total_pages = pageCount × numberOfCopy (không chia cho 2 khi in 2 mặt), basePrice = pageSizePrice.pagePrice, colorMultiplier = colorModePrice.priceMultiplier, duplexFactor = 0.7 nếu printSide = double-sided, 1.0 nếu printSide = one-sided, baseAmount = totalPages × basePrice × colorMultiplier × duplexFactor, tìm pageDiscountPackage nếu totalPages >= minPages, finalPrice = baseAmount × (1 - discountPercentage). Backend trả về PriceCalculationDTO cho frontend.
+
+Sinh viên chọn phương thức thanh toán, frontend gọi POST endpoint tạo công việc in với request body chứa thông tin công việc in. Backend gọi PaymentService để xử lý thanh toán: nếu thanh toán bằng số dư, truy vấn student_wallet_ledger để tính số dư, nếu số dư đủ thì tạo bản ghi trong payment và student_wallet_ledger với direction = OUT, source_type = PAYMENT. Backend tạo bản ghi trong print_job với các thông tin đã tính toán và tạo các bản ghi trong print_job_page với page_number từ 1 đến total_pages. Backend gửi lệnh in đến PrinterController (qua REST API hoặc message queue). WebSocket cập nhật tiến trình in thời gian thực: khi máy in báo cáo đã in xong một trang, PrintJobProgressWebSocketController nhận message, cập nhật trạng thái trang đã in, broadcast message qua WebSocket đến frontend. Khi hoàn thành, backend cập nhật print_status = completed và end_time, gửi thông báo qua StudentNotificationWebSocketController.
+
+5.4.2. Luồng Nạp Tiền
+Luồng nạp tiền được triển khai trong DepositController và DepositServiceImpl. Sinh viên chọn số tiền nạp trên frontend, frontend gọi POST endpoint nạp tiền với request body chứa số tiền và phương thức thanh toán. Backend gọi BonusService để tìm gói khuyến mãi phù hợp dựa trên số tiền nạp, nếu tìm thấy thì tính số tiền thưởng. Backend gọi PaymentGatewayService (tích hợp với SePay API) để tạo mã QR thanh toán với tổng số tiền (số tiền nạp cộng tiền thưởng). SePay trả về QR code data và mã giao dịch. Backend tạo bản ghi giao dịch nạp tiền với trạng thái "đang chờ" và trả về QR code cho frontend.
+
+Sinh viên quét mã QR và thanh toán, SePay xử lý thanh toán và gửi POST webhook đến endpoint webhook của hệ thống với payload chứa mã giao dịch, số tiền, trạng thái, và chữ ký xác thực. PaymentController nhận webhook và gọi PaymentWebhookService để xác thực chữ ký. Nếu hợp lệ, service ghi log webhook và gọi DepositService để hoàn tất giao dịch. DepositService tìm giao dịch nạp tiền tương ứng, cập nhật trạng thái thành "hoàn thành", và gọi LedgerService để ghi nhận vào sổ cái: tạo bản ghi cho số tiền nạp và một bản ghi riêng cho tiền thưởng (nếu có). Backend gửi thông báo qua DepositWebSocketController để broadcast message đến frontend với thông tin số tiền đã nạp, tiền thưởng, và số dư mới.
+
+5.4.3. Luồng Hủy Công Việc In
+Luồng hủy công việc in được triển khai trong StudentPrintJobController và RefundServiceImpl. Sinh viên yêu cầu hủy công việc in trên frontend, frontend gọi DELETE endpoint hủy công việc in. Backend lấy thông tin công việc in: trạng thái, tổng số trang, tổng giá. Nếu công việc đã hoàn thành, backend trả về lỗi. Nếu công việc đang được in, backend gửi lệnh dừng đến PrinterController, PrinterController điều khiển máy in dừng in và báo cáo số trang đã in. Backend đếm số trang đã in và tính số trang chưa in. Backend gọi RefundService để tính số tiền hoàn lại dựa trên tỷ lệ số trang chưa in. Backend gọi RefundService để xử lý hoàn tiền: tạo bản ghi hoàn tiền, cập nhật số dư tài khoản bằng cách ghi nhận giao dịch hoàn tiền vào sổ cái, cập nhật trạng thái công việc thành "đã hủy". Backend gửi thông báo qua WebSocket đến frontend với thông tin hủy thành công và số tiền hoàn lại.
+
+
+ 
+CHƯƠNG 6: KIỂM THỬ PHẦN MỀM
+6.1. Công cụ kiểm thử
+6.1.1. Unit Testing
+Backend sử dụng JUnit 5 làm framework unit testing cho Java, được khai báo trong `pom.xml` với dependency `spring-boot-starter-test` (bao gồm JUnit 5, Mockito, AssertJ). Các unit test được viết trong package `src/test/java/com/siu/` với cấu trúc tương ứng với source code. Ví dụ: test cho `StudentPrintJobServiceImpl` được viết trong `StudentPrintJobServiceImplTest.java`, sử dụng `@Mock` để mock các dependency (repository, service), `@InjectMocks` để inject mocks vào service cần test, và `@Test` để đánh dấu test methods. Test coverage được đo bằng JaCoCo plugin trong Maven, cấu hình trong `pom.xml` với goal `jacoco:report` để generate coverage report.
+
+Frontend sử dụng Jest làm framework unit testing cho TypeScript, được cấu hình trong `package.json` với script `"test": "jest"` và file cấu hình `jest.config.js`. React Testing Library được sử dụng để test React components, các test được viết trong thư mục `__tests__/` hoặc file `*.test.tsx`. Ví dụ: test cho component `Button` được viết trong `Button.test.tsx`, sử dụng `render()` để render component, `screen.getByRole()` để query elements, và `fireEvent.click()` để simulate user interactions. Test coverage được đo bằng Jest với flag `--coverage`, generate report trong thư mục `coverage/`.
+
+6.1.2. Integration Testing
+Backend sử dụng Spring Boot Test cho integration testing API endpoints, được viết trong các test classes với annotation `@SpringBootTest` và `@AutoConfigureMockMvc`. `MockMvc` được sử dụng để simulate HTTP requests và verify responses, ví dụ: `mockMvc.perform(get("/api/student/print-jobs")).andExpect(status().isOk())`. Test containers được sử dụng để test với database thực (SQL Server container), được cấu hình trong test class với `@Testcontainers` và `@Container` annotations. Database transactions được rollback sau mỗi test bằng `@Transactional` và `@Rollback` annotations.
+
+Frontend sử dụng React Testing Library với MSW (Mock Service Worker) để mock API calls trong integration tests. MSW được cấu hình trong file `src/mocks/handlers.ts` với các mock handlers cho các API endpoints, và `src/mocks/server.ts` để setup MSW server. Test sử dụng `render()` với `QueryClientProvider` và `ReactQueryProvider` để test components với TanStack Query.
+
+6.1.3. End-to-End Testing
+Frontend sử dụng Playwright cho E2E testing, được cấu hình trong file `playwright.config.ts` với các browsers: Chromium, Firefox, WebKit. E2E tests được viết trong thư mục `e2e/` với các test scenarios: đăng nhập, tải file, chọn máy in, thanh toán, nạp tiền. Playwright sử dụng `page.goto()`, `page.click()`, `page.fill()` để interact với UI, và `page.expect()` để verify kết quả.
+
+Backend API được test manually bằng Postman với collection chứa các requests cho tất cả endpoints: GET, POST, PUT, DELETE. Postman collection được export và lưu trong thư mục `docs/` để chia sẻ với team. Swagger UI được sử dụng để test và document API, truy cập tại `/swagger-ui.html` khi chạy ứng dụng, cho phép test các endpoints trực tiếp trên browser với UI thân thiện.
+
+6.1.4. Code Quality
+SonarQube được sử dụng cho code quality analysis, được cấu hình trong file `sonar-project.properties` với các tham số: `sonar.projectKey`, `sonar.sources`, `sonar.language` (java, ts), `sonar.sourceEncoding` (UTF-8). SonarQube được chạy trong CI/CD pipeline (GitHub Actions) với sonar-scanner, generate report và upload lên SonarQube server. ESLint được sử dụng cho linting TypeScript/JavaScript, được cấu hình trong `.eslintrc.json` với rules từ `@typescript-eslint/recommended` và `next/core-web-vitals`. Prettier được sử dụng cho code formatting, được cấu hình trong `.prettierrc` với options: `singleQuote: true`, `trailingComma: 'es5'`, `tabWidth: 2`. Husky và lint-staged được sử dụng cho pre-commit hooks, được cấu hình trong `.husky/pre-commit` để tự động chạy ESLint và Prettier trước khi commit, đảm bảo code quality trước khi push lên repository.
+
+6.2. Kết quả kiểm thử
+6.2.1. Unit Tests
+Backend có 80+ unit tests cho các service classes chính, bao gồm: `StudentPrintJobServiceImplTest` (test tạo công việc in, tính giá, xử lý thanh toán), `PaymentServiceImplTest` (test xử lý thanh toán, tích hợp với ledger), `DepositServiceImplTest` (test nạp tiền, tích hợp với SePay), `PricingServiceImplTest` (test tính giá với các trường hợp: in 1 mặt, in 2 mặt, có giảm giá, không có giảm giá), `RefundServiceImplTest` (test hoàn tiền với các trường hợp: hủy khi chờ, hủy khi đang in), `LedgerServiceImplTest` (test ghi nhận vào sổ cái). Test coverage đạt >70% cho các module chính (service, repository), được đo bằng JaCoCo và hiển thị trong coverage report.
+
+Frontend có 50+ unit tests cho các component và utility functions, bao gồm: test cho UI components (Button, Input, Modal, Select), test cho custom hooks (useApiQuery, useApiMutation, useDebounce), test cho utility functions (format currency, format date, validate email). Test coverage đạt >70% cho các module chính, được đo bằng Jest coverage và hiển thị trong `coverage/lcov-report/index.html`.
+
+6.2.2. Integration Tests
+Backend có 30+ integration tests cho các endpoint chính, bao gồm: test cho `StudentPrintJobController` (POST `/api/student/print-jobs`, GET `/api/student/print-jobs`, DELETE `/api/student/print-jobs/{id}/cancel`), test cho `DepositController` (POST `/api/student/deposits`, GET `/api/student/deposits`), test cho `PaymentController` (POST `/api/payments/webhook`), test cho `PrinterController` (GET `/api/printers`, POST `/api/printers`, PUT `/api/printers/{id}`). Tests sử dụng `@SpringBootTest` với test database (H2 in-memory hoặc SQL Server test container), `MockMvc` để simulate HTTP requests, và verify responses với `andExpect()`.
+
+Database integration tests được viết cho các repository classes, test các custom queries và transactions. Ví dụ: test cho `StudentWalletLedgerRepository` để verify tính toán số dư từ ledger entries, test cho `PrintJobRepository` để verify query tìm công việc in theo trạng thái và máy in. WebSocket integration tests được viết để test real-time updates, sử dụng `@SpringBootTest` với WebSocket test client để simulate WebSocket connections và verify messages được gửi đúng.
+
+6.2.3. Manual Testing
+Functional testing đã được thực hiện cho tất cả các use case đã được định nghĩa trong Chương 2, bao gồm: UC-01 (In Tài Liệu), UC-02 (Nạp Tiền), UC-03 (Hủy Công Việc In), UC-04 (Quản Lý Máy In), UC-05 (Cấu hình Giá In). Mỗi use case được test với các test cases: happy path (luồng chính), error cases (lỗi validation, lỗi business logic), edge cases (giới hạn, biên).
+
+UI/UX testing đã được thực hiện trên nhiều trình duyệt: Chrome (latest), Firefox (latest), Safari (latest), Edge (latest), và trên nhiều thiết bị: desktop (1920x1080, 1366x768), tablet (iPad, Android tablet), mobile (iPhone, Android phone). Giao diện được verify là responsive và hoạt động tốt trên tất cả các thiết bị. Accessibility testing đã được thực hiện với các công cụ: Lighthouse (Chrome DevTools), WAVE (Web Accessibility Evaluation Tool), để verify WCAG compliance.
+
+Security testing đã được thực hiện để verify JWT authentication và authorization: test với token hợp lệ, test với token hết hạn, test với token không hợp lệ, test với token không có quyền truy cập endpoint. API endpoints được test với các HTTP methods không được phép (ví dụ: DELETE trên endpoint chỉ cho phép GET), verify trả về HTTP 405 Method Not Allowed. SQL injection và XSS attacks đã được test để verify hệ thống không bị lỗ hổng bảo mật.
+
+Performance testing đã được thực hiện để verify API response time < 1s cho các endpoint chính: GET `/api/student/print-jobs` (lấy danh sách công việc in), POST `/api/student/print-jobs/calculate-price` (tính giá), GET `/api/student/balance` (lấy số dư). Load testing đã được thực hiện với Apache JMeter để simulate 100 concurrent users, verify hệ thống có thể handle load và không bị crash.
+
+6.2.4. Code Quality Metrics
+SonarQube analysis cho thấy code quality rating A (trên thang điểm A-F), với các metrics: code duplication <3% (dưới ngưỡng 5%), technical debt <5% (dưới ngưỡng 10%), maintainability index >80 (trên ngưỡng 60). Các code smells đã được fix: long methods được refactor thành các methods nhỏ hơn, magic numbers được thay thế bằng constants, duplicate code được extract thành utility functions. Security vulnerabilities đã được fix: SQL injection được prevent bằng parameterized queries (JPA), XSS được prevent bằng input validation và output encoding.
+
+ESLint analysis cho frontend cho thấy không có critical errors, chỉ có một số warnings về unused variables và console.log statements (đã được fix hoặc disable với comments). Prettier đảm bảo code formatting nhất quán trên toàn bộ project, được chạy tự động trong pre-commit hooks.
+
+
+ 
+CHƯƠNG 7: TỔNG KẾT
+7.1. Tóm tắt kết quả dự án
+Dự án "Xây dựng Website Quản lý Dịch vụ In ấn" đã được hoàn thành sau 4 tháng phát triển (từ tháng 9 đến tháng 12 năm 2025) với các kết quả chính sau:
+
+7.1.1. Sản phẩm đã hoàn thành
+Hệ thống backend hoàn chỉnh được xây dựng với Spring Boot 3.3.6, bao gồm 30 controller classes xử lý các endpoint REST API với tổng cộng hơn 150 endpoints, 60 service classes xử lý logic nghiệp vụ với tổng cộng hơn 500 methods, 34 repository classes truy cập cơ sở dữ liệu, 40 entity classes ánh xạ với các bảng trong database, 110 DTO classes cho request và response, 4 WebSocket controller classes cho cập nhật thời gian thực, và 5 scheduler classes cho các tác vụ tự động. Backend được triển khai lên Heroku với database Azure SQL Server, tích hợp với Supabase Storage để lưu trữ file, SePay Payment Gateway để xử lý thanh toán, và Gmail SMTP để gửi email.
+
+Ứng dụng frontend hoàn chỉnh được xây dựng với Next.js 14, bao gồm 8 màn hình cho sinh viên (dashboard, in tài liệu, lịch sử in, nạp tiền, hồ sơ cá nhân, danh sách máy in), 7 màn hình cho nhân viên (dashboard, quản lý máy in, quản lý sinh viên, báo cáo, cấu hình, phân bổ trang, nhật ký hệ thống), hơn 30 UI components có thể tái sử dụng, API client với TanStack Query để quản lý dữ liệu, tích hợp WebSocket với STOMP protocol, và hỗ trợ đa ngôn ngữ cho Tiếng Việt và Tiếng Anh. Frontend được triển khai lên Heroku hoặc Vercel với pipeline CI/CD tự động.
+
+Cơ sở dữ liệu với 35 bảng chính được thiết kế theo chuẩn hóa 3NF với hơn 80 indexes để tối ưu hiệu suất truy vấn. Các script migration được quản lý để theo dõi các thay đổi schema. Script tạo dữ liệu test được viết bằng Python để tạo hơn 1000 bản ghi cho mỗi bảng chính.
+
+Hệ thống đã tích hợp thành công với các dịch vụ bên ngoài: Supabase Storage để lưu trữ file tài liệu, SePay Payment Gateway để xử lý thanh toán qua QR code, Gmail SMTP để gửi email thông báo, và HCMSIU SSO để xác thực người dùng. Hệ thống WebSocket với 4 WebSocket controllers và STOMP protocol đảm bảo cập nhật thời gian thực cho người dùng. Hệ thống báo cáo tự động tạo báo cáo hàng tháng. Hệ thống quản lý tài chính sử dụng ledger pattern để quản lý số dư và cung cấp audit trail đầy đủ.
+
+7.1.2. Tài liệu đã hoàn thành
+Nhóm đã hoàn thành 9 biểu đồ UML được vẽ bằng PlantUML và render thành PNG: 3 biểu đồ hoạt động cho các use case In Tài Liệu, Hủy Công Việc In, và Nạp Tiền, 3 biểu đồ tuần tự tương ứng với ba use case trên, và 3 biểu đồ lớp mô tả cấu trúc dữ liệu cho từng use case. Ngoài ra, nhóm còn xây dựng 1 biểu đồ thành phần mô tả module quản lý in ấn với các component và interface, 1 biểu đồ kiến trúc mô tả kiến trúc tổng thể hệ thống với 4 tầng, và 1 biểu đồ cơ sở dữ liệu mô tả cấu trúc 35 bảng và mối quan hệ giữa chúng.
+
+Tài liệu hướng dẫn phát triển được viết với các nội dung: cấu trúc dự án, hướng dẫn thiết lập môi trường phát triển, hướng dẫn chạy ứng dụng, hướng dẫn triển khai, và các best practices. Tài liệu API được tự động tạo từ code với các annotation, có thể truy cập qua Swagger UI. Tài liệu cấu trúc dự án mô tả chi tiết cấu trúc thư mục và file. Tài liệu hướng dẫn hiển thị sơ đồ tầng mô tả cách hiển thị sơ đồ tầng với vị trí máy in.
+
+7.1.3. Tính năng đã triển khai
+Tất cả các tính năng đã được định nghĩa trong yêu cầu chức năng đã được triển khai và kiểm thử thành công. Hệ thống hỗ trợ đăng nhập và xác thực qua JWT với Spring Security, cho phép sinh viên tải file và tự động tính số trang với PDFBox và ConvertAPI. Sinh viên có thể chọn máy in và cấu hình các tùy chọn in như kích thước giấy, chế độ màu, số bản sao, và kiểu in một mặt hoặc hai mặt. Hệ thống tự động tính giá với công thức phức tạp bao gồm hệ số màu, hệ số in hai mặt, và giảm giá khối lượng. Thanh toán có thể thực hiện qua số dư ví hoặc QR code thông qua SePay. Sinh viên có thể nạp tiền với các gói khuyến mãi và tích hợp với SePay. Hệ thống hỗ trợ hủy công việc in và hoàn tiền theo tỷ lệ trang chưa in. Sinh viên có thể xem lịch sử in và giao dịch với các tính năng lọc, sắp xếp, và phân trang. Nhân viên có thể quản lý máy in với các thao tác thêm, sửa, xóa, bật tắt, cùng với validation và xử lý lỗi. Hệ thống cho phép cấu hình giá và gói khuyến mãi với giao diện thân thiện. Nhân viên có thể xem báo cáo sử dụng với biểu đồ và thống kê. Hệ thống cung cấp cập nhật thời gian thực qua WebSocket cho tiến trình in, thông báo, và số dư. Hệ thống hỗ trợ đa ngôn ngữ cho Tiếng Việt và Tiếng Anh.
+
+7.2. Bài học kinh nghiệm
+7.2.1. Kỹ thuật
+Kiến trúc phân tầng đã chứng minh hiệu quả trong việc tách biệt các mối quan tâm, giúp code dễ bảo trì và mở rộng. Mỗi tầng có trách nhiệm rõ ràng, giảm thiểu sự phụ thuộc giữa các tầng, và tăng khả năng kiểm thử. Tuy nhiên, việc thiết kế các interface giữa các tầng cần được cân nhắc kỹ để tránh thiết kế quá phức tạp.
+
+Sử dụng ORM (JPA/Hibernate) đã giúp giảm thiểu việc viết code SQL thủ công và tăng tính bảo trì. Tuy nhiên, một số truy vấn phức tạp vẫn cần được viết bằng native SQL với annotation @Query để đạt hiệu suất tối ưu. Việc sử dụng @EntityGraph và fetch join đã giúp giảm vấn đề N+1 query.
+
+Ledger pattern đã chứng minh rất hiệu quả cho quản lý tài chính và audit trail. Bảng sổ cái cung cấp audit trail hoàn chỉnh, dễ dàng truy vết lại từng giao dịch, và tính toán số dư nhanh chóng. Tuy nhiên, việc đảm bảo tính nhất quán giữa các bảng domain và bảng sổ cái cần được xử lý cẩn thận trong transactions.
+
+WebSocket cần được xử lý cẩn thận để tránh rò rỉ bộ nhớ. Việc quản lý kết nối WebSocket, dọn dẹp khi client ngắt kết nối, và xử lý kết nối lại đã được thực hiện trong các WebSocket controllers. Sử dụng STOMP protocol đã giúp quản lý subscriptions và định tuyến message dễ dàng hơn.
+
+TypeScript strict mode đã giúp phát hiện nhiều lỗi sớm trong quá trình phát triển, đặc biệt là lỗi kiểu dữ liệu và lỗi null/undefined. Tuy nhiên, việc viết định nghĩa kiểu cho các DTO và API responses đã tốn khá nhiều thời gian.
+
+7.2.2. Quản lý dự án
+Sử dụng Trello đã giúp theo dõi tiến độ và phân công công việc hiệu quả. Mỗi task được tạo với mô tả, người được giao, ngày hết hạn, và nhãn phân loại. Tuy nhiên, việc cập nhật Trello thường xuyên đôi khi bị bỏ qua, dẫn đến thông tin không đồng bộ.
+
+Code review và pair programming đã giúp cải thiện chất lượng code đáng kể. Mỗi pull request được review bởi ít nhất một thành viên khác trước khi merge, giúp phát hiện lỗi và cải thiện phong cách code. Pair programming đã được sử dụng cho các tính năng phức tạp như tính giá và xử lý thanh toán.
+
+Tài liệu hóa ngay từ đầu đã giúp tiết kiệm thời gian sau này. Các tài liệu cho mỗi màn hình, hướng dẫn phát triển, và cấu trúc dự án đã giúp các thành viên mới tham gia nhanh chóng và giảm thiểu nhầm lẫn về cấu trúc dự án.
+
+CI/CD pipeline với GitHub Actions đã giúp tự động hóa quy trình build, test, và deploy. Mỗi pull request tự động chạy tests và build, đảm bảo code không bị lỗi. Deploy tự động lên Heroku khi merge vào nhánh main đã giúp giảm thiểu lỗi do triển khai thủ công.
+
+7.2.3. Làm việc nhóm
+Giao tiếp là chìa khóa cho sự thành công của dự án. Nhóm đã sử dụng Discord để giao tiếp hàng ngày, GitHub Issues để theo dõi lỗi và yêu cầu tính năng, và các cuộc họp hàng tuần để đồng bộ tiến độ. Tuy nhiên, việc giao tiếp không đầy đủ đôi khi dẫn đến công việc trùng lặp hoặc xung đột.
+
+Phân chia công việc rõ ràng đã giúp tránh xung đột và công việc trùng lặp. Mỗi thành viên được giao các module cụ thể: một người làm frontend, một người làm backend, một người làm database, và một người làm testing. Tuy nhiên, việc phân chia quá cứng nhắc đôi khi dẫn đến tắc nghẽn khi một người bận.
+
+Các cuộc họp thường xuyên (hàng tuần) đã giúp đồng bộ tiến độ và giải quyết vấn đề kịp thời. Mỗi cuộc họp có chương trình nghị sự rõ ràng: xem xét tiến độ tuần trước, lập kế hoạch công việc tuần sau, và thảo luận các vấn đề kỹ thuật. Tuy nhiên, việc sắp xếp lịch họp đôi khi khó khăn do lịch học của các thành viên.
+
+7.3. Hướng phát triển
+7.3.1. Tính năng mới
+Ứng dụng di động (React Native) cho sinh viên để tăng tính tiện lợi, cho phép sinh viên in tài liệu từ điện thoại mà không cần mở trình duyệt. Tính năng xem trước và tối ưu hóa tài liệu bằng AI để tự động phát hiện và tối ưu hóa chất lượng file trước khi in, giảm thiểu lỗi in. Phân tích nâng cao và machine learning để dự đoán nhu cầu in dựa trên lịch sử, giúp SPSO quản lý tài nguyên tốt hơn. Tích hợp với hệ thống thư viện để tự động in tài liệu từ thư viện số. Hỗ trợ cho nhiều loại máy in như máy in 3D, máy in khổ lớn để mở rộng dịch vụ.
+
+7.3.2. Cải thiện hiệu năng
+Lớp cache (Redis) cho các truy vấn thường xuyên như danh sách máy in, cấu hình giá, để giảm tải database và tăng thời gian phản hồi. CDN cho các tài nguyên tĩnh như hình ảnh, font chữ, CSS, JavaScript để tăng tốc độ tải trang. Database sharding để mở rộng theo chiều ngang khi số lượng người dùng và giao dịch tăng lên. Kiến trúc microservices để tách các module thành các service độc lập, cho phép mở rộng từng service riêng biệt.
+
+7.3.3. Bảo mật
+Xác thực hai yếu tố (2FA) để tăng cường bảo mật, yêu cầu sinh viên xác thực qua SMS hoặc email khi đăng nhập. Giới hạn tần suất cho các API endpoints để ngăn chặn tấn công brute force và DDoS. Ghi log và giám sát nâng cao với các công cụ như ELK Stack để theo dõi và phân tích logs. Kiểm thử thâm nhập và kiểm tra bảo mật định kỳ để phát hiện và sửa các lỗ hổng bảo mật.
+
+7.3.4. Trải nghiệm người dùng
+Tùy chỉnh theme để cho phép sinh viên tùy chỉnh màu sắc và bố cục theo sở thích. Cải thiện khả năng truy cập (tuân thủ WCAG) để đảm bảo hệ thống có thể sử dụng bởi người khuyết tật. Hỗ trợ offline với service workers để cho phép sinh viên xem lịch sử in và số dư khi không có internet. Tính năng Progressive Web App (PWA) để cho phép cài đặt ứng dụng trên điện thoại như ứng dụng gốc.
+ 
+TÀI LIỆU THAM KHẢO
+[1] Đoàn Văn Phú. (2020). Tổng quan về NodeJS - Một số điểm khác biệt với PHP.
+https://viblo.asia/p/tong-quan-ve-nodejs-mot-so-diem-khac-biet-voi-php-1Je5E9945nL
+[2] Thân Hoàng. (2020). [Networking] Socket hoạt động như thế nào?.
+https://viblo.asia/p/networking-socket-hoat-dong-nhu-the-nao-aWj53LxYK6m
+[3] Hoàng Nguyễn. (2019). Tìm hiểu về Tailwind CSS.
+https://viblo.asia/p/tim-hieu-ve-tailwind-css-924lJp6WKPM
+[4] Đỗ Khánh Toàn. (2017). Giới thiệu về ReactJS – Phần I (Các khái niệm cơ bản).
+https://viblo.asia/p/gioi-thieu-ve-reactjs-phan-i-cac-khai-niem-co-ban-V3m5WzjblO7
+[5] Wikipedia. (2017). Visual Studio Code.
+https://vi.wikipedia.org/wiki/Visual_Studio_Code
+[6] Việt Trần. (2022). Clean Architecture là gì - Ưu nhược và cách dùng hợp lý.
+https://200lab.io/blog/clean-architecture-uu-nhuoc-va-cach-dung-hop-ly
+[7] Ngọc Vy. (2025). C# Cho Lập Trình Viên ASP.NET Core: Bắt Đầu Từ Đâu?.
+https://tuyendung.evotek.vn/c-cho-lap-trinh-vien-asp-net-core-bat-dau-tu-dau/
+[8] Next.js Documentation. (2024). Next.js - The React Framework.
+https://nextjs.org/docs
+[9] Spring Boot Documentation. (2024). Spring Boot Reference Documentation.
+https://spring.io/projects/spring-boot
+[10] Azure SQL Database Documentation. (2024). Azure SQL Database.
+https://learn.microsoft.com/en-us/azure/azure-sql/database/
+[11] Supabase Documentation. (2024). Supabase - The Open Source Firebase Alternative.
+https://supabase.com/docs
+[12] TanStack Query Documentation. (2024). TanStack Query - Powerful data synchronization for React.
+https://tanstack.com/query/latest
+[13] React Hook Form Documentation. (2024). Performant, flexible and extensible forms with easy-to-use validation.
+https://react-hook-form.com/
+[14] Zod Documentation. (2024). TypeScript-first schema validation.
+https://zod.dev/
+[15] WebSocket API. (2024). MDN Web Docs.
+https://developer.mozilla.org/en-US/docs/Web/API/WebSocket
+

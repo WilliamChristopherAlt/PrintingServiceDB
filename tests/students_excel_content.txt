@@ -1,0 +1,603 @@
+================================================================================
+EXTRACTED CONTENT FROM STUDENTS.XLSX
+================================================================================
+
+================================================================================
+SHEET 1: SV-1-Thành phần chung
+================================================================================
+Dimensions: 994 rows x 26 columns
+
+HEADERS:
+ID | Tên Testcase | Mức độ | Các bước thực hiện | Kết quả mong đợi | Trạng thái |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+--------------------------------------------------------------------------------
+
+ROW 1:
+ID | Tên Testcase | Mức độ | Các bước thực hiện | Kết quả mong đợi | Trạng thái |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 2:
+TC-CC-UI-001 | Hiển thị Page Header | Cao | Truy cập Dashboard sau khi đăng nhập | Header hiển thị tiêu đề "Trang chủ" và mô tả trang rõ ràng, đúng layout. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 3:
+TC-CC-UI-002 | Hiển thị Notification Button | Cao | Quan sát góc phải Header | Icon chuông hiển thị rõ ràng, có thể click và hiện badge số lượng. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 4:
+TC-CC-UI-003 | Mở Notification Dropdown | Cao | Click vào icon chuông | Dropdown xuất hiện kèm title, nút "Làm mới", "Mark all as read" và danh sách. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 5:
+TC-CC-UI-004 | Hiển thị List Notifications | Cao | Mở Notification dropdown | Mỗi thông báo hiển thị đủ icon, nội dung và thời gian (vd: "khoảng 4 giờ trước"). | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 6:
+TC-CC-UI-005 | Refresh Notifications | TB | Click nút "Làm mới" trong dropdown | Danh sách và số lượng thông báo được cập nhật qua API. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 7:
+TC-CC-UI-006 | Mark All as Read | TB | Click nút "Mark all as read" | Tất cả thông báo chuyển trạng thái đã đọc, badge số lượng cập nhật về 0. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 8:
+TC-CC-UI-007 | Scroll Notifications | TB | Cuộn danh sách thông báo | Có thể scroll để xem các thông báo cũ (hỗ trợ danh sách dài > 30 mục). | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 9:
+TC-CC-UI-008 | Close Dropdown | TB | Click ra ngoài hoặc click lại icon chuông | Dropdown đóng lại chính xác, không gây lỗi giao diện. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 10:
+TC-CC-UI-009 | Hiển thị Application Dock | Cao | Quan sát đáy màn hình | Dock hiển thị đủ 7 nút chức năng, nút trang hiện tại được highlight. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 11:
+TC-CC-NAV-001 | Navigate Home | Cao | Click nút Home trên Dock | URL chuyển hướng về /en/student/dashboard thành công. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 12:
+TC-CC-NAV-002 | Navigate Profile | Cao | Click nút thứ 4 (Profile) trên Dock | Chuyển đến /en/student/profile, hiển thị avatar và thông tin cá nhân. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 13:
+TC-CC-NAV-003 | Navigate Print Document | Cao | Click nút Print Document trên Dock | Chuyển đến /en/student/print, tiêu đề trang cập nhật tương ứng. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 14:
+TC-CC-NAV-004 | Navigate Print History | Cao | Click nút Print History trên Dock | Chuyển đến /en/student/history, hiển thị danh sách lịch sử in. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 15:
+TC-CC-NAV-005 | Navigate Top Up | Cao | Click nút thứ 5 (Top Up) trên Dock | Chuyển đến /en/student/top-up, hiển thị các gói nạp tiền. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 16:
+TC-CC-NAV-007 | Navigate Settings | Cao | Click nút Settings trên Dock | Chuyển đến /en/student/settings, hiển thị cài đặt Theme/Language. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 17:
+TC-CC-UI-011 | View User Menu | Cao | Click vào Profile/User menu button | Dropdown xuất hiện hiển thị Username, số dư A4 và nút Đăng xuất. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 18:
+TC-CC-LOGOUT-001 | Logout Success | Cao | Click "Log out" (màu đỏ) trong menu | Session bị xóa, hệ thống redirect về trang Login /en. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 19:
+TC-CC-LOGOUT-002 | Logout with Queued Jobs | TB | Đăng xuất khi có lệnh in đang chờ | Hiển thị hộp thoại xác nhận cảnh báo về việc không hủy lệnh in đã gửi. | Fail |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 20:
+TC-CC-LOGOUT-004 | Logout from Dock | Cao | Click nút Logout cuối cùng trên Dock | Thực hiện đăng xuất và điều hướng về trang chủ thành công. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 21:
+TC-CC-ERROR-001 | 404 Error Handling | TB | Truy cập URL không tồn tại | Hiển thị trang lỗi "404 Page Not Found" kèm nút "Go Home". | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+Total non-empty rows: 21
+
+
+================================================================================
+SHEET 2: SV-2-Trang chủ
+================================================================================
+Dimensions: 38 rows x 24 columns
+
+HEADERS:
+ID | Tên Testcase | Mức độ | Các bước thực hiện | Kết quả mong đợi | Kết quả |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+--------------------------------------------------------------------------------
+
+ROW 1:
+ID | Tên Testcase | Mức độ | Các bước thực hiện | Kết quả mong đợi | Kết quả |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 2:
+TC-DASH-001 | Hiển thị Header Dashboard | Cao | Truy cập /en/staff/dashboard và quan sát phần header. | Hiển thị nhãn "STAFF DASHBOARD", tiêu đề "Dashboard" (bold white) và thông điệp chào mừng. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 3:
+TC-DASH-002 | Hiển thị Skeleton Loading | Cao | Truy cập trang khi network chậm (hoặc throttle network). | Hiển thị StaffDashboardSkeleton gồm placeholder cho header, 3 cards, 2 charts và alerts có shimmer effect. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 4:
+TC-DASH-003 | Hiển thị Error State | Cao | Giả lập lỗi API hoặc chặn request /api/dashboard/printer-stats. | Hiển thị card lỗi (bg-red-500/10), thông báo "Không thể tải thống kê" và nút "Thử lại". | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 5:
+TC-DASH-004 | KPI Card: Printers Online | Cao | Kiểm tra card thống kê máy in trực tuyến. | Hiển thị đúng số máy online từ API (activePrinters), có CountUp và chú thích "Out of {total}". | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 6:
+TC-DASH-005 | KPI Card: Jobs Today | Cao | Kiểm tra card thống kê công việc trong ngày. | Hiển thị số job, TrendBadge màu emerald (up) và thông tin "Last job finished". | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 7:
+TC-DASH-006 | KPI Card: Pages Month | Cao | Kiểm tra card thống kê số trang trong tháng. | Hiển thị số trang có định dạng dấu phẩy (comma), TrendBadge màu rose (down) nếu tăng trưởng âm. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 8:
+TC-DASH-007 | CountUp Animation | TB | Load trang và quan sát các con số trong KPI cards. | Các con số chạy từ 0 đến giá trị thực tế mượt mà, không bị lag hay nhảy số đột ngột. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 9:
+TC-DASH-008 | TrendBadge Styling | TB | Quan sát màu sắc các huy hiệu xu hướng (up/down/flat). | Up: xanh lục; Down: hồng đỏ; Flat: vàng hổ phách. Đúng mã màu CSS theo code implementation. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 10:
+TC-DASH-009 | Weekly Activity Bar Chart | Cao | Kiểm tra biểu đồ cột hoạt động hàng tuần. | Hiển thị biểu đồ với 2 series màu Blue (Jobs) và Pink (Pages), cao 320px, đầy đủ trục X/Y. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 11:
+TC-DASH-010 | Paper Size Usage Pie Chart | Cao | Kiểm tra biểu đồ tròn sử dụng khổ giấy. | Hiển thị dạng Donut với 3 màu (A4-Blue, A3-Green, A5-Orange), có legend nằm dưới biểu đồ. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 12:
+TC-DASH-011 | Bar Chart Tooltip | TB | Hover vào từng cột (Bar) cụ thể trên biểu đồ tuần. | Hiển thị Day, Jobs, Pages với đúng styling bg-slate-900/80 và backdrop blur. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 13:
+TC-DASH-012 | Pie Chart Tooltip | TB | Hover vào từng phân vùng (Segment) của biểu đồ tròn. | Hiển thị tên khổ giấy (A3/A4/A5) và tỉ lệ % tương ứng một cách chính xác. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 14:
+TC-DASH-013 | Chart Responsive Layout | TB | Thay đổi kích thước trình duyệt sang Mobile/Tablet. | Desktop: Bar chart chiếm 2/3, Pie chart 1/3. Mobile: Các chart xếp chồng (stack) theo chiều dọc. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 15:
+TC-DASH-014 | Printer Status Card | Cao | Quan sát card trạng thái tổng quát máy in. | Hiển thị tiêu đề "Status" và 4 thông số: Online, Offline, Maintenance, Utilization. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 16:
+TC-DASH-015 | Progress Bar Utilization | TB | Kiểm tra thanh tiến trình hiệu suất hệ thống. | Thanh bar có gradient (Emerald -> Amber -> Rose), độ dài tương ứng chính xác với % utilization. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 17:
+TC-DASH-016 | CTA Manage Printer | Cao | Click nút "Manage printer" tại card Status. | Điều hướng thành công đến trang /staff/manage-printers. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 18:
+TC-DASH-017 | Alerts Card Display | Cao | Quan sát card cảnh báo (Alerts). | Hiển thị tối đa 2 cảnh báo mới nhất với Severity Badge (Critical/Warning/Info) và nút "Xem chi tiết". | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 19:
+TC-DASH-018 | Alerts Limit Logic | TB | Cung cấp dữ liệu > 2 alerts cho hệ thống. | Card chỉ hiển thị đúng 2 bản ghi đầu tiên (áp dụng slice(0, 2) trong code). | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 20:
+TC-DASH-019 | API Data Mapping | Cao | Kiểm tra Network tab trong DevTools. | Các API /printer-stats và /paper-usage trả về 200 OK và dữ liệu khớp với UI hiển thị. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 21:
+TC-DASH-020 | Caching & Refetching | TB | Để tab dashboard mở và quan sát sau 5 phút. | Hệ thống tự động gọi lại API (auto-refetch) sau mỗi 5 phút theo cấu hình React Query. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 22:
+TC-DASH-021 | Dashboard Grid System | TB | Kiểm tra bố cục tổng thể trên màn hình lớn. | KPI cards chia 3 cột; Charts chia 2:1; Status/Alerts chia 2:1 (lg:grid-cols-[2fr,1fr]). | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 23:
+TC-DASH-022 | Status Grid Responsive | TB | Thu nhỏ màn hình xuống kích thước Tablet. | Grid 4 cột của Printer Status tự động chuyển sang Grid 2 cột (2 hàng). | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 24:
+TC-DASH-023 | Empty Data Handling | TB | Xóa dữ liệu máy in trong DB hoặc mock null. | UI không crash; hiển thị skeleton hoặc trạng thái trống thay vì báo lỗi trắng trang. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 25:
+TC-DASH-024 | Network Offline Retry | Cao | Ngắt kết nối mạng và click "Thử lại". | Khi có mạng lại, click "Thử lại" phải load lại được dữ liệu mà không cần F5 trang. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 26:
+TC-DASH-025 | Main Flow: Xem Dashboard tổng quan | Cao | 1. Đăng nhập với quyền SPSO/Staff.  2. Click menu "Dashboard".  3. Quan sát quá trình load và hiển thị. | Hệ thống gọi API thành công; hiển thị Skeleton trước khi hiện đầy đủ 3 KPI Cards, 2 Charts, Status Card và Alerts. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 27:
+TC-DASH-026 | Alternative Flow: Hệ thống chưa có dữ liệu | TB | 1. Truy cập Dashboard với tài khoản mới hoặc DB rỗng.  2. Quan sát các thẻ số liệu và biểu đồ. | Các chỉ số hiển thị "0" hoặc "N/A"; Biểu đồ hiển thị trạng thái trống (Empty State); Alerts hiện "No alerts"; UI không bị crash. | SKIP |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 28:
+TC-DASH-027 | Keyboard Navigation | TB | 1. Sử dụng phím Tab để di chuyển.  2. Sử dụng Enter/Space để kích hoạt các nút. | Có thể di chuyển qua các nút "Manage printer", "Xem chi tiết"; Focus hiển thị rõ ràng; Charts được bỏ qua (tabIndex={-1}) đúng thiết kế. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 29:
+TC-DASH-028 | Screen Reader Compatibility | TB | 1. Bật trình đọc màn hình (NVDA/VoiceOver).  2. Duyệt qua các thành phần Dashboard. | Trình đọc thông báo đúng nội dung các thẻ KPI, tên biểu đồ và nhãn của các nút bấm (Aria-label/Text content). | SKIP |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+Total non-empty rows: 29
+
+
+================================================================================
+SHEET 3: SV-3-Trang nạp tiền tài khoản
+================================================================================
+Dimensions: 994 rows x 26 columns
+
+HEADERS:
+ID | Tên Testcase | Mức độ | Các bước thực hiện | Kết quả mong đợi | Kết quả |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+--------------------------------------------------------------------------------
+
+ROW 1:
+ID | Tên Testcase | Mức độ | Các bước thực hiện | Kết quả mong đợi | Kết quả |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 2:
+TC-DEP-001 | Page Header | Cao | Truy cập /en/student/top-up, quan sát tiêu đề và mô tả. | Hiển thị tiêu đề "Top Up" (bold) và mô tả "Top up your account balance". Layout chuẩn, không che khuất. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 3:
+TC-DEP-002 | Skeleton Loading | Cao | Truy cập trang khi mạng chậm, quan sát trạng thái tải. | Hiển thị RechargeSkeleton (4 cards, input, table placeholder) với hiệu ứng shimmer trước khi hiện data. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 4:
+TC-DEP-003 | Package Selection UI | Cao | Quan sát danh sách các gói nạp tiền hiển thị từ API. | Hiển thị Grid 4 cột (desktop); mỗi gói đủ tên, số tiền, bonus (màu xanh lá) và nút "Select Package". | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 5:
+TC-DEP-004 | Christmas Theme | TB | Quan sát gói nạp có tên chứa "Giáng sinh/Christmas". | Hiển thị Badge "🎄 Sự kiện", border đỏ và background pattern chủ đề Noel đặc biệt. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 6:
+TC-DEP-005 | Select Package Flow | Cao | Click vào một gói nạp cụ thể. | Nút hiện loading "Đang xử lý...", gọi API tạo đơn thành công và tự động mở QR Payment Modal. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 7:
+TC-DEP-006 | Package Empty State | TB | Giả lập API trả về mảng rỗng. | Hiển thị khung nét đứt với thông báo "Không có gói nạp tiền nào", giao diện không bị lỗi/crash. |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 8:
+TC-DEP-007 | Custom Amount UI | Cao | Quan sát phần nhập số tiền tùy chỉnh. | Có label "Amount (VND)", input field (placeholder: Enter amount) và nút "Top Up" bị khóa mặc định. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 9:
+TC-DEP-008 | Input Formatting | TB | Nhập số vào ô tùy chỉnh (ví dụ: 50000). | Tự động thêm dấu phẩy phân cách (50,000) khi gõ; loại bỏ các ký tự không phải số. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 10:
+TC-DEP-009 | Min Amount Validation | Cao | Nhập số tiền < 10,000 VND. | Hiển thị lỗi "Số tiền tối thiểu là 10,000 VND" màu đỏ; nút nạp tiền tiếp tục bị vô hiệu hóa. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 11:
+TC-DEP-010 | Multiple Validation | Cao | Nhập số tiền không chia hết cho 1,000. | Hiển thị lỗi "Số tiền phải là bội số của 1,000"; không cho phép nhấn nút nạp tiền. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 12:
+TC-DEP-011 | Submit Custom Amount | Cao | Nhập 100,000 VND và nhấn "Top Up". | Nút hiện "Đang tạo...", gọi API POST /create-deposit thành công và mở QR Payment Modal. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 13:
+TC-DEP-012 | QR Modal Display | Cao | Mở QR Modal từ một đơn nạp. | Hiển thị ảnh QR (200x200), nội dung chuyển khoản "SIUPay...", số tiền và nút "Cancel Order". | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 14:
+TC-DEP-013 | Countdown Timer | Cao | Quan sát đồng hồ trong QR Modal. | Định dạng MM:SS đếm ngược mỗi giây; chuyển màu đỏ (text-red-600) khi thời gian còn dưới 1 phút. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 15:
+TC-DEP-014 | Copy Transfer Content | TB | Click nút Copy hoặc nội dung mã đơn. | Lưu thành công vào clipboard; đổi sang icon check (✓) màu xanh trong 2 giây để feedback. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 16:
+TC-DEP-015 | Polling Status | Cao | Theo dõi Network khi mở QR Modal. | Hệ thống tự động gọi API /payment/current mỗi 5 giây để kiểm tra trạng thái thanh toán từ phía ngân hàng. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 17:
+TC-DEP-016 | Cancel Order Action | Cao | Nhấn "Cancel Order" trong QR Modal. | QR Modal không đóng ngay mà hiển thị thêm một Modal xác nhận hủy (Cancel Confirm Modal). | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 18:
+TC-DEP-017 | Cancel Modal UI | TB | Quan sát Modal xác nhận hủy. | Hiển thị ô nhập lý do (maxLength 500) kèm bộ đếm ký tự "X/500" và nút "Confirm Cancel". | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 19:
+TC-DEP-018 | Confirm Cancel Flow | Cao | Nhập lý do và nhấn xác nhận hủy đơn. | Nút hiện "Cancelling...", gọi API hủy, đóng cả 2 modal và hiển thị Toast thông báo thành công. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 20:
+TC-DEP-019 | Success Modal UI | Cao | Giả lập trạng thái nạp thành công. | Hiển thị Modal "Deposit Successful!" với icon tích xanh lớn, số tiền nạp và nút "Done". | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 21:
+TC-DEP-020 | Close Success Modal | TB | Nhấn "Done" sau khi nạp thành công. | Modal đóng, làm mới dữ liệu lịch sử nạp tiền và cập nhật số dư hiển thị (nếu có). | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 22:
+TC-DEP-021 | History Table UI | Cao | Quan sát bảng Recent Deposit History. | Hiển thị đủ các thẻ thống kê phía trên và bảng 7 cột dữ liệu; có phân trang (10 dòng/trang). | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 23:
+TC-DEP-022 | History Statistics | TB | Quan sát các thẻ số liệu trên bảng. | Hiển thị đúng: Tổng giao dịch, Tiền đã nạp, Bonus và Tiền đã chi với hiệu ứng CountUp. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 24:
+TC-DEP-023 | Search Function | TB | Nhập mã đơn nạp vào ô Search. | Sau 500ms (debounce), bảng gọi API và lọc đúng bản ghi theo mã đã nhập. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 25:
+TC-DEP-024 | Status Filter | TB | Chọn trạng thái (Completed, Pending...) | Bảng reset về trang 1 và hiển thị danh sách giao dịch theo đúng trạng thái đã chọn. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 26:
+TC-DEP-025 | Status Badge Color | TB | Quan sát cột Status trong bảng. | Màu sắc chuẩn: Completed (Xanh lá), Pending (Vàng), Expired/Failed (Đỏ), Cancelled (Xám). | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 27:
+TC-DEP-026 | Re-open Pending QR | TB | Click vào một dòng đơn "Pending" trong bảng. | Nếu là đơn hiện tại, hệ thống mở lại ngay QR Payment Modal để người dùng tiếp tục thanh toán. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 28:
+TC-DEP-027 | History Pagination | TB | Quan sát bộ phân trang khi có > 10 giao dịch. | Hiển thị đúng số trang (1, 2, 3...); Chuyển đổi chính xác giữa 0-indexed (backend) và 1-indexed (frontend). Nút Prev/Next khóa đúng lúc. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 29:
+TC-DEP-028 | History Empty State | TB | Truy cập bằng tài khoản mới chưa có lịch sử nạp. | Hiển thị thông báo "No deposit history yet..." căn giữa bảng; Colspan đủ 7 cột; Không có lỗi JS hay crash giao diện. |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 30:
+TC-DEP-029 | API Integration: Create Deposit | Cao | Mở Network tab, thực hiện tạo đơn nạp tiền. | API /api/payment/create-deposit trả về status 200 kèm bộ data: depositId, qrUrl, transferContent, expiredAt. Mapping dữ liệu vào QR Modal chính xác. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 31:
+TC-DEP-030 | Responsive Layout | TB | Thay đổi kích thước trình duyệt (Desktop, Tablet, Mobile). | Desktop: Grid 4 cột; Tablet: Grid 2 cột; Mobile: 1 cột đơn. Bảng lịch sử cho phép cuộn ngang trên thiết bị nhỏ, không phá vỡ layout. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+Total non-empty rows: 31
+
+
+================================================================================
+SHEET 4: SV-4-Trang in tài liệu
+================================================================================
+Dimensions: 993 rows x 26 columns
+
+HEADERS:
+ID | Tên Testcase | Mức độ | Các bước thực hiện | Kết quả mong đợi | Kết quả |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+--------------------------------------------------------------------------------
+
+ROW 1:
+ID | Tên Testcase | Mức độ | Các bước thực hiện | Kết quả mong đợi | Kết quả |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 2:
+TC-PRINT-001 | Page Header | Cao | Truy cập /en/student/print, quan sát tiêu đề. | Hiển thị "Print Document" và mô tả "Upload and print your document" đúng design. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 3:
+TC-PRINT-002 | Step Indicator UI | Cao | Quan sát thanh trạng thái 4 bước ở đầu trang. | Hiển thị 4 bước: Upload, Printer, Config, Confirm. Bước 1 hiện pulse animation màu xanh. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 4:
+TC-PRINT-003 | Step Transition | TB | Upload file thành công và nhấn "Next". | Bước 1 hiện tích xanh (completed), bước 2 active. Connector line fill màu xanh mượt mà. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 5:
+TC-PRINT-004 | Upload Area UI | Cao | Quan sát vùng kéo thả file ở Bước 1. | Border nét đứt, có icon đám mây và text hướng dẫn định dạng/dung lượng (Max 50MB). | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 6:
+TC-PRINT-005 | File Picker | Cao | Click trực tiếp vào vùng upload. | File picker hệ thống mở ra; cho phép chọn file PDF/Office. Tự động upload sau khi chọn. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 7:
+TC-PRINT-006 | Drag & Drop | TB | Kéo file từ thư mục máy tính thả vào vùng upload. | Visual feedback khi kéo vào (border đổi màu). File được tiếp nhận và bắt đầu tính số trang. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 8:
+TC-PRINT-007 | File Type Validation | Cao | Thử upload file .txt hoặc .jpg. | Hiện thông báo lỗi: "Loại file không được hỗ trợ". Chỉ chấp nhận PDF, DOCX, XLSX, PPTX... | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 9:
+TC-PRINT-008 | File Size Validation | Cao | Thử upload file > 50MB. | Hiện thông báo lỗi: "File quá lớn. Kích thước tối đa: 50MB". Ngăn chặn tiến hành bước sau. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 10:
+TC-PRINT-009 | Upload Progress | TB | Quan sát trạng thái khi file đang được đẩy lên server. | Hiển thị spinner và text "Đang upload và tính số trang...". Xong hiện số trang và mở nút "Next". | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 11:
+TC-PRINT-010 | Remove File | TB | Nhấn nút (X) trên file info card đã upload. | File bị xóa khỏi state, vùng upload ban đầu quay trở lại, nút "Next" bị vô hiệu hóa (disable). | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 12:
+TC-PRINT-011 | Printer List UI | Cao | Chuyển sang Bước 2, quan sát danh sách máy in. | Hiển thị Grid các máy in kèm: Model, Vị trí (Tòa-Phòng), Trạng thái (Online/Offline) và Features. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 13:
+TC-PRINT-012 | Printer Search | TB | Nhập từ khóa (vd: "HP") vào ô tìm kiếm. | Danh sách tự động lọc chỉ hiển thị các máy in có tên hoặc thương hiệu chứa "HP". | Fail |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 14:
+TC-PRINT-013 | Building Filter | TB | Chọn tòa nhà (vd: "H1") từ dropdown. | Chỉ hiển thị máy in thuộc tòa H1. Reset dropdown Room về "All rooms" khi đổi tòa nhà. | Fail |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 15:
+TC-PRINT-014 | Room Filter | TB | Chọn một phòng cụ thể sau khi chọn tòa nhà. | Lọc chính xác máy in tại phòng đó. API gọi đúng tham số roomId. | Fail |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 16:
+TC-PRINT-015 | Feature Filter | TB | Lọc máy in theo "Hỗ trợ màu" hoặc "In 2 mặt". | Danh sách chỉ hiện các máy thỏa mãn tính năng kỹ thuật đã chọn. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 17:
+TC-PRINT-016 | Select Printer | Cao | Click chọn một máy in đang Online. | Card máy in hiện border đậm, có icon check. Nút "Next" được kích hoạt để sang Bước 3. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 18:
+TC-PRINT-017 | Printer Pagination | TB | Quan sát phân trang nếu danh sách máy in > 20. | Hiển thị "Trang X / Y". Nhấn chuyển trang gọi API load dữ liệu mới chính xác. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 19:
+TC-PRINT-018 | Config Form UI | Cao | Quan sát form cấu hình tại Bước 3. | Hiển thị đủ: Khổ giấy, Chiều in, Mặt in, Chế độ màu, Khoảng trang và Số bản sao. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 20:
+TC-PRINT-019 | Paper Size Change | TB | Đổi khổ giấy sang A3. | Cấu hình được lưu; hệ thống tự động gọi API calculateCost để tính lại giá tiền dự kiến. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 21:
+TC-PRINT-020 | Orientation Toggle | TB | Chuyển đổi giữa Portrait và Landscape. | Giao diện nút bấm thay đổi (highlight); Icon checkmark di chuyển theo lựa chọn. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 22:
+TC-PRINT-021 | Duplex Validation | TB | Chọn in 2 mặt trên máy in KHÔNG hỗ trợ duplex. | Nút "Two-sided" bị mờ (disable), hiện cảnh báo "Not supported". Không cho phép chọn. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 23:
+TC-PRINT-022 | Color Validation | TB | Chọn in màu trên máy in trắng đen. | Nút "Color" bị disable. Nếu máy có hỗ trợ màu, chọn sẽ làm tăng tổng tiền thanh toán. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 24:
+TC-PRINT-024 | Copies Validation | TB | Thay đổi số lượng bản sao (1-99). | Nút +/- hoạt động đúng; Input không cho phép nhập số ngoài khoảng 1-99 hoặc ký tự lạ. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 25:
+TC-PRINT-025 | Real-time Cost | Cao | Thay đổi khổ giấy/số bản sao tại Bước 3. | Hiển thị spinner "Đang tính...". Gọi API calculateCost (debounce 500ms) và cập nhật số tiền dự kiến chính xác. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 26:
+TC-PRINT-026 | Final Summary | Cao | Chuyển sang Bước 4 (Confirm). | Hiển thị đầy đủ 4 phần: Thông tin File, Máy in, Cấu hình in và Tổng chi phí. Dữ liệu khớp 100% với các bước trước. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 27:
+TC-PRINT-027 | Payment Selection | Cao | Click chọn giữa "Dùng số dư" và "Thanh toán QR". | Card được chọn có border xanh và icon checkmark. Tổng chi phí cập nhật theo phương thức tương ứng. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 28:
+TC-PRINT-028 | QR Modal UI | TB | Chọn QR SePay và nhấn Xác nhận. | Popup hiện mã QR, Mã giao dịch, Số tiền và Thời gian hết hạn. Có nút "Đã thanh toán" và "Hủy". | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 29:
+TC-PRINT-029 | Confirm & Submit | Cao | Nhấn "Confirm" với phương thức "Dùng số dư". | Nút chuyển sang "Processing...". Gọi API POST /api/students/print-jobs. Thành công sẽ hiện Toast và reset Wizard về Bước 1. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 30:
+TC-PRINT-030 | Error Handling | Cao | Cố tình submit khi số dư tài khoản < phí in. | Hiển thị Banner đỏ báo lỗi "Số dư không đủ...". Nút Confirm quay lại trạng thái bình thường để người dùng đổi máy in/cấu hình. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 31:
+TC-PRINT-031 | File Table UI | TB | Quan sát bảng bên dưới Print Wizard. | Hiển thị danh sách file: Tên, Loại, Dung lượng, Ngày upload. Có thanh Search và Bộ lọc nâng cao. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 32:
+TC-PRINT-032 | Print Existing File | TB | Nhấn nút "Print" trên một file có sẵn trong bảng. | Wizard tự động nhảy thẳng sang Bước 2 (Chọn máy in) với file đó đã được nạp sẵn vào hệ thống. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 33:
+TC-PRINT-033 | Back Navigation | TB | Nhấn nút "Back" ở các bước 2, 3, 4. | Quay lại bước trước đó mà không làm mất dữ liệu đã chọn/nhập. Step Indicator cập nhật trạng thái lùi lại. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 34:
+TC-PRINT-034 | Next Validation | Cao | Thử nhấn "Next" khi chưa upload file hoặc chưa chọn máy. | Nút "Next" bị disable (mờ). Không thể chuyển bước nếu thiếu thông tin bắt buộc ở Step 1 và Step 2. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 35:
+TC-PRINT-035 | Responsive | TB | Kiểm tra trên Mobile (375px) và Tablet. | Step Indicator chuyển sang dạng rút gọn hoặc scroll ngang. Form fields và Printer cards tự động xếp dọc (stack) trên mobile. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+Total non-empty rows: 35
+
+
+================================================================================
+SHEET 5: SV-5-Trang lịch sử in
+================================================================================
+Dimensions: 994 rows x 26 columns
+
+HEADERS:
+ID | Tên Testcase | Mức độ | Các bước thực hiện | Kết quả mong đợi | Kết quả |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+--------------------------------------------------------------------------------
+
+ROW 1:
+ID | Tên Testcase | Mức độ | Các bước thực hiện | Kết quả mong đợi | Kết quả |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 2:
+TC-HISTORY-001 | Header Display | TB | Truy cập /en/student/history, quan sát tiêu đề. | Hiển thị "Print History" và mô tả phụ "View your printing history" đúng chuẩn thiết kế. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 3:
+TC-HISTORY-002 | Summary Cards UI | Cao | Kiểm tra 3 thẻ thống kê ở đầu trang. | Hiển thị: Công việc tháng này, Số trang đã in (30 ngày), Tỷ lệ thành công. Có Skeleton khi load. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 4:
+TC-HISTORY-003 | Stats API Integration | Cao | Quan sát Network tab khi trang load. | API /api/student/print/history/stats gọi thành công. Dữ liệu từ API hiển thị khớp lên các Cards. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 5:
+TC-HISTORY-004 | Trend Display | TB | Kiểm tra chỉ số tăng/giảm trên Card. | Hiển thị "Tăng/Giảm X%". Màu xanh cho tích cực, màu đỏ/vàng cho tiêu cực hoặc 0% thì ẩn. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 6:
+TC-HISTORY-005 | Search Function | Cao | Nhập tên tài liệu hoặc máy in vào ô tìm kiếm. | Lọc dữ liệu client-side real-time theo: tên tài liệu, máy in, vị trí hoặc ID công việc. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 7:
+TC-HISTORY-006 | Filters Toggle | TB | Click nút "Bộ lọc nâng cao". | Hiển thị/Ẩn vùng lọc nâng cao mượt mà. Mặc định là ẩn khi mới vào trang. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 8:
+TC-HISTORY-007 | Filter - Status | Cao | Chọn trạng thái (vd: "Thành công") từ dropdown. | API gọi lại với tham số status. Danh sách chỉ hiện các job có trạng thái tương ứng. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 9:
+TC-HISTORY-008 | Filter - Date Range | Cao | Chọn ngày bắt đầu và ngày kết thúc. | API gọi với fromDate, toDate. Danh sách lọc đúng khoảng thời gian. End date không được trước Start date. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 10:
+TC-HISTORY-009 | Filter - Color Mode | TB | Chọn chế độ màu (In màu/Đen trắng). | Lọc chính xác các bản in theo chế độ màu đã cấu hình. Kết hợp cả API và Client-side filter. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 11:
+TC-HISTORY-010 | Filter - Duplex | TB | Lọc theo "In 2 mặt" hoặc "In 1 mặt". | API gọi với supportsDuplex: true/false. Danh sách cập nhật đúng kết quả. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 12:
+TC-HISTORY-011 | Filter - File Type | TB | Chọn định dạng file (PDF, DOCX...). | API gửi tham số fileType. Chỉ hiển thị các công việc in thuộc định dạng đó. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 13:
+TC-HISTORY-012 | History Table UI | Cao | Quan sát cấu trúc bảng lịch sử. | Đủ 6 cột: Tài liệu, Máy in, Chế độ, Trang, Thời gian, Trạng thái. Dữ liệu hiển thị rõ ràng. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 14:
+TC-HISTORY-013 | Table Empty State | TB | Lọc với điều kiện không có kết quả. | Hiển thị thông báo "Không có dữ liệu phù hợp...". Ẩn bộ phân trang (pagination). | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 15:
+TC-HISTORY-014 | Table Sorting | Cao | Click vào header các cột trong bảng. | Hỗ trợ Sort ASC/DESC (hiện icon ↑↓ xanh). Gọi API với sortBy và sortDirection tương ứng. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 16:
+TC-HISTORY-015 | Row Click Action | Cao | Click vào một dòng bất kỳ trong bảng. | Mở Modal chi tiết công việc. Trạng thái ID job được lưu vào state để gọi API chi tiết. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 17:
+TC-HISTORY-016 | Status Badge UI | TB | Quan sát màu sắc cột Trạng thái. | Xanh lá: Hoàn tất; Xanh dương: Đang xử lý; Vàng: Đang chờ; Đỏ: Lỗi/Thất bại. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 18:
+TC-HISTORY-017 | List API Integration | Cao | Kiểm tra API danh sách lịch sử. | API /api/student/print/history gọi đúng query params: page, limit, sortBy, filters. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 19:
+TC-HISTORY-018 | Error Handling UI | Cao | Giả lập lỗi API (Network error). | Hiển thị banner thông báo lỗi màu đỏ "Có lỗi xảy ra khi tải dữ liệu...". Giao diện không bị crash. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 20:
+TC-HISTORY-019 | Detail Modal UI | Cao | Quan sát nội dung khi Modal chi tiết mở. | Hiển thị đủ: Icon file, Job ID, Status badge, Config in (Paper, Color...), và Thông tin máy in. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 21:
+TC-HISTORY-020 | Detail Modal Close | TB | Nhấn nút X hoặc click ra ngoài Modal. | Modal đóng lại. Reset selectedJobId về null để giải phóng bộ nhớ. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 22:
+TC-HISTORY-021 | View File Action | TB | Nhấn "Xem file in" trong Modal chi tiết. | Nếu có previewUrl, mở file trong tab mới. Nếu không có, nút bị vô hiệu hóa (disable). | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 23:
+TC-HISTORY-022 | Detail API Sync | Cao | Quan sát Network khi mở Modal. | Gọi API /api/students/print-jobs/{jobId} để lấy dữ liệu mới nhất, không dùng dữ liệu cũ từ bảng. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 24:
+TC-HISTORY-023 | Printer Location | TB | Click vào thông tin vị trí máy in trong Modal chi tiết. | Mở PrinterLocationModal hiển thị bản đồ hoặc chỉ dẫn chi tiết (Campus/Building/Room). | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 25:
+TC-HISTORY-024 | Pagination UI | TB | Quan sát thanh phân trang ở cuối bảng dữ liệu. | Hiển thị nút Prev/Next, số trang và text "Hiển thị X-Y của Z". Disabled nút Prev khi ở trang 1. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 26:
+TC-HISTORY-025 | Pagination Nav | TB | Click chuyển trang (số trang cụ thể hoặc nút Next). | API gọi với page mới. Danh sách cập nhật dữ liệu tương ứng. Trang tự động cuộn lên đầu. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 27:
+TC-HISTORY-026 | Cancel Btn Display | Cao | Mở chi tiết một job đang ở trạng thái "Đang chờ". | Nút "Hủy" hiển thị cho job queued/processing và ẩn cho job completed/failed. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 28:
+TC-HISTORY-027 | Cancel Action | Cao | Nhấn "Hủy" và xác nhận trong Dialog. | API /cancel được gọi. Job chuyển trạng thái sang "Đã hủy", hoàn tiền trang (nếu có logic). | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 29:
+TC-HISTORY-028 | Reprint Btn Display | Cao | Mở chi tiết một job đã "Hoàn tất" hoặc "Lỗi". | Nút "In lại" hiển thị nổi bật. Ẩn nút này đối với các job đang trong hàng đợi xử lý. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 30:
+TC-HISTORY-029 | Reprint Action | Cao | Nhấn "In lại" và xác nhận thanh toán. | Kiểm tra số dư, tạo Job mới với cấu hình y hệt job cũ. Job mới xuất hiện ở đầu danh sách. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+Total non-empty rows: 30
+
+
+================================================================================
+SHEET 6: SV-6-Thông tin sinh viên
+================================================================================
+Dimensions: 994 rows x 26 columns
+
+HEADERS:
+ID | Tên Testcase | Mức độ | Các bước thực hiện | Kết quả mong đợi | Trạng thái |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+--------------------------------------------------------------------------------
+
+ROW 1:
+ID | Tên Testcase | Mức độ | Các bước thực hiện | Kết quả mong đợi | Trạng thái |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 2:
+TC-PROFILE-001 | Page Header | TB | Truy cập /en/student/profile. | Trang hiển thị đúng layout với PageBackground và AppDock điều hướng. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 3:
+TC-PROFILE-002 | Profile Card UI | Cao | Kiểm tra thẻ thông tin chính (Avatar, Tên). | Hiển thị đầy đủ Avatar, Tên (bold), Status badge "Active" và các nút hành động. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 4:
+TC-PROFILE-003 | Avatar Logic | TB | Kiểm tra hiển thị ảnh đại diện. | Ưu tiên hiển thị profilePicture. Nếu không có, hiển thị Initials trên nền Gradient. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 5:
+TC-PROFILE-004 | Status Badge | TB | Quan sát nhãn trạng thái sinh viên. | Hiển thị badge màu xanh với icon User và text trạng thái (Active/Graduated...). | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 6:
+TC-PROFILE-005 | Action Buttons | Cao | Kiểm tra nút "Edit Profile" & "Change PW". | Nút hiển thị đúng icon. Click mở tương ứng EditProfileModal hoặc ChangePasswordModal. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 7:
+TC-PROFILE-006 | Balance Display | Cao | Kiểm tra thẻ số dư tài khoản. | Hiển thị tiêu đề "SỐ DƯ", số tiền có hiệu ứng count-up và nút "Nạp tiền". | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 8:
+TC-PROFILE-007 | Balance Sync | Cao | Kiểm tra đồng bộ số dư từ API. | API /api/student/profile trả về trường balance. Giá trị hiển thị khớp với API. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 9:
+TC-PROFILE-008 | Top-up Nav | TB | Click vào nút "Nạp tiền". | Điều hướng thành công đến trang /en/student/top-up. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 10:
+TC-PROFILE-009 | Contact Card | Cao | Kiểm tra thẻ thông tin liên lạc. | Hiển thị Email (Uni), Phone, Ngày sinh với các icon tương ứng. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 11:
+TC-PROFILE-010 | Academic Card | Cao | Kiểm tra thẻ thông tin học tập. | Hiển thị MSSV, Lớp (nếu có), Khoa và Ngành học từ dữ liệu hệ thống. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 12:
+TC-PROFILE-011 | Profile API | Cao | Quan sát Network tab khi tải trang. | API profile được gọi thành công (200 OK) với đầy đủ metadata sinh viên. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 13:
+TC-PROFILE-012 | Loading State | TB | Quan sát khi mạng chậm/đang tải. | Hiển thị ProfileSkeleton (các khung xám nhấp nháy) thay cho nội dung thật. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 14:
+TC-PROFILE-013 | Error State | Cao | Giả lập lỗi API profile. | Hiển thị thẻ lỗi màu đỏ với nút "Thử lại" để refetch dữ liệu. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 15:
+TC-PROFILE-014 | Edit Modal UI | Cao | Click "Edit Profile", quan sát Modal. | Modal hiển thị: Email (read-only), Phone, Address, Profile Pic URL. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 16:
+TC-PROFILE-015 | Email Locked | TB | Thử chỉnh sửa ô Email trong Modal. | Trường Email bị disabled, có thông báo "Email không thể thay đổi". | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 17:
+TC-PROFILE-016 | Phone Valid | Cao | Nhập số điện thoại sai định dạng. | Hiển thị lỗi validation (Zod). Yêu cầu từ 10-15 chữ số. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 18:
+TC-PROFILE-017 | Address Field | TB | Nhập địa chỉ trong Edit Modal. | Hỗ trợ tối đa 500 ký tự. Có bộ đếm ký tự (X/500) cập nhật real-time. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 19:
+TC-PROFILE-018 | Avatar Preview | TB | Nhập URL ảnh đại diện mới. | Hiển thị ảnh preview (80x80px) ngay trong Modal nếu URL hợp lệ. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 20:
+TC-PROFILE-019 | Edit Submit | Cao | Nhấn "Save Change" với thông tin mới. | API PUT được gọi. Hiển thị Toast thành công, đóng modal và cập nhật UI. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 21:
+TC-PROFILE-020 | No Change Opt | Cao | Nhấn Save khi không chỉnh sửa gì. | Hiển thị Toast cảnh báo "Không có thay đổi nào để lưu". | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 22:
+TC-PROFILE-021 | Modal Close | TB | Nhấn "Hủy" hoặc phím ESC. | Đóng modal và reset các thay đổi tạm thời về trạng thái ban đầu. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 23:
+TC-PROFILE-022 | Change PW UI | Cao | Click "Change Password". | Modal hiển thị đủ 3 trường: Mật khẩu cũ, Mật khẩu mới, Xác nhận mật khẩu. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 24:
+TC-PROFILE-023 | PW Validation | Cao | Nhập mật khẩu mới ngắn hoặc không khớp. | Hiển thị lỗi: mật khẩu < 6 ký tự hoặc "Mật khẩu xác nhận không khớp". | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 25:
+TC-PROFILE-024 | PW Submit OK | Cao | Đổi mật khẩu thành công. | API gọi thành công. Toast thông báo, reset form và đóng modal. | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+ROW 26:
+TC-PROFILE-025 | PW Error Handl | Cao | Nhập sai mật khẩu hiện tại. | API trả về lỗi (401/400). Toast hiển thị lỗi "Mật khẩu cũ không chính xác". | Pass |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+Total non-empty rows: 26
+
+
+================================================================================
+SUMMARY
+================================================================================
+Total sheets: 6
+Sheet names: SV-1-Thành phần chung, SV-2-Trang chủ, SV-3-Trang nạp tiền tài khoản, SV-4-Trang in tài liệu, SV-5-Trang lịch sử in, SV-6-Thông tin sinh viên

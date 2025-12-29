@@ -1,0 +1,333 @@
+BÁO CÁO USABILITY TEST
+Hệ Thống In Ấn Thông Minh (SmartPrint) - MVP 1
+
+1. TỔNG QUAN DỰ ÁN
+1.1. Thông Tin Dự Án
+•	Tên dự án: SmartPrint - Hệ Thống In Ấn Thông Minh
+•	Phiên bản: MVP 1
+•	Ngày thực hiện test: [Ngày/Tháng/Năm]
+•	Người thực hiện: [Tên người thực hiện]
+•	Mục tiêu test: Đánh giá khả năng sử dụng (usability) của giao diện người dùng trong phiên bản MVP 1.
+1.2. Mô Tả Hệ Thống
+SmartPrint là hệ thống quản lý in ấn dành cho sinh viên và nhân viên với các tính năng trọng tâm:
+•	Dành cho Sinh viên: Dashboard (số dư, lịch sử), Quy trình in 4 bước (Upload → Chọn máy in → Cấu hình → Xác nhận), Lịch sử in, Nạp tiền (QR Code), Mua gói trang in, Quản lý máy in, Hồ sơ cá nhân và Cài đặt.
+•	Dành cho Nhân viên: Dashboard thống kê, Quản lý máy in (CRUD), Quản lý sinh viên, Báo cáo in ấn, Cấu hình hệ thống và Nhật ký hệ thống (Logs).
+
+2. CHIẾN LƯỢC TEST
+2.1. Loại Test
+Qualitative Usability Testing (Kiểm thử định tính): Tập trung phát hiện vấn đề sử dụng, hiểu trải nghiệm và thu thập phản hồi về giao diện.
+2.2. Phương Thức Thực Hiện
+In-Person Testing (Trực tiếp): Quan sát hành vi, biểu cảm và thời gian thực trên trình duyệt Chrome/Firefox tại [Địa điểm thực hiện].
+2.3. Phương Pháp Thu Thập Dữ Liệu
+•	Think-Aloud Protocol: Người dùng nói ra suy nghĩ khi thực hiện thao tác.
+•	Quan sát trực tiếp: Ghi nhận hành vi, thời gian và lỗi.
+•	Ghi hình màn hình: Lưu lại quá trình (nếu được đồng ý).
+•	Bảng câu hỏi sau test: Thu thập đánh giá tổng thể sau khi kết thúc các nhiệm vụ.
+
+3. TUYỂN CHỌN NGƯỜI THAM GIA
+3.1. Tiêu Chí Tuyển Chọn
+•	Nhóm 1 (Sinh viên - 5 người): Độ tuổi 18-25, đa dạng năm học, có kỹ năng internet cơ bản, đã hoặc chưa từng dùng hệ thống in cũ.
+•	Nhóm 2 (Nhân viên - 3 người): Độ tuổi 25-45, quen thuộc giao diện quản trị, có kinh nghiệm quản lý hệ thống.
+3.2. Thông Tin Người Tham Gia
+ID	Vai trò	Tuổi	Kinh nghiệm	Thiết bị
+P01	Sinh viên	20	Năm 2, đã dùng hệ thống cũ	Laptop Windows
+P02	Sinh viên	22	Năm 3, chưa dùng hệ thống in	Laptop MacOS
+P03	Sinh viên	19	Năm 1, mới vào trường	Desktop Windows
+P04	Sinh viên	21	Năm 4, thường xuyên in	Laptop Windows
+P05	Sinh viên	23	Năm 3, ít khi in	Laptop Windows
+S01	Nhân viên	30	3 năm quản lý hệ thống	Desktop Windows
+S02	Nhân viên	28	2 năm hỗ trợ sinh viên	Laptop Windows
+S03	Nhân viên	35	5 năm quản lý CNTT	Desktop Windows
+
+4. ĐỊNH NGHĨA NHIỆM VỤ (TASKS)
+4.1. Nhiệm Vụ Cho Sinh Viên
+•	Task 1: Đăng nhập và xem Dashboard.
+•	Task 2: In tài liệu PDF (thực hiện quy trình 4 bước).
+•	Task 3: Xem lịch sử in và sử dụng bộ lọc theo ngày.
+•	Task 4: Thực hiện quy trình nạp tiền (chọn gói, quét QR).
+•	Task 5: Tìm kiếm thông tin và vị trí máy in.
+•	Task 6: Cập nhật thông tin hồ sơ cá nhân.
+4.2. Nhiệm Vụ Cho Nhân viên
+•	Task 1: Đăng nhập và phân tích Dashboard quản trị.
+•	Task 2: Thực hiện thêm máy in mới vào hệ thống.
+•	Task 3: Tra cứu báo cáo in ấn theo tháng.
+•	Task 4: Tìm kiếm và xem thông tin sinh viên theo mã số.
+
+5. QUY TRÌNH THỰC HIỆN TEST
+1.	Trước khi test: Chuẩn bị môi trường (deploy app, tài khoản test, file mẫu) và tài liệu (Consent form, checklist, bảng ghi chép).
+2.	Trong khi test: Giới thiệu mục đích (5'), Thực hiện nhiệm vụ & Quan sát (30-45'), Phỏng vấn sau test (10').
+3.	Sau khi test: Tổng hợp dữ liệu và phân tích kết quả.
+
+6. KẾT QUẢ TEST
+6.1. Tổng Quan
+•	Tỷ lệ hoàn thành: 85%
+•	Thời gian TB/nhiệm vụ: 3.5 phút
+•	Tổng số người tham gia: 8 người.
+6.2. Kết Quả Chi Tiết (Nhóm Sinh Viên)
+Nhiệm vụ	Kết quả nổi bật	Vấn đề ghi nhận
+T1: Đăng nhập	5/5 Thành công	P03 tìm form đăng nhập hơi lâu.
+T2: In PDF	3/5 Thành công	01 người cần hỗ trợ, 01 người thất bại do lúng túng cấu hình.
+T3: Lịch sử in	5/5 Thành công	P03 tìm bộ lọc hơi lâu.
+T4: Nạp tiền	5/5 Thành công	P02 bối rối khi quét QR; P03 cần thêm hướng dẫn.
+T5: Xem máy in	5/5 Thành công	Hoạt động tốt, thông tin rõ ràng.
+T6: Hồ sơ	5/5 Thành công	P03 tìm nút chỉnh sửa hơi lâu.
+6.3. Kết Quả Chi Tiết (Nhóm Nhân Viên)
+Nhiệm vụ	Kết quả nổi bật	Vấn đề ghi nhận
+T1: Đăng nhập & Dashboard	3/3 Thành công	Các biểu đồ thống kê hiển thị tốt nhưng S03 góp ý cần thêm chú thích cho các cột dữ liệu.
+T2: Thêm máy in mới	2/3 Thành công	01 người cần hỗ trợ ở phần nhập thông tin Model và Brand do form hơi dài; P02 nhầm lẫn giữa địa chỉ IP và tên máy in.
+T3: Xem báo cáo theo tháng	3/3 Thành công	Tốc độ tải báo cáo nhanh; S01 đề xuất nên có tính năng xuất file Excel trực tiếp từ trang này.
+T4: Tìm kiếm sinh viên	3/3 Thành công	Tìm kiếm theo MSSV rất nhanh và chính xác; S02 thấy giao diện xem chi tiết thông tin sinh viên hơi rối.
+
+7. PHÂN TÍCH VẤN ĐỀ
+7.1. Vấn Đề Nghiêm Trọng (Severity 1)
+1.	Thiếu preview trước khi in: 5/5 người dùng yêu cầu để tránh in nhầm.
+2.	Thiếu hướng dẫn quy trình in: Người dùng khó hiểu các tùy chọn (kích thước giấy, màu sắc).
+7.2. Vấn Đề Quan Trọng (Severity 2)
+1.	Thông tin máy in chưa đầy đủ (vị trí, trạng thái) tại bước chọn máy.
+2.	Bộ lọc lịch sử chưa thực sự nổi bật.
+7.3. Vấn Đề Nhỏ (Severity 3)
+•	Nút chỉnh sửa hồ sơ chưa rõ ràng.
+•	Thiếu hướng dẫn thanh toán QR cụ thể.
+•	Kích thước chữ trên mobile ở một số chỗ còn nhỏ.
+
+8. PHẢN HỒI TỪ NGƯỜI DÙNG
+•	Điểm mạnh: Giao diện hiện đại; Quy trình rõ ràng; Dashboard đầy đủ thông tin; Tính năng lịch sử hữu ích; Responsive tốt.
+•	Điểm yếu: Thiếu Preview; Cấu hình in khó hiểu; Thông tin máy in cần chi tiết hơn; Hướng dẫn nạp tiền sơ sài.
+
+9. KẾT LUẬN VÀ KHUYẾN NGHỊ
+9.1. Tổng Kết
+Hệ thống SmartPrint MVP 1 có nền tảng tốt, giao diện đẹp và quy trình rõ ràng. Tuy nhiên, cần bổ sung tính năng Preview và hướng dẫn chi tiết để giảm thiểu sai sót cho người dùng.
+9.2. Khuyến Nghị Ưu Tiên
+•	Cao: Thêm Preview PDF; Thêm Tooltip giải thích cấu hình; Bổ sung trạng thái máy in.
+•	Trung bình: Nổi bật bộ lọc; Thêm hướng dẫn QR; Cải thiện UI nút chỉnh sửa.
+•	Thấp: Lưu cấu hình yêu thích; Bản đồ vị trí máy in.
+10.1. CONSENT FORM (PHIẾU ĐỒNG Ý THAM GIA TEST)
+PHIẾU ĐỒNG Ý THAM GIA USABILITY TEST
+Hệ Thống In Ấn Thông Minh (SmartPrint) – MVP 1
+Thông tin dự án
+•	Tên dự án: SmartPrint – Hệ Thống In Ấn Thông Minh
+•	Phiên bản: MVP 1
+•	Ngày thực hiện: _______________
+•	Thời gian dự kiến: 45–60 phút
+1. MỤC ĐÍCH TEST
+Bạn được mời tham gia vào một buổi usability test để đánh giá giao diện người dùng của hệ thống SmartPrint.
+Mục tiêu của test này là:
+•	Đánh giá khả năng sử dụng của giao diện
+•	Xác định các vấn đề mà người dùng có thể gặp phải
+•	Thu thập phản hồi để cải thiện hệ thống
+Lưu ý quan trọng:
+Chúng tôi đang test hệ thống, KHÔNG phải test bạn. Không có câu trả lời đúng hay sai.
+2. QUY TRÌNH TEST
+1.	Giới thiệu (5 phút): Giải thích về test và hướng dẫn cách tham gia
+2.	Thực hiện nhiệm vụ (30–45 phút): Bạn sẽ được yêu cầu thực hiện một số nhiệm vụ trên hệ thống
+3.	Câu hỏi sau test (10 phút): Trả lời các câu hỏi về trải nghiệm
+Yêu cầu:
+Trong quá trình test, vui lòng nói ra suy nghĩ của bạn (think-aloud protocol).
+3. GHI HÌNH VÀ GHI ÂM
+•	Tôi đồng ý cho phép ghi hình màn hình trong quá trình test
+•	Tôi đồng ý cho phép ghi âm cuộc trò chuyện
+•	Tôi KHÔNG đồng ý ghi hình/ghi âm
+Lưu ý:
+•	Tất cả dữ liệu sẽ được bảo mật và chỉ sử dụng cho mục đích nghiên cứu
+•	Bạn có quyền dừng ghi hình/ghi âm bất cứ lúc nào
+•	Video/audio sẽ được xóa sau khi hoàn thành phân tích
+4. QUYỀN LỢI VÀ BẢO MẬT
+Quyền lợi của bạn:
+•	Có quyền dừng test bất cứ lúc nào mà không cần giải thích
+•	Có quyền từ chối trả lời bất kỳ câu hỏi nào
+•	Thông tin cá nhân được bảo mật
+•	Nhận được [phần thưởng/giải thưởng] sau khi hoàn thành test
+Bảo mật:
+•	Thông tin cá nhân sẽ được ẩn danh trong báo cáo
+•	Dữ liệu chỉ dùng để cải thiện hệ thống
+•	Không chia sẻ cho bên thứ ba
+5. RỦI RO VÀ LỢI ÍCH
+Rủi ro:
+Không có rủi ro nào được dự đoán. Test chỉ liên quan đến việc sử dụng giao diện web trên máy tính.
+Lợi ích:
+•	Trải nghiệm hệ thống mới
+•	Góp phần cải thiện hệ thống cho người dùng khác
+6. XÁC NHẬN
+Bằng cách ký tên dưới đây, tôi xác nhận rằng:
+•	Tôi đã đọc và hiểu rõ nội dung phiếu đồng ý
+•	Tôi đã được giải thích đầy đủ về quy trình test
+•	Tôi tham gia test một cách tự nguyện
+•	Tôi hiểu rằng có thể dừng test bất cứ lúc nào
+•	Tôi đồng ý với các điều khoản ghi hình/ghi âm (nếu có)
+Chữ ký người tham gia:
+•	Họ và tên: _________________________________
+•	Chữ ký: _________________________________
+•	Ngày: _________________________________
+Chữ ký người thực hiện test:
+•	Họ và tên: _________________________________
+•	Chữ ký: _________________________________
+•	Ngày: _________________________________
+Thông tin liên hệ:
+•	Email: [email liên hệ]
+•	Điện thoại: [số điện thoại]
+Cảm ơn bạn đã tham gia!
+
+10.2. BẢNG CÂU HỎI SAU TEST
+BẢNG CÂU HỎI ĐÁNH GIÁ SAU TEST
+Hệ Thống In Ấn Thông Minh (SmartPrint) – MVP 1
+Thông tin người tham gia
+•	ID: _______________
+•	Vai trò: [ ] Sinh viên [ ] Nhân viên
+•	Ngày test: _______________
+PHẦN 1: ĐÁNH GIÁ TỔNG QUAN
+Câu 1: Mức độ hài lòng tổng thể
+[ ] Rất hài lòng (5)
+[ ] Hài lòng (4)
+[ ] Bình thường (3)
+[ ] Không hài lòng (2)
+[ ] Rất không hài lòng (1)
+Lý do: ___________________________________________
+Câu 2: Khả năng sử dụng
+[ ] Rất dễ dàng (5)
+[ ] Dễ dàng (4)
+[ ] Bình thường (3)
+[ ] Khó khăn (2)
+[ ] Rất khó khăn (1)
+Lý do: ___________________________________________
+Câu 3: Giao diện
+[ ] Rất đẹp và hiện đại (5)
+[ ] Đẹp (4)
+[ ] Bình thường (3)
+[ ] Không đẹp (2)
+[ ] Rất không đẹp (1)
+Lý do: ___________________________________________
+Câu 4: Tốc độ và hiệu suất
+[ ] Rất nhanh (5)
+[ ] Nhanh (4)
+[ ] Bình thường (3)
+[ ] Chậm (2)
+[ ] Rất chậm (1)
+Lý do: ___________________________________________
+
+PHẦN 2: ĐÁNH GIÁ TỪNG TÍNH NĂNG
+Câu 5: Quy trình đăng nhập
+[ ] Rất dễ (5) [ ] Dễ (4) [ ] Bình thường (3) [ ] Khó (2) [ ] Rất khó (1)
+Nhận xét: ________________________________________
+Câu 6: Quy trình in tài liệu (4 bước)
+[ ] Rất dễ (5) [ ] Dễ (4) [ ] Bình thường (3) [ ] Khó (2) [ ] Rất khó (1)
+Bước khó nhất:
+[ ] Bước 1: Upload tài liệu
+[ ] Bước 2: Chọn máy in
+[ ] Bước 3: Cấu hình in
+[ ] Bước 4: Xác nhận in
+Lý do: ___________________________________________
+Câu 7: Lịch sử in
+[ ] Rất hữu ích (5) [ ] Hữu ích (4) [ ] Bình thường (3) [ ] Không hữu ích (2) [ ] Rất không hữu ích (1)
+Câu 8: Nạp tiền
+[ ] Rất dễ sử dụng (5) [ ] Dễ sử dụng (4) [ ] Bình thường (3) [ ] Khó sử dụng (2) [ ] Rất khó sử dụng (1)
+Câu 9: Dashboard
+[ ] Rất hữu ích (5) [ ] Hữu ích (4) [ ] Bình thường (3) [ ] Không hữu ích (2) [ ] Rất không hữu ích (1)
+PHẦN 3: VẤN ĐỀ GẶP PHẢI
+Câu 10: Lỗi kỹ thuật
+[ ] Có [ ] Không
+Mô tả (nếu có): ___________________________________
+Câu 11: Khó khăn trong sử dụng
+[ ] Không hiểu tính năng
+[ ] Giao diện khó nhìn
+[ ] Thông tin không rõ
+[ ] Quy trình phức tạp
+[ ] Không tìm thấy tính năng
+[ ] Khác: ___________________________
+Câu 12: Tính năng thiếu
+________________________________________
+________________________________________
+PHẦN 4: SO SÁNH VÀ ĐỀ XUẤT
+Câu 13: So sánh với hệ thống cũ
+[ ] Tốt hơn nhiều
+[ ] Tốt hơn một chút
+[ ] Tương đương
+[ ] Kém hơn một chút
+[ ] Kém hơn nhiều
+Câu 14: Đề xuất cải thiện
+1.	________________________________________
+2.	________________________________________
+3.	________________________________________
+Câu 15: Khả năng sử dụng lại
+[ ] Chắc chắn có (5)
+[ ] Có thể có (4)
+[ ] Không chắc (3)
+[ ] Có thể không (2)
+[ ] Chắc chắn không (1)
+Câu 16: Giới thiệu cho người khác
+[ ] Chắc chắn có (5)
+[ ] Có thể có (4)
+[ ] Không chắc (3)
+[ ] Có thể không (2)
+[ ] Chắc chắn không (1)
+PHẦN 5: THÔNG TIN BỔ SUNG
+Câu 17: Điểm mạnh
+1.	________________________________________
+2.	________________________________________
+3.	________________________________________
+Câu 18: Điểm yếu
+1.	________________________________________
+2.	________________________________________
+3.	________________________________________
+Câu 19: Nhận xét khác
+________________________________________
+Ngày hoàn thành: _______________
+
+
+10.3. BẢNG GHI CHÉP QUAN SÁT (OBSERVATION SHEET)
+Người ghi chép: _______________ | ID Người tham gia: _______________
+THEO DÕI NHIỆM VỤ (TASKS)
+Nhiệm vụ	Kết quả	Thời gian	Hành vi/Lỗi
+Task 1: __________	[ ] Đạt 
+
+
+[ ] Cần hỗ trợ 
+
+
+[ ] Thất bại	____ phút	- Click sai: [ ] 
+
+
+- Lúng túng: [ ] 
+
+
+- Ghi chú: ________
+Task 2: __________	[ ] Đạt 
+
+
+[ ] Cần hỗ trợ 
+
+
+[ ] Thất bại	____ phút	- Click sai: [ ] 
+
+
+- Lúng túng: [ ] 
+
+
+- Ghi chú: ________
+Task 3: __________	[ ] Đạt 
+
+
+[ ] Cần hỗ trợ 
+
+
+[ ] Thất bại	____ phút	- Click sai: [ ] 
+
+
+- Lúng túng: [ ] 
+
+
+- Ghi chú: ________
+TỔNG KẾT QUAN SÁT
+•	Thống kê: Tổng lỗi: _______ | Số Task thành công: _______ / _______
+•	Vấn đề nghiêm trọng nhất: _____________________________________________________
+•	Điểm mạnh: _____________________________________________________
+•	Điểm yếu: _____________________________________________________
+CHECKLIST NHANH
+•	[ ] Giao diện rõ ràng, font chữ dễ đọc.
+•	[ ] Điều hướng menu dễ tìm, có nút quay lại.
+•	[ ] Thông báo lỗi/Hướng dẫn đầy đủ.
+•	[ ] Phản hồi hệ thống nhanh, không lag.
+•	[ ] (Nếu có Mobile) Layout không bị vỡ, nút bấm đủ lớn.
+Kết thúc buổi Test.
+Ngày hoàn thành: //2025
+
+
